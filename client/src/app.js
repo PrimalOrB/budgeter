@@ -4,7 +4,7 @@ import { setContext } from '@apollo/client/link/context';
 import { useAuth0 } from "@auth0/auth0-react";
 import { ApolloProvider, ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
 import { StoreProvider } from "./utils/GlobalState";
-import { NavBar, Loading } from "./components";
+import { FullPageSpinLoader, Header, Footer } from "./components";
 import { Home } from "./views";
 import ProtectedRoute from "./auth/protected-route";
 
@@ -33,14 +33,14 @@ const App = () => {
   const { isLoading } = useAuth0();
 
   if (isLoading) {
-    return <Loading />;
+    return <FullPageSpinLoader />;
   }
 
   return (
     <ApolloProvider client={client}>
       <StoreProvider>
         <div id="app">
-          <NavBar/>
+          <Header/>
           <main>
             <Switch>
               <ProtectedRoute exact path="/" component={ Home } />

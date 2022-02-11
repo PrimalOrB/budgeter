@@ -1,4 +1,4 @@
-import Loading from "./loading";
-import NavBar from "./nav-bar";
+import { Header, Footer } from './Layout';
+import { SpinLoader, FullPageSpinLoader } from './Loaders';
 
-export { Loading, NavBar };
+export { Header, Footer, SpinLoader, FullPageSpinLoader };

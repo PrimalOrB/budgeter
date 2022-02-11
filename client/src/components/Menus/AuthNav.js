@@ -1,6 +1,6 @@
 import React from "react";
-import AuthenticationButton from "./authentication-button";
-import { useStoreContext } from "../utils/GlobalState";
+import AuthenticationButton from "../authentication-button";
+import { useStoreContext } from "../../utils/GlobalState";
 
 const AuthNav = () => {
 

@@ -1,15 +1,14 @@
 import React, { useEffect } from "react";
-import { UPDATE_USER} from '../utils/actions';
-import MainNav from "./main-nav";
-import AuthNav from "./auth-nav";
-import { useStoreContext } from "../utils/GlobalState";
+import { UPDATE_USER} from '../../utils/actions';
+import { AuthNav, MainNav } from "../Menus";
+import { useStoreContext } from "../../utils/GlobalState";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useMutation } from '@apollo/client';
-import { LOGIN_USER } from '../utils/mutations'
-import Auth from '../utils/auth';
-import { Loading } from ".";
+import { LOGIN_USER } from '../../utils/mutations'
+import Auth from '../../utils/auth';
+import { SpinLoader } from '../'
 
-const NavBar = () => {
+const Header = () => {
 
   const [, dispatch] = useStoreContext();
 
@@ -41,7 +40,7 @@ const NavBar = () => {
 
   return (
     <>
-    { error ? <Loading /> :
+    { error ? <SpinLoader /> :
       <nav>
         <div className="container">
           <MainNav />
@@ -53,4 +52,4 @@ const NavBar = () => {
   );
 };
 
-export default NavBar;
+export default Header;

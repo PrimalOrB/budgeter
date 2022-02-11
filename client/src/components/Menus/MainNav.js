@@ -1,6 +1,5 @@
 import {NavLink} from "react-router-dom";
 import React from "react";
-import { useStoreContext } from "../utils/GlobalState";
 import { FiHome } from 'react-icons/fi'
 
 const MainNav = () => {
