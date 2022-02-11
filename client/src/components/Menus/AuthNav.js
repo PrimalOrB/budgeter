@@ -13,10 +13,7 @@ const AuthNav = () => {
         
             <div className="access-block">
                 <div className="profile-img">
-                    <img
-                        src={picture}
-                        alt="Profile"
-                    />
+                    <img src={picture} alt="Profile"/>
                 </div>
                 <h2>{given_name}</h2>
                 <AuthenticationButton />

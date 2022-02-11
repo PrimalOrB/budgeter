@@ -41,12 +41,12 @@ const Header = () => {
   return (
     <>
     { error ? <SpinLoader /> :
-      <nav>
+      <header>
         <div className="container">
           <MainNav />
           <AuthNav />
         </div>
-      </nav>
+      </header>
     }
     </>
   );

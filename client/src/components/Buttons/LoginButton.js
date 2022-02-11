@@ -1,15 +1,13 @@
 import React from "react";
 import { useAuth0 } from "@auth0/auth0-react";
+import { ActionButton } from ".";
 
 const LoginButton = () => {
+  
   const { loginWithRedirect } = useAuth0({organization: process.env.ORGID});
+
   return (
-    <button
-    className="login"
-      onClick={() => loginWithRedirect()}
-    >
-      Log In
-    </button>
+    <ActionButton action={ loginWithRedirect } text={ 'Log In' }/>
   );
 };
 
