@@ -1,8 +1,19 @@
+/* Color Vars */
+#root {
+  --primary-color: #2b2d42;
+  --secondary-color: #8d99ae;
+  --tertiary-color: #edf2f4;
+  --highlight-color: #71a9f7;
+  --highlight-2-color: #c6d8ff;
+}
+
+/*  Globals */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  color: #4d4d4d;
+  color: var(--primary-color);
+  stroke: var(--primary-color);
 }
 
 #app {
@@ -14,51 +25,78 @@
 }
 
 a {
+  color: var(--primary-color);
 }
 
 a:hover {
   text-decoration: none;
 }
 
+/* Header */
 header {
   width: 100%;
   padding: 0;
-  background-color: #4d4d4d;
+  background-color: var(--tertiary-color);
+  border-bottom: 1px inset var(--highlight-color);
 }
 
+/* Main App Container */
 .container {
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: nowrap;
-  color: white;
+  color: var(--tertiary-color);
   width: 100%;
   max-width: 1200px;
-  background-color: red;
 }
 
-.container img {
-  width: 2rem;
-  height: 2rem;
-  margin-right: 1rem;
-}
+/* Nav Menu & Nav Buttons */
 
 .nav-menu {
   display: flex;
   justify-content: center;
 }
 
-.nav-button {
+.nav-button,
+.username-block {
   display: flex;
-  padding: 0.25rem 0.5rem;
+  padding: 0.1rem 0.75rem;
   align-items: center;
-  background-color: wheat;
-  margin: 0 0.1rem;
+  background-color: var(--tertiary-color);
+  border-bottom: 3px inset var(--highlight-2-color);
+  transition: 0.25s ease all;
 }
 
-.access-block {
-  display: flex;
-  padding: 0rem 0.5rem;
-  align-items: center;
-  background-color: wheat;
+.nav-button svg {
+  margin-right: 0.5rem;
+}
+
+.nav-menu > .nav-button:not(:first-child) {
+  border-left: 1px solid var(--highlight-2-color);
+}
+
+.nav-button-active {
+  border-bottom: 3px inset var(--primary-color);
+}
+
+.nav-button:hover {
+  background-color: white;
+  border-bottom: 3px inset var(--highlight-color);
+}
+
+.logout,
+.username-block {
+  background-color: var(--highlight-2-color);
+}
+
+.logout:hover {
+  background-color: var(--highlight-color);
+}
+
+.username-block {
+  font-size: 0.9rem;
+  border-radius: 1rem 0 0 0;
+  border: none;
+  border-right: 1px solid var(--highlight-color);
 }

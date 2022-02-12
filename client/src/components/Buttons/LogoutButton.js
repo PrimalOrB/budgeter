@@ -14,7 +14,7 @@ const LogoutButton = () => {
   }
 
   return (
-    <ActionButton action={ logoutActions } text={ 'Log Out' }/>
+    <ActionButton additionalClass={ "logout" } action={ logoutActions } text={ 'Log Out' }/>
   );
 };
 

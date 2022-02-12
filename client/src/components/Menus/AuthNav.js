@@ -8,23 +8,18 @@ const AuthNav = () => {
     const { currentUser } = state;
 
     if( currentUser ){
-        const { given_name, picture } = currentUser;
+        const { name } = currentUser;
         return (
         
-            <div className="access-block">
-                <div className="profile-img">
-                    <img src={picture} alt="Profile"/>
-                </div>
-                <h2>{given_name}</h2>
+            <div className="nav-menu">
+                <span className="username-block">{ name }</span>
                 <AuthenticationButton />
             </div>
         )
     }
 
     return (
-            <div className="access-block">
-                <AuthenticationButton />
-            </div>
+        <AuthenticationButton />
     )
 
 };

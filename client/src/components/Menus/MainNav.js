@@ -8,6 +8,7 @@ const MainNav = () => {
   <div className="nav-menu">
     <LinkButton to="/" icon={ FiHome } text={ "Dashboard" } />
     <LinkButton to="/test" icon={ FiHome } text={ "Test" } />
+    <LinkButton to="/testt" icon={ FiHome } text={ "Test Again" } />
   </div>
   )
 };
