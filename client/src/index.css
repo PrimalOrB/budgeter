@@ -86,11 +86,13 @@ header {
 }
 
 .logout,
+.login,
 .username-block {
   background-color: var(--highlight-2-color);
 }
 
-.logout:hover {
+.logout:hover,
+.logoin:hover {
   background-color: var(--highlight-color);
 }
 

@@ -9,8 +9,7 @@ const AuthNav = () => {
 
     if( currentUser ){
         const { name } = currentUser;
-        return (
-        
+        return (        
             <div className="nav-menu">
                 <span className="username-block">{ name }</span>
                 <AuthenticationButton />
@@ -19,7 +18,9 @@ const AuthNav = () => {
     }
 
     return (
-        <AuthenticationButton />
+        <div className="nav-menu">
+            <AuthenticationButton />
+        </div>
     )
 
 };

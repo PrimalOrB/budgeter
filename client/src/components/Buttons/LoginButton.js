@@ -7,7 +7,7 @@ const LoginButton = () => {
   const { loginWithRedirect } = useAuth0({organization: process.env.ORGID});
 
   return (
-    <ActionButton action={ loginWithRedirect } text={ 'Log In' }/>
+    <ActionButton additionalClass={ "login" } action={ loginWithRedirect } text={ 'Log In' }/>
   );
 };
 
