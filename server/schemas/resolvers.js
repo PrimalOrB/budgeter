@@ -1,8 +1,11 @@
-const { User } = require( '../models' )
+const { User, Budget } = require( '../models' )
 const { AuthenticationError } = require( 'apollo-server-express' )
 const { signToken } = require( '../utils/auth' )
+const dateScalar = require( './dateScalar' )
 
 const resolvers = {
+    Date: dateScalar,
+
     Query: {
     },
 
@@ -35,7 +38,21 @@ const resolvers = {
 
         }
         throw new AuthenticationError('Incorrect credentials');
-      }
+      },
+
+      createBudget: async( parent, data, context ) => {
+        // if( context.headers.authorization !== undefined ){
+
+
+          // create budget
+          const createBudget = await Budget.create( data.input )
+
+          return createBudget
+
+
+        }
+        // throw new AuthenticationError('Incorrect credentials');
+      // }
     }
 }
 

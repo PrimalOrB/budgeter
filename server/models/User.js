@@ -11,6 +11,12 @@ const userSchema = new Schema(
       required: true,
       unique: true,
     },
+    budgets: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Budget'
+      }
+    ],
   },
   {
     toJSON: {
