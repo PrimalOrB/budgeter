@@ -1,9 +1,18 @@
+/* Color Vars */
+#root {
+  --primary-color: #2b2d42;
+  --secondary-color: #8d99ae;
+  --tertiary-color: #edf2f4;
+  --highlight-color: #71a9f7;
+  --highlight-2-color: #c6d8ff;
+}
+
 .loader {
   width: 10em;
   height: 10em;
   font-size: 25px;
   box-sizing: border-box;
-  border-top: 0.3em solid hotpink;
+  border-top: 0.3em solid var(--primary-color);
   border-radius: 50%;
   position: relative;
   animation: rotating 2s ease-in-out infinite;
@@ -22,18 +31,18 @@
 }
 
 .loader::before {
-  border-top: 0.3em solid dodgerblue;
+  border-top: 0.3em solid var(--highlight-color);
   transform: rotate(120deg);
 }
 
 .loader::after {
-  border-top: 0.3em solid gold;
+  border-top: 0.3em solid var(--highlight-2-color);
   transform: rotate(240deg);
 }
 
 .loader span {
   position: absolute;
-  color: #333333;
+  color: var(--primary-color);
   width: inherit;
   height: inherit;
   text-align: center;

@@ -8,8 +8,6 @@ import { FullPageSpinLoader, Header, Footer } from "./components";
 import { Home } from "./views";
 import ProtectedRoute from "./auth/protected-route";
 
-import "./app.css";
-
 const httpLink = createHttpLink({
   uri: '/graphql',
 });
