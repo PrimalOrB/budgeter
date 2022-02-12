@@ -4,7 +4,7 @@ import { ActionButton } from ".";
 
 const LoginButton = () => {
   
-  const { loginWithRedirect } = useAuth0({organization: process.env.ORGID});
+  const { loginWithRedirect } = useAuth0( { organization: process.env.ORGID } );
 
   return (
     <ActionButton additionalClass={ "login" } action={ loginWithRedirect } text={ 'Log In' }/>

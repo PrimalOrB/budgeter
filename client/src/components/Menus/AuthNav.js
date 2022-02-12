@@ -4,14 +4,14 @@ import { useStoreContext } from "../../utils/GlobalState";
 
 const AuthNav = () => {
 
-    const [state] = useStoreContext();
+    const [ state ] = useStoreContext();
     const { currentUser } = state;
 
     if( currentUser ){
-        const { name } = currentUser;
+        const { email } = currentUser;
         return (        
             <div className="nav-menu">
-                <span className="username-block">{ name }</span>
+                <span className="username-block">{ email }</span>
                 <AuthenticationButton />
             </div>
         )

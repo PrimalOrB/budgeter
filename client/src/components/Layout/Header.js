@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { UPDATE_USER} from '../../utils/actions';
+import { UPDATE_USER } from '../../utils/actions';
 import { AuthNav, MainNav } from "../Menus";
 import { useStoreContext } from "../../utils/GlobalState";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -18,19 +18,20 @@ const Header = () => {
   const { user } = useAuth0()
   useEffect(() => {
     if (user) {
-      dispatch({
-        type: UPDATE_USER,
-        currentUser: user
-      });
       tryLogin()
     }
-  }, [user, dispatch]);
+  }, [ user ]);
 
 
   const tryLogin = async ()  => {
     try {
       const { data } = await login({
-        variables: {email: user.email }
+        variables: { email: user.email }
+      } );
+      const userID = Auth.getProfile( data.login.token )
+      dispatch({
+        type: UPDATE_USER,
+        currentUser: { email: userID.data.email, _id: userID.data._id}
       });
       Auth.login(data.login.token);
     } catch (e) {
