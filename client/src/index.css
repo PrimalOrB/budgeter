@@ -197,13 +197,8 @@ section {
   border-style: dashed;
 }
 
-/* Buttons - Button Effects */
-.primary-button:hover {
-  background-color: var(--highlight-2-color);
-}
-
 .contact-chip {
-  background-color: #d4d5d6;
+  background-color: var(--highlight-2-color);
   display: inline-block;
   font-size: 14px;
   border-radius: 30px;
@@ -211,7 +206,7 @@ section {
   padding: 0 4px 0 1rem;
   display: inline-flex;
   align-items: center;
-  margin: 0 0.3rem 0.3rem 0;
+  margin: 0.15rem;
 }
 
 .contact-chip > .button {
@@ -229,10 +224,20 @@ section {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background-color 0.25s ease;
 }
 
 .no-delete {
   padding: 0 1rem 0 1rem;
+}
+
+/* Buttons - Button Effects */
+.primary-button:hover {
+  background-color: var(--highlight-2-color);
+}
+
+.contact-chip > .button:hover {
+  background-color: var(--highlight-color);
 }
 
 /* Buttons - Button Sub Elements */
@@ -270,7 +275,8 @@ form {
 }
 
 .form-inline-text > input,
-textarea {
+textarea,
+.container-flex {
   flex: 4;
   font-weight: bold;
   outline: none;
