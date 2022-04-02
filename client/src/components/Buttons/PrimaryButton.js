@@ -13,7 +13,7 @@ const PrimaryButton = ( { title, desc, link, disabled } ) => {
         { shortenedString( title, 25 ) }
       </h3>
       <span className={ `primary-button-description` } >
-        { shortenedString( desc, 125 ) }
+        { shortenedString( desc, 75 ) }
       </span>
 
     </Link>
