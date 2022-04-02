@@ -3,7 +3,7 @@ import { InlineTextInput, InlineTextareaInput, InlineListDisplay } from '../comp
 
 const AddBudget = () => {
 
-  const [ formInput, setFormInput ] = useState( { emails: [] } ) 
+  const [ formInput, setFormInput ] = useState( { emails: [], error: null } ) 
 
   return (
     <section>

@@ -118,3 +118,7 @@ export function decodeCoolantLink( input ){
     const output = input.replaceAll('_','/')
     return output
 }
+
+export function isEmail(email) {
+    return /[\w\d\.-]+@[\w\d\.-]+\.[\w\d\.-]+/.test(email);
+}

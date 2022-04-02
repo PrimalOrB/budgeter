@@ -1,4 +1,5 @@
 import React from "react";
+import { isEmail } from '../../utils/helpers'
 
 const InlineTextInput = ( { prop, input, setInput, label, placeholder } ) => {
 
@@ -7,15 +8,42 @@ const InlineTextInput = ( { prop, input, setInput, label, placeholder } ) => {
         setInput( { ...input, [name]: value.trim() })
     }
 
+    function isInList(email) {
+        return input.emails.includes(email);
+      }
+
+    function isValid(email) {
+        var error = null;
+        
+        if (!isEmail(email)) {
+          error = `${email} is not a valid email address.`;
+        }
+        
+        if (isInList(email)) {
+          error = `${email} has already been added.`;
+        }
+        
+        if (error) {
+            setInput({
+                ...input,
+                error
+             });
+          
+          return false;
+        }
+        
+        return true;
+    }
+
     function handleKeyDown(e){
         if (['Enter', 'Tab', ','].includes(e.key)) {
           e.preventDefault();
           
           let email = input[prop].trim();
 
-          console.log( email )
+          console.log( email, isValid( email ) )
             
-          if (email) {
+          if ( isValid( email )) {
             setInput({
                 ...input,
                 emails: [...input.emails, email],
