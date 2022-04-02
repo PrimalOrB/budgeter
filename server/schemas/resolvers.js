@@ -65,12 +65,29 @@ const resolvers = {
           // create budget
           const createBudget = await Budget.create( { ...newBudget } )
 
-          console.log( createBudget )
-
           return createBudget
         }
         throw new AuthenticationError('Incorrect credentials');
-      }
+      },
+
+      queryBudget: async( parent, { input }, context ) => {
+        if( context.headers.authorization !== undefined ){
+
+          // find budget by ID
+          const findBudget = await Budget.findOne( { _id: input.budget } )
+          if( !findBudget ){
+            throw new AuthenticationError('No Data Returned')
+          }
+          // ensure user is authorized
+          const userMatch = findBudget.ownerIDs.includes( input.user )
+          if( !userMatch ){
+            throw new AuthenticationError('Incorrect credentials');
+          }
+
+          return findBudget
+        }
+        throw new AuthenticationError('Incorrect credentials');
+      },
     }
 }
 

@@ -36,7 +36,7 @@ const InlineTextInput = ( { prop, input, setInput, label, placeholder } ) => {
     }
 
     function handleKeyDown(e){
-        if (['Enter', 'Tab', ','].includes(e.key)) {
+        if (['Enter'].includes(e.key)) {
           e.preventDefault();
           
           let email = input[prop].trim();

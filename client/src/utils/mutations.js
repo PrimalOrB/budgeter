@@ -16,3 +16,13 @@ export const CREATE_NEW_BUDGET = gql`
     }
   }
 `;
+
+export const QUERY_CURRENT_BUDGET = gql`
+  mutation queryBudget($input: BudgetQueryInput! ) {
+    queryBudget(input: $input) {
+      _id
+      title
+      desc
+    }
+  }
+`;

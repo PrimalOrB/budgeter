@@ -17,6 +17,11 @@ const typeDefs = gql`
         desc: String!
     }
 
+    input BudgetQueryInput {
+        user: ID!
+        budget: ID!
+    }
+
     type User {
         _id: ID
         email: String
@@ -49,6 +54,7 @@ const typeDefs = gql`
     type Mutation {
         login(email: String! ): Auth
         createBudget( input: BudgetInput! ): Budget
+        queryBudget( input: BudgetQueryInput! ): Budget
     }
     
 `;
