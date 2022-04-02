@@ -1,6 +1,7 @@
-
-import Home from "./home";
+import Home from "./Home";
+import AddBudget from "./AddBudget"
 
 export { 
-    Home
+    Home,
+    AddBudget
  };

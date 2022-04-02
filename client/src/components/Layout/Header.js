@@ -43,7 +43,7 @@ const Header = () => {
     <>
     { error ? <SpinLoader /> :
       <header>
-        <div className="container">
+        <div className="header-container">
           <MainNav />
           <AuthNav />
         </div>

@@ -41,7 +41,7 @@ const resolvers = {
       },
 
       createBudget: async( parent, data, context ) => {
-        // if( context.headers.authorization !== undefined ){
+        if( context.headers.authorization !== undefined ){
 
 
           // create budget
@@ -51,8 +51,8 @@ const resolvers = {
 
 
         }
-        // throw new AuthenticationError('Incorrect credentials');
-      // }
+        throw new AuthenticationError('Incorrect credentials');
+      }
     }
 }
 

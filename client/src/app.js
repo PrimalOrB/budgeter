@@ -5,7 +5,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { ApolloProvider, ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
 import { StoreProvider } from "./utils/GlobalState";
 import { FullPageSpinLoader, Header, Footer } from "./components";
-import { Home } from "./views";
+import { Home, AddBudget } from "./views";
 import ProtectedRoute from "./auth/protected-route";
 
 const httpLink = createHttpLink({
@@ -42,6 +42,7 @@ const App = () => {
           <main>
             <Switch>
               <ProtectedRoute exact path="/" component={ Home } />
+              <ProtectedRoute exact path="/add-budget" component={ AddBudget } />
             </Switch>
           </main>
         </div>
