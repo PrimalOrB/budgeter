@@ -9,7 +9,7 @@ const ButtonContainer = ( { buttons, title } ) => {
             <h2 className="container-title">{ title }</h2>
             <div className="container-grid-full">
                 { buttons.map( ( x, i ) => {
-                    return <PrimaryButton key={ `${i}_budget` } title={ x.title } disabled={ x.disabled || false } link={ x.link }/>
+                    return <PrimaryButton key={ `${i}_budget` } title={ x.title } desc={ x.desc } disabled={ x.disabled || false } link={ x.link }/>
                 })}
             </div>
         </section>

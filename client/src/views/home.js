@@ -3,6 +3,7 @@ import { ButtonContainer }from '../components/Menus'
 import { useMutation } from '@apollo/client'
 import { QUERY_ALL_USER_BUDGETS } from '../utils/mutations'
 import { useStoreContext } from '../utils/GlobalState'
+import { SpinLoader } from '../components/Loaders'
 
 const Home = () => {
 
@@ -24,7 +25,7 @@ const Home = () => {
           data.data.queryUserBudgets.map( x => {
             return buttons.push( { title: x.title, desc: x.desc, link: `/budget/${ x._id }` } )
           })
-          buttons.push( { title: 'Create New Budget +', desc: 'test', link: '/add-budget', disabled: true } )
+          buttons.push( { title: 'Create New Budget +', desc: '', link: '/add-budget', disabled: true } )
           setBudgetState( [ ...buttons ] )
         }
       } catch (e) {
@@ -42,7 +43,10 @@ const Home = () => {
   
   return (
     <>
-      <ButtonContainer title={ 'Your Budgets'} buttons={ budgetState }/>
+      { queryLoading && <SpinLoader /> }
+      { budgetState.length > 0 &&
+        <ButtonContainer title={ 'Your Budgets'} buttons={ budgetState }/>
+      }
     </>
   )
 

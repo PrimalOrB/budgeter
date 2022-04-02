@@ -43,7 +43,13 @@ a:hover {
   text-decoration: none;
 }
 
-label {
+label,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   margin: 0;
 }
 
@@ -269,6 +275,15 @@ section {
   width: 100%;
   color: var(--primary-color);
   font-size: 1.25rem;
+}
+
+.primary-button-description {
+  display: block;
+  width: 100%;
+  color: var(--primary-color);
+  font-size: 1rem;
+  font-weight: normal;
+  padding-left: 0.5rem;
 }
 
 /* Forms */
