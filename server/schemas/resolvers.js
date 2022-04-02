@@ -82,7 +82,7 @@ const resolvers = {
           // ensure user is authorized
           const userMatch = findBudget.ownerIDs.includes( input.user )
           if( !userMatch ){
-            throw new AuthenticationError('Incorrect credentials');
+            throw new UserInputError('Incorrect credentials');
           }
 
           return findBudget
@@ -96,7 +96,7 @@ const resolvers = {
           // find budget with ownerID containing userID
           const findBudgets = await Budget.find( { ownerIDs: { $all: [ input._id ] }  } )
           if( findBudgets.length === 0 ){
-            throw new AuthenticationError('No Data Returned')
+            throw new UserInputError('No Data Returned')
           }
 
           return findBudgets
