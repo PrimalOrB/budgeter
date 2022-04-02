@@ -42,14 +42,32 @@ const resolvers = {
 
       createBudget: async( parent, data, context ) => {
         if( context.headers.authorization !== undefined ){
+          
+          const ownerIDs = []
+          const findOwner = await User.findOne( { email: data.input.owner } )
+          if( findOwner ){
+            ownerIDs.push( findOwner._id )
+          }
 
+          for( let i = 0; i < data.input.emails.length; i++ ){
+            const findAdditionalOwner = await User.findOne( { email: data.input.emails[i] } )
+            if( findAdditionalOwner ){
+              ownerIDs.push( findAdditionalOwner._id )
+            }
+          }
+
+          const newBudget = {
+            ownerIDs: [ ...ownerIDs ],
+            title: data.input.title,
+            desc: data.input.desc
+          }
 
           // create budget
-          const createBudget = await Budget.create( data.input )
+          const createBudget = await Budget.create( { ...newBudget } )
+
+          console.log( createBudget )
 
           return createBudget
-
-
         }
         throw new AuthenticationError('Incorrect credentials');
       }

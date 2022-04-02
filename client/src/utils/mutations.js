@@ -8,3 +8,11 @@ export const LOGIN_USER = gql`
     }
   }
 `;
+
+export const CREATE_NEW_BUDGET = gql`
+  mutation createBudget($input: BudgetInput! ) {
+    createBudget(input: $input) {
+      _id
+    }
+  }
+`;

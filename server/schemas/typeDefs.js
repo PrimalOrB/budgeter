@@ -11,9 +11,10 @@ const typeDefs = gql`
     }
 
     input BudgetInput {
-        ownerIDs: [ID!],
-        title: String!,
-        lines: [ BudgetLineInput! ]
+        owner: String!
+        emails: [ String ]
+        title: String!
+        desc: String!
     }
 
     type User {
@@ -33,6 +34,7 @@ const typeDefs = gql`
         _id: ID
         ownerIDs: [ID!]
         title: String!
+        desc: String!
         lines: [ BudgetLine ]
     }
 

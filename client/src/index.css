@@ -47,6 +47,10 @@ label {
   margin: 0;
 }
 
+hr {
+  width: 100%;
+}
+
 .center {
   text-align: center;
 }
@@ -54,6 +58,11 @@ label {
 .inline {
   display: block;
   width: 100%;
+}
+
+.notification {
+  color: green;
+  font-weight: bold;
 }
 
 .error {

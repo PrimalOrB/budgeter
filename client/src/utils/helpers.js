@@ -120,5 +120,5 @@ export function decodeCoolantLink( input ){
 }
 
 export function isEmail(email) {
-    return /[\w\d\.-]+@[\w\d\.-]+\.[\w\d\.-]+/.test(email);
+    return /[\w\d.-]+@[\w\d.-]+\.[\w\d.-]+/.test(email);
 }
