@@ -47,6 +47,20 @@ label {
   margin: 0;
 }
 
+.center {
+  text-align: center;
+}
+
+.inline {
+  display: block;
+  width: 100%;
+}
+
+.error {
+  color: red;
+  font-weight: bold;
+}
+
 /* Paddings */
 .margin-top-half {
   margin-top: 0.5rem;

@@ -5,22 +5,22 @@ const InlineTextInput = ( { prop, input, setInput, label, placeholder } ) => {
 
     function updateInput( e ){
         const { name, value } = e.target
-        setInput( { ...input, [name]: value.trim() })
+        setInput( { ...input, [name]: value.trim(), error: null } )
     }
 
-    function isInList(email) {
-        return input.emails.includes(email);
+    function isInList( email ) {
+        return input.emails.includes( email );
       }
 
-    function isValid(email) {
+    function isValid( email ) {
         var error = null;
         
-        if (!isEmail(email)) {
-          error = `${email} is not a valid email address.`;
+        if (!isEmail( email ) ) {
+          error = `${ email } is not a valid email address.`;
         }
         
-        if (isInList(email)) {
-          error = `${email} has already been added.`;
+        if (isInList( email) ) {
+          error = `${ email } has already been added.`;
         }
         
         if (error) {
@@ -30,8 +30,8 @@ const InlineTextInput = ( { prop, input, setInput, label, placeholder } ) => {
              });
           
           return false;
-        }
-        
+        } 
+
         return true;
     }
 
@@ -40,10 +40,8 @@ const InlineTextInput = ( { prop, input, setInput, label, placeholder } ) => {
           e.preventDefault();
           
           let email = input[prop].trim();
-
-          console.log( email, isValid( email ) )
             
-          if ( isValid( email )) {
+          if ( isValid( email ) ) {
             setInput({
                 ...input,
                 emails: [...input.emails, email],
@@ -56,7 +54,7 @@ const InlineTextInput = ( { prop, input, setInput, label, placeholder } ) => {
     return (
         <div className={ 'form-inline-text' } >
             <label htmlFor={ prop }>{ label }</label>
-            <input name={ prop } type="text" onChange={ updateInput } onKeyDown={ handleKeyDown } placeholder={ placeholder } value={ input[prop] }/>
+            <input name={ prop } type="text" onChange={ updateInput } onKeyDown={ handleKeyDown } placeholder={ placeholder } value={ input[prop] } autoComplete="off"/>
         </div>
     )
 };
