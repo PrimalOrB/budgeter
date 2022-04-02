@@ -1,5 +1,5 @@
 const { User, Budget } = require( '../models' )
-const { AuthenticationError } = require( 'apollo-server-express' )
+const { AuthenticationError, UserInputError } = require( 'apollo-server-express' )
 const { signToken } = require( '../utils/auth' )
 const dateScalar = require( './dateScalar' )
 
@@ -77,7 +77,7 @@ const resolvers = {
           // find budget by ID
           const findBudget = await Budget.findOne( { _id: input.budget } )
           if( !findBudget ){
-            throw new AuthenticationError('No Data Returned')
+            throw new UserInputError('No Data Returned')
           }
           // ensure user is authorized
           const userMatch = findBudget.ownerIDs.includes( input.user )
