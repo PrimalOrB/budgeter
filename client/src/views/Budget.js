@@ -5,6 +5,8 @@ import { QUERY_CURRENT_BUDGET } from '../utils/mutations'
 import { useStoreContext } from '../utils/GlobalState'
 import { InlineError } from '../components/Notifications'
 import { SpinLoader } from '../components/Loaders'
+import { ButtonContainer }from '../components/Menus'
+import { Title } from '../components/Layout'
 
 const Budget = () => {
 
@@ -52,8 +54,15 @@ const Budget = () => {
   return (
     <>
       { queryLoading && <SpinLoader /> }
-      { budgetState?.title && <h3>Title { budgetState.title }</h3>}
-      { budgetState?.desc && <h3>Description { budgetState.desc }</h3>}
+      { budgetState?.title && <section>
+          <Title text={ budgetState.title } />
+          <h3 className="container-description">{ budgetState.desc }</h3>
+          {/* <div className="container-grid-full">
+              { buttons.map( ( x, i ) => {
+                  return <PrimaryButton key={ `${i}_budget` } title={ x.title } desc={ x.desc } disabled={ x.disabled || false } link={ x.link }/>
+              })}
+          </div> */}
+        </section>}
     </>
   )
 

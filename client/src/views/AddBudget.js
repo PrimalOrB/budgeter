@@ -7,6 +7,7 @@ import { isEmail } from '../utils/helpers'
 import { useMutation } from '@apollo/client'
 import { CREATE_NEW_BUDGET } from '../utils/mutations'
 import { useHistory } from "react-router-dom";
+import { Title } from '../components/Layout'
 
 const AddBudget = () => {
   
@@ -79,7 +80,7 @@ const AddBudget = () => {
 
   return (
     <section>
-      <h2 className="container-title">Create New Budget</h2>
+      <Title text={ `Create New Budget` } />
       <form autoComplete="off">
         <InlineTextInput prop={ 'title' } input={ formInput } setInput={ setFormInput } label={ 'Budget Title' }/>
         <InlineTextareaInput prop={ 'desc' } input={ formInput } setInput={ setFormInput } label={ 'Description' }/>

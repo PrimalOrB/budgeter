@@ -202,6 +202,27 @@ section {
 }
 
 /* Titles */
+.title {
+  display: block;
+  width: 100%;
+  color: var(--primary-color);
+  text-align: center;
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.75rem;
+  border-top: 2px solid var(--highlight-color);
+  border-bottom: 2px solid var(--highlight-color);
+  text-transform: uppercase;
+  background: rgb(89, 240, 225);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    var(--tertiary-color) 10%,
+    var(--tertiary-color) 90%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
 .container-title {
   display: block;
   width: 100%;
@@ -210,6 +231,16 @@ section {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
   font-size: 1.75rem;
+}
+
+.container-description {
+  display: block;
+  width: 100%;
+  color: var(--primary-color);
+  text-align: center;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
 }
 
 /* Buttons */
