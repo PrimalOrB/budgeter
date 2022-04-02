@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ActionButton } from '../components/Buttons'
-import { InlineTextInput, InlineTextareaInput, InlineListDisplay } from '../components/Forms'
+import { InlineTextInput, InlineTextareaInput, InlineListDisplay, InlineEmailInput } from '../components/Forms'
 import { InlineError, InlineNotification } from '../components/Notifications'
 import { useStoreContext } from '../utils/GlobalState'
 import { isEmail } from '../utils/helpers'
@@ -10,7 +10,7 @@ import { useHistory } from "react-router-dom";
 
 const AddBudget = () => {
   
-  const [ formInput, setFormInput ] = useState( { owner: null, emails: [], error: null } ) 
+  const [ formInput, setFormInput ] = useState( { title: '', desc: '', email: '', owner: null, emails: [], error: null } ) 
   
   const [ state ] = useStoreContext();
 
@@ -84,7 +84,7 @@ const AddBudget = () => {
         <InlineTextInput prop={ 'title' } input={ formInput } setInput={ setFormInput } label={ 'Budget Title' }/>
         <InlineTextareaInput prop={ 'desc' } input={ formInput } setInput={ setFormInput } label={ 'Description' }/>
         <InlineListDisplay input={ formInput } setInput={ setFormInput } label={ 'Owners' }/>
-        <InlineTextInput prop={ 'email' } input={ formInput } setInput={ setFormInput } label={ 'Add More Owners' } placeholder={ "Type or paste email addresses and press `Enter`" }/> 
+        <InlineEmailInput prop={ 'email' } input={ formInput } setInput={ setFormInput } label={ 'Add More Owners' } placeholder={ "Type or paste email addresses and press `Enter`" }/> 
         { formInput.error && <InlineError text={ formInput.error }/> }
       </form>
       <hr/>

@@ -36,8 +36,6 @@ const Budget = () => {
       queryBudget()
     }
   },[ currentUser ])
-    
-  console.log( budgetState )
 
   return (
     <>

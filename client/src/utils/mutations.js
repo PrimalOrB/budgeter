@@ -26,3 +26,13 @@ export const QUERY_CURRENT_BUDGET = gql`
     }
   }
 `;
+
+export const QUERY_ALL_USER_BUDGETS = gql`
+  mutation queryUserBudgets($input: UserIDInput! ) {
+    queryUserBudgets(input: $input) {
+      _id
+      title
+      desc
+    }
+  }
+`;

@@ -3,7 +3,7 @@ const { gql } = require( 'apollo-server-express' );
 const typeDefs = gql`
     scalar Date
 
-    input BudgetLineInput {
+    input BudgetCategoryInput {
         title: String!
         effectiveStartDate: Date
         effectiveEndDate: Date
@@ -22,25 +22,40 @@ const typeDefs = gql`
         budget: ID!
     }
 
+    input UserIDInput {
+        _id: ID
+    }
+
     type User {
         _id: ID
         email: String
         budgets: [ID]
     }
 
-    type BudgetLine {
+    type Category {
+        _id: ID!
         title: String!
         effectiveStartDate: Date
         effectiveEndDate: Date
         budgetedValue: Float!
+        budgetID: ID!
+    }
+
+    type Entry {
+        _id: ID!
+        title: String!
+        value: Float!
+        budgetID: ID!
+        categoryID: ID!
     }
 
     type Budget {
-        _id: ID
+        _id: ID!
         ownerIDs: [ID!]
         title: String!
         desc: String!
-        lines: [ BudgetLine ]
+        categories: [ Category ]
+        entries: [ Entry ]
     }
 
     type Auth {
@@ -55,6 +70,7 @@ const typeDefs = gql`
         login(email: String! ): Auth
         createBudget( input: BudgetInput! ): Budget
         queryBudget( input: BudgetQueryInput! ): Budget
+        queryUserBudgets( input: UserIDInput! ): [ Budget ]
     }
     
 `;

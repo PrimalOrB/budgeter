@@ -7,6 +7,7 @@ const resolvers = {
     Date: dateScalar,
 
     Query: {
+      
     },
 
     Mutation: {
@@ -85,6 +86,20 @@ const resolvers = {
           }
 
           return findBudget
+        }
+        throw new AuthenticationError('Incorrect credentials');
+      },
+
+      queryUserBudgets: async( parent, { input }, context ) => {
+        if( context.headers.authorization !== undefined ){
+
+          // find budget with ownerID containing userID
+          const findBudgets = await Budget.find( { ownerIDs: { $all: [ input._id ] }  } )
+          if( findBudgets.length === 0 ){
+            throw new AuthenticationError('No Data Returned')
+          }
+
+          return findBudgets
         }
         throw new AuthenticationError('Incorrect credentials');
       },

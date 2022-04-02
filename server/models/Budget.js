@@ -1,29 +1,5 @@
 const { Schema, model } = require('mongoose');
 
-const budgetLineSchema = new Schema(
-  {
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
-    title: {
-      type: String,
-      required: "Title required"
-    },
-    effectiveStartDate: {
-      type: Date,
-      default: Date.now,
-    },
-    effectiveEndDate: {
-      type: Date
-    },
-    budgetedValue: {
-      type: Number,
-      required: "Value required"
-    }
-  },
-)
-
 const budgetSchema = new Schema(
   {
     createdAt: {
@@ -45,7 +21,14 @@ const budgetSchema = new Schema(
       type: String,
       required: true
     },
-    lines: [ budgetLineSchema ]
+    categories: [ {
+      type: Schema.Types.ObjectId,
+      ref: 'Category',
+    } ],
+    entries: [ {
+      type: Schema.Types.ObjectId,
+      ref: 'Entry',
+    }]
   },
   {
     toJSON: {
