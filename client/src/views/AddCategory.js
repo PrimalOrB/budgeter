@@ -11,7 +11,7 @@ import { Title } from '../components/Layout'
 
 const AddCategory = () => {
 
-  const [ formInput, setFormInput ] = useState( { title: '', desc: '', email: '', owner: null, emails: [], error: null } ) 
+  const [ formInput, setFormInput ] = useState( { title: '', effectiveStartDate: null, effectiveEndDate: '', budgetedValue: 0 } ) 
   
   const [ state ] = useStoreContext();
 
@@ -80,11 +80,11 @@ const AddCategory = () => {
 
   return (
     <section>
-      <Title text={ `Create New Budget` } />
+      <Title text={ `Create New Category` } />
       <form autoComplete="off">
         <InlineTextInput prop={ 'title' } input={ formInput } setInput={ setFormInput } label={ 'Budget Title' }/>
         <InlineTextareaInput prop={ 'desc' } input={ formInput } setInput={ setFormInput } label={ 'Description' }/>
-        <InlineListDisplay input={ formInput } setInput={ setFormInput } label={ 'Owners' }/>
+        {/* <InlineListDisplay input={ formInput } setInput={ setFormInput } label={ 'Owners' }/> */}
         <InlineEmailInput prop={ 'email' } input={ formInput } setInput={ setFormInput } label={ 'Add More Owners' } placeholder={ "Type or paste email addresses and press `Enter`" }/> 
         { formInput.error && <InlineError text={ formInput.error }/> }
       </form>

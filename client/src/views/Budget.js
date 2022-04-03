@@ -5,8 +5,9 @@ import { QUERY_CURRENT_BUDGET } from '../utils/mutations'
 import { useStoreContext } from '../utils/GlobalState'
 import { InlineError } from '../components/Notifications'
 import { SpinLoader } from '../components/Loaders'
-import { ButtonContainer, NavStateContainer }from '../components/Menus'
+import { NavStateContainer }from '../components/Menus'
 import { Title } from '../components/Layout'
+import { AddCategory } from './'
 
 const Budget = () => {
   
@@ -62,7 +63,6 @@ const Budget = () => {
     { text: 'Add Category +', desc: '', link: `add-category` }
   ]
 
-  console.log( pageState )
   return (
     <>
       { queryLoading && <SpinLoader /> }
@@ -72,6 +72,11 @@ const Budget = () => {
           { pageState === "home" && (
             <>
             <h3 className="container-description">{ budgetState.desc }</h3>
+            </>
+          )}
+          { pageState === "add-category" && (
+            <>
+            <AddCategory />
             </>
           )}
         </section>}
