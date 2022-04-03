@@ -5,10 +5,13 @@ import { QUERY_CURRENT_BUDGET } from '../utils/mutations'
 import { useStoreContext } from '../utils/GlobalState'
 import { InlineError } from '../components/Notifications'
 import { SpinLoader } from '../components/Loaders'
-import { ButtonContainer }from '../components/Menus'
+import { ButtonContainer, NavStateContainer }from '../components/Menus'
 import { Title } from '../components/Layout'
 
 const Budget = () => {
+  
+  const defaultPage = "home"
+  const [ pageState, setPageState ] = useState( defaultPage )
 
   const { id: _id } = useParams();
   const [ state ] = useStoreContext();
@@ -51,17 +54,26 @@ const Budget = () => {
     )
   }
 
+  // buttons
+  const buttons = [
+    { text: 'Overview', desc: '', link: `home` },
+    { text: 'Add Debit -', desc: '', link: `add-debit` },
+    { text: 'Add Credit +', desc: '', link: `add-credit` },
+    { text: 'Add Category +', desc: '', link: `add-category` }
+  ]
+
+  console.log( pageState )
   return (
     <>
       { queryLoading && <SpinLoader /> }
-      { budgetState?.title && <section>
-          <Title text={ budgetState.title } />
-          <h3 className="container-description">{ budgetState.desc }</h3>
-          {/* <div className="container-grid-full">
-              { buttons.map( ( x, i ) => {
-                  return <PrimaryButton key={ `${i}_budget` } title={ x.title } desc={ x.desc } disabled={ x.disabled || false } link={ x.link }/>
-              })}
-          </div> */}
+      { budgetState?.title && <section className="">
+          <Title text={ budgetState.title } additionalClass={ 'margin-bottom-none' }/>
+          <NavStateContainer buttons={ buttons } state={ pageState } setState={ setPageState }/>
+          { pageState === "home" && (
+            <>
+            <h3 className="container-description">{ budgetState.desc }</h3>
+            </>
+          )}
         </section>}
     </>
   )

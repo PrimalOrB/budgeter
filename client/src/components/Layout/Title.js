@@ -1,7 +1,7 @@
 import React from "react";
 
-const Title = ( { text } ) => (
-  <span className="title">{ text }
+const Title = ( { text, additionalClass } ) => (
+  <span className={ `title grad-bg ${ additionalClass }` }>{ text }
   </span>
 );
 
