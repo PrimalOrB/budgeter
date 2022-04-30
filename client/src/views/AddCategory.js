@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ActionButton } from '../components/Buttons'
-import { InlineTextInput, InlineTextareaInput, InlineListDisplay, InlineEmailInput } from '../components/Forms'
+import { InlineTextInput, InlineNumberInput, InlineDateInput } from '../components/Forms'
 import { InlineError, InlineNotification } from '../components/Notifications'
-import { useStoreContext } from '../utils/GlobalState'
 import { isEmail } from '../utils/helpers'
 import { useMutation } from '@apollo/client'
 import { CREATE_NEW_BUDGET } from '../utils/mutations'
@@ -12,19 +11,8 @@ import { Title } from '../components/Layout'
 const AddCategory = () => {
 
   const [ formInput, setFormInput ] = useState( { title: '', effectiveStartDate: null, effectiveEndDate: '', budgetedValue: 0 } ) 
-  
-  const [ state ] = useStoreContext();
 
   const history = useHistory();
-
-  useEffect(()=>{
-    if( state?.currentUser ){
-      setFormInput( {
-        ...formInput,
-        owner: state.currentUser.email
-      } )
-    }
-  },[ state ])
 
   function validateForm( form ){
     if( form.title === undefined || form.desc === undefined || form.owner === undefined ){
@@ -47,8 +35,9 @@ const AddCategory = () => {
         error: null
       });
 
+
       // send to submit
-      return processSumbit()
+      // return processSumbit()
     }
     // return error
     setFormInput({
@@ -82,10 +71,9 @@ const AddCategory = () => {
     <section>
       <Title text={ `Create New Category` } />
       <form autoComplete="off">
-        <InlineTextInput prop={ 'title' } input={ formInput } setInput={ setFormInput } label={ 'Budget Title' }/>
-        <InlineTextareaInput prop={ 'desc' } input={ formInput } setInput={ setFormInput } label={ 'Description' }/>
-        {/* <InlineListDisplay input={ formInput } setInput={ setFormInput } label={ 'Owners' }/> */}
-        <InlineEmailInput prop={ 'email' } input={ formInput } setInput={ setFormInput } label={ 'Add More Owners' } placeholder={ "Type or paste email addresses and press `Enter`" }/> 
+        <InlineTextInput prop={ 'title' } input={ formInput } setInput={ setFormInput } label={ 'Category Name' }/>
+        <InlineNumberInput prop={ 'budgetedValue' } input={ formInput } setInput={ setFormInput } label={ 'Monthly Value' } min={ 0 }/>
+        <InlineDateInput prop={ 'budgetedValue' } input={ formInput } setInput={ setFormInput } label={ 'Start Month' }/>
         { formInput.error && <InlineError text={ formInput.error }/> }
       </form>
       <hr/>
