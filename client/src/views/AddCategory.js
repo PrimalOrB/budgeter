@@ -9,9 +9,9 @@ import { useHistory } from "react-router-dom";
 import { Title } from '../components/Layout'
 import { startOfMonth } from 'date-fns'
 
-const AddCategory = () => {
+const AddCategory = ( { id } ) => {
 
-  const [ formInput, setFormInput ] = useState( { title: '', effectiveStartDate: startOfMonth( new Date() ), effectiveEndDate: null, budgetedValue: 0 } ) 
+  const [ formInput, setFormInput ] = useState( { budgetID: id, title: '', effectiveStartDate: startOfMonth( new Date() ), effectiveEndDate: null, budgetedValue: 0 } ) 
 
   const history = useHistory();
 

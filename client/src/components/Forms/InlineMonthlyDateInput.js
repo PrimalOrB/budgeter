@@ -30,8 +30,6 @@ const InlineMonthlyDateInput = ( { prop, input, setInput, label, startDate } ) =
     // eslint-disable-next-line react-hooks/exhaustive-deps
     },[ state ])
 
-    console.log( state )
-
     return (
         <div className={ 'form-inline-date-monthly' } >
             <label htmlFor={ prop }>{ label }</label>

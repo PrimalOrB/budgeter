@@ -76,7 +76,7 @@ const Budget = () => {
           )}
           { pageState === "add-category" && (
             <>
-            <AddCategory />
+            <AddCategory id={ _id }/>
             </>
           )}
         </section>}
