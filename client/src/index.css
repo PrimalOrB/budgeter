@@ -349,12 +349,17 @@ section {
 }
 
 /* Forms */
-form {
+form,
+.form-input-range-group {
   width: 100%;
   max-width: 900px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+.form-input-range-group {
+  border: 1px solid black;
 }
 
 .form-inline-text,

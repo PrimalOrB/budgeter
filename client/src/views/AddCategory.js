@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ActionButton } from '../components/Buttons'
-import { InlineTextInput, InlineNumberInput, InlineMonthlyDateInput } from '../components/Forms'
+import { InlineTextInput, InlineNumberInput, InlineMonthlyDateInput, BudgetValueRangeGroup } from '../components/Forms'
 import { InlineError, InlineNotification } from '../components/Notifications'
 import { isEmail } from '../utils/helpers'
 import { useMutation } from '@apollo/client'
@@ -11,7 +11,7 @@ import { startOfMonth } from 'date-fns'
 
 const AddCategory = ( { id } ) => {
 
-  const [ formInput, setFormInput ] = useState( { budgetID: id, title: '', effectiveStartDate: startOfMonth( new Date() ), effectiveEndDate: null, budgetedValue: 0 } ) 
+  const [ formInput, setFormInput ] = useState( { budgetID: id, title: '', budgetedValueRange: [ { order: 0, effectiveStartDate: startOfMonth( new Date() ), effectiveEndDate: null, budgetedValue: 0 } ] } ) 
 
   const history = useHistory();
 
@@ -75,11 +75,18 @@ const AddCategory = ( { id } ) => {
       <Title text={ `Create New Category` } />
       <form autoComplete="off">
         <InlineTextInput prop={ 'title' } input={ formInput } setInput={ setFormInput } label={ 'Category Name' }/>
-        <InlineNumberInput prop={ 'budgetedValue' } input={ formInput } setInput={ setFormInput } label={ 'Monthly Value' } min={ 0 }/>
-        <InlineMonthlyDateInput prop={ 'effectiveStartDate' } input={ formInput } setInput={ setFormInput } label={ 'Start Month' } startDate={ true }/>
-        { formInput.effectiveEndDate && 
-          <InlineMonthlyDateInput prop={ 'effectiveEndDate' } input={ formInput } setInput={ setFormInput } label={ 'End Month' } startDate={ false }/>
-        }
+        { formInput.budgetedValueRange.map( ( range, i ) => {
+          return (
+            // <div key={ `${ i }_range` } className={ 'form-input-range-group' }>
+            //   <InlineNumberInput prop={ 'budgetedValue' } input={ formInput } setInput={ setFormInput } label={ 'Monthly Value' } min={ 0 }/>
+            //   <InlineMonthlyDateInput prop={ 'effectiveStartDate' } input={ formInput } setInput={ setFormInput } label={ 'Start Month' } startDate={ true }/>
+            //   { formInput.effectiveEndDate && 
+            //     <InlineMonthlyDateInput prop={ 'effectiveEndDate' } input={ formInput } setInput={ setFormInput } label={ 'End Month' } startDate={ false }/>
+            //   }
+            // </div>
+            <BudgetValueRangeGroup key={ `${ i }_range` } index={ i } parentProp={ 'budgetedValueRange' } input={ formInput } setInput={ setFormInput }/>
+          )
+        })}
         { formInput.error && <InlineError text={ formInput.error }/> }
       </form>
       <hr/>

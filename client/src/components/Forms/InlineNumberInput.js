@@ -4,7 +4,7 @@ const InlineNumberInput = ( { prop, input, setInput, label, placeholder } ) => {
 
     function updateInput( e ){
         const { name, value } = e.target
-        setInput( { ...input, [name]: value, error: null } )
+        setInput( { ...input, [name]: Number( value ), error: null } )
     }
 
     return (
