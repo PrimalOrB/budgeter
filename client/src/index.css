@@ -357,7 +357,8 @@ form {
   justify-content: center;
 }
 
-.form-inline-text {
+.form-inline-text,
+.form-inline-date-monthly {
   display: flex;
   width: 100%;
   flex-wrap: nowrap;
@@ -366,7 +367,8 @@ form {
   margin: 0.5rem 0 0.5rem 0;
 }
 
-.form-inline-text > label {
+.form-inline-text > label,
+.form-inline-date-monthly > label {
   flex: 1;
   font-weight: bold;
   text-align: right;
@@ -376,7 +378,8 @@ form {
 
 .form-inline-text > input,
 .form-inline-text > textarea,
-.form-inline-text > .container-flex {
+.form-inline-text > .container-flex,
+.form-inline-date-monthly > input {
   flex: 4;
   font-weight: bold;
   outline: none;
@@ -387,17 +390,24 @@ form {
   border: 1px solid var(--highlight-2-color);
 }
 
+.form-inline-date-monthly > input {
+  flex: 2;
+  text-align: center;
+}
+
 .form-inline-text > textarea {
   resize: none;
   overflow-y: scroll;
 }
 
-.form-inline-text > label::after {
+.form-inline-text > label::after,
+.form-inline-date-monthly > label::after {
   content: ":";
   margin-right: 0.5rem;
 }
 
 .form-inline-text > input:focus,
+.form-inline-date-monthly > input:focus,
 textarea:focus {
   background-color: white;
   border: 1px solid var(--highlight-color);

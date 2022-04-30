@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { ActionButton } from '../components/Buttons'
-import { InlineTextInput, InlineNumberInput, InlineDateInput } from '../components/Forms'
+import { InlineTextInput, InlineNumberInput, InlineMonthlyDateInput } from '../components/Forms'
 import { InlineError, InlineNotification } from '../components/Notifications'
 import { isEmail } from '../utils/helpers'
 import { useMutation } from '@apollo/client'
 import { CREATE_NEW_BUDGET } from '../utils/mutations'
 import { useHistory } from "react-router-dom";
 import { Title } from '../components/Layout'
+import { startOfMonth } from 'date-fns'
 
 const AddCategory = () => {
 
-  const [ formInput, setFormInput ] = useState( { title: '', effectiveStartDate: null, effectiveEndDate: '', budgetedValue: 0 } ) 
+  const [ formInput, setFormInput ] = useState( { title: '', effectiveStartDate: startOfMonth( new Date() ), effectiveEndDate: null, budgetedValue: 0 } ) 
 
   const history = useHistory();
 
@@ -47,6 +48,8 @@ const AddCategory = () => {
     return console.log( 'failed' )
   }
 
+  console.log( formInput )
+
   const [ processSumbit, { loading: createdLoading, error: createdError }] = useMutation(CREATE_NEW_BUDGET, {
     variables: { 
       input: {
@@ -73,7 +76,10 @@ const AddCategory = () => {
       <form autoComplete="off">
         <InlineTextInput prop={ 'title' } input={ formInput } setInput={ setFormInput } label={ 'Category Name' }/>
         <InlineNumberInput prop={ 'budgetedValue' } input={ formInput } setInput={ setFormInput } label={ 'Monthly Value' } min={ 0 }/>
-        <InlineDateInput prop={ 'budgetedValue' } input={ formInput } setInput={ setFormInput } label={ 'Start Month' }/>
+        <InlineMonthlyDateInput prop={ 'effectiveStartDate' } input={ formInput } setInput={ setFormInput } label={ 'Start Month' } startDate={ true }/>
+        { formInput.effectiveEndDate && 
+          <InlineMonthlyDateInput prop={ 'effectiveEndDate' } input={ formInput } setInput={ setFormInput } label={ 'End Month' } startDate={ false }/>
+        }
         { formInput.error && <InlineError text={ formInput.error }/> }
       </form>
       <hr/>

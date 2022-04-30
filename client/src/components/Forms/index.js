@@ -3,6 +3,6 @@ import InlineTextareaInput from './InlineTextareaInput';
 import InlineListDisplay from './InlineListDisplay';
 import InlineEmailInput from './InlineEmailInput'
 import InlineNumberInput from './InlineNumberInput'
-import InlineDateInput from './InlineDateInput'
+import InlineMonthlyDateInput from './InlineMonthlyDateInput'
 
-export { InlineTextInput, InlineTextareaInput, InlineListDisplay, InlineEmailInput, InlineNumberInput, InlineDateInput };
+export { InlineTextInput, InlineTextareaInput, InlineListDisplay, InlineEmailInput, InlineNumberInput, InlineMonthlyDateInput };
