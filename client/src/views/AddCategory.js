@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ActionButton } from '../components/Buttons'
-import { InlineTextInput, BudgetValueRangeGroup } from '../components/Forms'
+import { InlineTextInput, BudgetValueRangeGroup, InlineSelectInput } from '../components/Forms'
 import { InlineError, InlineNotification } from '../components/Notifications'
 import { useMutation } from '@apollo/client'
 import { CREATE_NEW_BUDGET_CATEGORY } from '../utils/mutations'
@@ -13,15 +13,15 @@ const AddCategory = ( { id } ) => {
 
   const initialRange = { order: 0, effectiveStartDate: dateRemoveTZ( startOfMonth( new Date() ) ), effectiveEndDate: null, budgetedValue: 0 } 
 
-  const [ formInput, setFormInput ] = useState( { budgetID: id, title: '', budgetedValueRange: [ { ...initialRange } ] } ) 
+  const [ formInput, setFormInput ] = useState( { budgetID: id, title: '', categoryType: '', budgetedValueRange: [ { ...initialRange } ] } ) 
 
   const history = useHistory();
 
   function validateForm( form ){
-    if( form.title === undefined || form.budgetID === undefined || form.budgetedValueRange.length === 0 ){
+    if( form.title === undefined || form.budgetID === undefined || form.categoryType === undefined || form.budgetedValueRange.length === 0 ){
       return false
     }
-    if( form.title.length > 0 && form.budgetID.length > 0 && form.budgetedValueRange.length > 0 ){
+    if( form.title.length > 0 && form.budgetID.length > 0 && form.categoryType.length > 0 && form.budgetedValueRange.length > 0 ){
       return true
     }
     return false
@@ -93,6 +93,7 @@ const AddCategory = ( { id } ) => {
     variables: { 
       input: {
         budgetID: formInput.budgetID,
+        categoryType: formInput.categoryType,
         title: formInput.title,
         budgetedValueRange: formInput.budgetedValueRange.map(({ error, ...rest }) => rest)
       }
@@ -112,15 +113,17 @@ const AddCategory = ( { id } ) => {
     <section>
       <Title text={ `Create New Category` } />
       <form autoComplete="off">
+        <InlineSelectInput prop={ 'categoryType' } input={ formInput } setInput={ setFormInput } label={ 'Type' } optionList={ ['income','debit']  }/>
         <InlineTextInput prop={ 'title' } input={ formInput } setInput={ setFormInput } label={ 'Category Name' }/>
         { formInput.budgetedValueRange.map( ( range, i ) => {
           return (
             <BudgetValueRangeGroup key={ `${ i }_range` } index={ i } parentProp={ 'budgetedValueRange' } input={ formInput } setInput={ setFormInput } triggerDateAudit={ handleDateRanges }/>
           )
         })}
-        <ActionButton action={ addNewRange } text={ 'Add Another Range' } additionalClass={ null } />
         { formInput.error && <InlineError text={ formInput.error }/> }
       </form>
+      <hr/>
+      <ActionButton action={ addNewRange } text={ 'Add Another Range' } additionalClass={ null } />
       <hr/>
       { createdLoading ? <InlineNotification text={ 'Submit processing' }/> :  <ActionButton action={ sumbitForm } text={ 'Submit' } additionalClass={ null } /> }
     </section>

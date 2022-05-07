@@ -34,6 +34,7 @@ export const QUERY_CURRENT_BUDGET = gql`
       categories {
         _id
         title
+        categoryType
       }
     }
   }

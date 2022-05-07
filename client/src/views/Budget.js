@@ -14,8 +14,6 @@ const Budget = () => {
   const { id: _id, tab } = useParams();
   const [ pageState, setPageState ] = useState( tab === undefined ? 'dashboard' : tab )
 
-  console.log( tab, _id )
-
   const [ state ] = useStoreContext();
   const { currentUser } = state
 
@@ -43,8 +41,6 @@ const Budget = () => {
     }
   })
 
-  console.log( budgetState, pageState )
-
   // onload run query
   useEffect(()=>{
     if( currentUser?._id ){
@@ -63,7 +59,7 @@ const Budget = () => {
   const buttons = [
     { text: 'Overview', desc: '', link: `dashboard` },
     { text: 'Add Debit -', desc: '', link: `add-debit` },
-    { text: 'Add Credit +', desc: '', link: `add-credit` },
+    { text: 'Add Income +', desc: '', link: `add-income` },
     { text: 'Add Category +', desc: '', link: `add-category` }
   ]
 
@@ -80,7 +76,12 @@ const Budget = () => {
           )}
           { pageState === "add-debit" && (
             <>
-              <AddTransactionEntry id={ _id } budgetState={ budgetState }/>
+              <AddTransactionEntry categoryType={ 'debit' } budgetState={ budgetState }/>
+            </>
+          )}
+          { pageState === "add-income" && (
+            <>
+              <AddTransactionEntry categoryType={ 'income' } budgetState={ budgetState }/>
             </>
           )}
           { pageState === "add-category" && (

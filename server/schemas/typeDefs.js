@@ -13,6 +13,7 @@ const typeDefs = gql`
     input CategoryInput {
         budgetID: ID!
         title: String!
+        categoryType: String!
         budgetedValueRange: [ CategoryRangeInput ]
     }
 
@@ -49,6 +50,7 @@ const typeDefs = gql`
         _id: ID!
         title: String!
         budgetID: ID!
+        categoryType: String!
         budgetedValueRange: [ CategoryRange! ]
     }
 

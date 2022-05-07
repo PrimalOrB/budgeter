@@ -3,20 +3,17 @@ import { InlineSelectInput, InlineTextareaInput, InlineNumberInput } from '../co
 import { Title } from '../components/Layout'
 
 
-const AddTransactionEntry = ( { id, budgetState } ) => {
+const AddTransactionEntry = ( { categoryType, budgetState } ) => {
 
   const [ formInput, setFormInput ] = useState( { category: '', title: '', value: 0 } ) 
 
-  console.log( formInput )
-
   return (
     <section>
-      <Title text={ `Add Debit -` } />
+      <Title text={ `Add ${ categoryType }` } />
       <form autoComplete="off">
-        <InlineSelectInput prop={ 'category' } input={ formInput } setInput={ setFormInput } label={ 'Category' } optionList={ budgetState.categories }/>
+        <InlineSelectInput prop={ 'category' } input={ formInput } setInput={ setFormInput } label={ 'Category' } optionList={ budgetState.categories.filter( category => category.categoryType === categoryType ) }/>
         <InlineTextareaInput prop={ 'title' } input={ formInput } setInput={ setFormInput } label={ 'Description' }/>
-        <InlineNumberInput prop={ `value` } input={ formInput } setInput={ setFormInput } label={ 'Monthly Value' } min={ 0 }/>
-      
+        <InlineNumberInput prop={ `value` } input={ formInput } setInput={ setFormInput } label={ 'Monthly Value' } min={ 0 }/>      
       </form>
     </section>
   )

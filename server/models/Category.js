@@ -26,6 +26,11 @@ const categorySchema = new Schema(
       type: Date,
       default: Date.now,
     },
+    categoryType: {
+      type: String,
+      enums: [ 'income','debit' ],
+      required: true
+    },
     title: {
       type: String,
       trim: true,

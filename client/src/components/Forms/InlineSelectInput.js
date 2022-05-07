@@ -1,4 +1,5 @@
 import React from "react";
+import { titleCaseString } from '../../utils/helpers'
 
 const InlineSelectInput = ( { prop, input, setInput, label, optionList } ) => {
 
@@ -13,7 +14,7 @@ const InlineSelectInput = ( { prop, input, setInput, label, optionList } ) => {
             <select name={ prop } type="number" value={ input[prop] } onChange={ updateInput }>
                 <option disabled></option>
                 { optionList.map( option => {
-                    return <option key={ option._id } value={ option._id }>{ option.title }</option>
+                    return <option key={ option._id || option } value={ option._id || option }>{ titleCaseString( option.title || option ) }</option>
                 })}
             </select>
         </div>
