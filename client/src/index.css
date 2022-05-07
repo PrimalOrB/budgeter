@@ -368,7 +368,8 @@ form,
 
 .form-inline-text,
 .form-inline-number,
-.form-inline-date-monthly {
+.form-inline-date-monthly,
+.form-inline-select {
   display: flex;
   width: 100%;
   flex-wrap: nowrap;
@@ -379,7 +380,8 @@ form,
 
 .form-inline-text > label,
 .form-inline-number > label,
-.form-inline-date-monthly > label {
+.form-inline-date-monthly > label,
+.form-inline-select > label {
   flex: 1;
   font-weight: bold;
   text-align: right;
@@ -391,7 +393,8 @@ form,
 .form-inline-text > textarea,
 .form-inline-text > .container-flex,
 .form-inline-number > input,
-.form-inline-date-monthly > input {
+.form-inline-date-monthly > input,
+.form-inline-select > select {
   flex: 4;
   font-weight: bold;
   outline: none;
@@ -403,7 +406,6 @@ form,
 }
 
 .form-inline-date-monthly > input {
-  flex: 2;
   text-align: center;
 }
 
@@ -418,7 +420,8 @@ form,
 
 .form-inline-text > label::after,
 .form-inline-number >label::after,
-.form-inline-date-monthly > label::after {
+.form-inline-date-monthly > label::after,
+.form-inline-select > label::after {
   content: ":";
   margin-right: 0.5rem;
 }
@@ -426,6 +429,7 @@ form,
 .form-inline-text > input:focus,
 .form-inline-date-monthly > input:focus,
 .form-inline-number > input:focus,
+.form-inline-select > select:focus
 textarea:focus {
   background-color: white;
   border: 1px solid var(--highlight-color);
