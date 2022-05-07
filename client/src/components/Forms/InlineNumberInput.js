@@ -10,7 +10,7 @@ const InlineNumberInput = ( { prop, input, setInput, label, placeholder } ) => {
     return (
         <div className={ 'form-inline-number' } >
             <label htmlFor={ prop }>{ label }</label>
-            <input name={ prop } type="number" min="0" onChange={ updateInput } placeholder={ placeholder } autoComplete="off"/>
+            <input name={ prop } type="number" min="0" value={ input[prop] } onChange={ updateInput } placeholder={ placeholder } autoComplete="off"/>
         </div>
     )
 };

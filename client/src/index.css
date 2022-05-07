@@ -359,7 +359,11 @@ form,
 }
 
 .form-input-range-group {
-  border: 1px solid black;
+  margin: 0.25rem 0;
+  padding-right: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--highlight-2-color);
+  border-left: 5px solid var(--highlight-color);
 }
 
 .form-inline-text,

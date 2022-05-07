@@ -1,14 +1,10 @@
 const { Schema, model } = require('mongoose');
 
-const categorySchema = new Schema(
+const categoryRangeSchema = new Schema(
   {
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
-    title: {
-      type: String,
-      required: "Title required"
+    order: {  
+      type: Number,
+      required: true
     },
     effectiveStartDate: {
       type: Date,
@@ -21,10 +17,24 @@ const categorySchema = new Schema(
       type: Number,
       required: "Value required"
     },
+  },
+)
+
+const categorySchema = new Schema(
+  {
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
+    title: {
+      type: String,
+      required: "Title required"
+    },
     budgetID: {
       type: Schema.Types.ObjectId,
       ref: 'Budget',
     },
+    budgetedValueRange: [ categoryRangeSchema ]
   },
 )
 

@@ -7,7 +7,7 @@ import { useMutation } from '@apollo/client'
 import { CREATE_NEW_BUDGET } from '../utils/mutations'
 import { useHistory } from "react-router-dom";
 import { Title } from '../components/Layout'
-import { startOfMonth, endOfMonth, add, differenceInMonths  } from 'date-fns'
+import { startOfMonth, endOfMonth, add  } from 'date-fns'
 
 const AddCategory = ( { id } ) => {
 
@@ -30,28 +30,40 @@ const AddCategory = ( { id } ) => {
   const addNewRange = () => {
     const currentRanges = [ ...formInput.budgetedValueRange ]
     let lastEntry = currentRanges.pop()
-    console.log( currentRanges, lastEntry )
-    if( lastEntry.effectiveEndDate ){
-      console.log( 'exsting' )
-      let newRange = { ...initialRange, effectiveStartDate: startOfMonth( add( lastEntry.effectiveEndDate, { months: 1 } ) ) }
+
+    // apply end date to current last entry, and add new entry which starts after
+    if( !lastEntry.effectiveEndDate ){
+      const lastDate = Math.max( endOfMonth( new Date() ), endOfMonth( lastEntry.effectiveStartDate ) )
+      lastEntry.effectiveEndDate = endOfMonth( lastDate )
+      let newRange = { ...initialRange, order: formInput.budgetedValueRange.length, effectiveStartDate: startOfMonth( add( lastDate, { months: 1 } ) ) }
       currentRanges.push( { ...lastEntry } )
-      currentRanges.push( { ...newRange } )
-    } else if ( currentRanges.length === 0 ) {
-      console.log( 'new' )
-      lastEntry.effectiveEndDate = endOfMonth( new Date() )
-      currentRanges.push( { ...lastEntry } )
-      let newRange = { ...initialRange, effectiveStartDate: startOfMonth( add( endOfMonth( new Date() ), { months: 1 } ) ) }
-      currentRanges.push( { ...newRange } )
-    } else {
-      console.log( 'new addon' )
-      lastEntry.effectiveEndDate = endOfMonth( new Date( currentRanges[currentRanges.length - 1 ].effectiveStartDate ) )
-      currentRanges.push( { ...lastEntry } )
-      let newRange = { ...initialRange, effectiveStartDate: startOfMonth( add( lastEntry.effectiveEndDate, { months: 1 } ) ) }
       currentRanges.push( { ...newRange } )
     }
 
-
     return setFormInput( { ...formInput, budgetedValueRange: [ ...currentRanges ] } )
+  }
+
+  const handleDateRanges = ( arr ) => {
+
+    const error = []
+    arr.budgetedValueRange.map( ( x, i ) => {
+      if( x.effectiveEndDate ){
+        if( x.effectiveEndDate < arr.budgetedValueRange[i].effectiveStartDate ){
+          error.push( true )
+        }
+      }
+      if( x.effectiveStartDate && i > 0 ){
+        if( x.effectiveStartDate < arr.budgetedValueRange[i-1].effectiveEndDate ){
+          error.push( true )
+        }
+      }
+      return i
+    } )
+
+    if( error.length > 1 ){
+      return true
+    }
+    return false
   }
 
   function sumbitForm(){
@@ -76,8 +88,6 @@ const AddCategory = ( { id } ) => {
     });
     return console.log( 'failed' )
   }
-
-  console.log( formInput )
 
   const [ processSumbit, { loading: createdLoading, error: createdError }] = useMutation(CREATE_NEW_BUDGET, {
     variables: { 
@@ -106,7 +116,7 @@ const AddCategory = ( { id } ) => {
         <InlineTextInput prop={ 'title' } input={ formInput } setInput={ setFormInput } label={ 'Category Name' }/>
         { formInput.budgetedValueRange.map( ( range, i ) => {
           return (
-            <BudgetValueRangeGroup key={ `${ i }_range` } index={ i } parentProp={ 'budgetedValueRange' } input={ formInput } setInput={ setFormInput }/>
+            <BudgetValueRangeGroup key={ `${ i }_range` } index={ i } parentProp={ 'budgetedValueRange' } input={ formInput } setInput={ setFormInput } triggerDateAudit={ handleDateRanges }/>
           )
         })}
         <ActionButton action={ addNewRange } text={ 'Add Another Range' } additionalClass={ null } />

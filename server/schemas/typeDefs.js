@@ -32,13 +32,18 @@ const typeDefs = gql`
         budgets: [ID]
     }
 
-    type Category {
-        _id: ID!
-        title: String!
+    type CategoryRange {
+        order: Int!
         effectiveStartDate: Date
         effectiveEndDate: Date
         budgetedValue: Float!
+    }
+
+    type Category {
+        _id: ID!
+        title: String!
         budgetID: ID!
+        budgetedValueRange: [ CategoryRange! ]
     }
 
     type Entry {

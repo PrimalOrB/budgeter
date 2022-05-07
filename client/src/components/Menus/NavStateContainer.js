@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { ActionButton } from '../Buttons'
 import { Title } from '../Layout'
 
@@ -7,8 +7,6 @@ const NavStateContainer = ( { buttons, title, state, setState } ) => {
     function select( x ){
         setState( x.link )
     }
-
-    console.log( state, buttons )
 
     return (
         <>

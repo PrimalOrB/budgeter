@@ -1,40 +1,35 @@
-import React, { useEffect, useReducer } from "react";
-import { getMonth, getYear, startOfMonth, endOfMonth } from 'date-fns'
+import React from "react";
+import { startOfMonth, endOfMonth, format, add } from 'date-fns'
 
-function reducer( state, action ){
-    switch ( action.type ) {
-        case 'month':
-            return { ...state, month: action.value ? Number( action.value ) : 0 };
-        case 'year':
-            return { ...state, year: action.value ? Number( action.value ) : 0 };
-        default:
-            throw new Error();
+const InlineMonthlyDateInput = ( { prop, input, setInput, label, minDate, maxDate, startDate } ) => {
+
+    const parseDate = ( e ) => {
+        const { value } = e.target
+        let newState = { ...input }
+        if( startDate ){
+            newState[prop] = startOfMonth( add( new Date( value ), { days: 1 } ) )
         }
-}
-
-const InlineMonthlyDateInput = ( { prop, input, setInput, label, startDate } ) => {
-      
-    const [ state, dispatch ] = useReducer ( reducer, { month: input[prop] ? getMonth( input[prop] ) + 1 : 0, year: input[prop] ? getYear( input[prop] ) : 0 } )
-
-    useEffect(()=>{
-        if( state.month && state.year ){
-            const newDate = new Date( state.year, state.month - 1, 1 )
-            let outputDate
-            if( startDate ){
-                outputDate = startOfMonth( newDate )
-            } else {
-                outputDate = endOfMonth( newDate )
-            }
-            setInput( { ...input, [prop]: outputDate, error: null } )
+        if( !startDate ){
+            newState[prop] = endOfMonth( add( new Date( value ), { days: 1 } ) )
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    },[ state ])
+        setInput( { ...newState } )
+    }
 
     return (
         <div className={ 'form-inline-date-monthly' } >
             <label htmlFor={ prop }>{ label }</label>
-            <input name={ prop } type="number" onChange={ ( e ) => dispatch( { type: 'month', value: e.target.value } ) } min="1" max="12" autoComplete="off" value={ state.month }/>
-            <input name={ prop } type="number" onChange={ ( e ) => dispatch( { type: 'year', value: e.target.value } ) } autoComplete="off" value={ state.year }/>
+            { ( !minDate && !maxDate ) &&
+                <input name={ prop } type="month" onChange={ parseDate } value={ String( format( new Date( input[prop] ), 'yyyy-MM' ) ) }/>
+            }
+            { ( !minDate && maxDate ) &&
+                <input name={ prop } type="month" onChange={ parseDate } max={ String( format( maxDate, 'yyyy-MM' ) )} value={ String( format( new Date( input[prop] ), 'yyyy-MM' ) ) }/>
+            }
+            { ( minDate && !maxDate ) &&
+                <input name={ prop } type="month" onChange={ parseDate } min={ String( format( minDate, 'yyyy-MM' ) )} value={ String( format( new Date( input[prop] ), 'yyyy-MM' ) ) }/>
+            }
+            { ( minDate && maxDate ) &&
+                <input name={ prop } type="month" onChange={ parseDate } min={ String( format( minDate, 'yyyy-MM' ) )} max={ String( format( maxDate, 'yyyy-MM' ) ) } value={ String( format( new Date( input[prop] ), 'yyyy-MM' ) ) }/>
+            }
         </div>
     )
 };
