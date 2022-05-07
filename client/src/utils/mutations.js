@@ -31,6 +31,10 @@ export const QUERY_CURRENT_BUDGET = gql`
       _id
       title
       desc
+      categories {
+        _id
+        title
+      }
     }
   }
 `;

@@ -11,10 +11,11 @@ import { AddCategory, AddTransactionEntry } from './'
 
 const Budget = () => {
   
-  const defaultPage = "home"
-  const [ pageState, setPageState ] = useState( defaultPage )
+  const { id: _id, tab } = useParams();
+  const [ pageState, setPageState ] = useState( tab === undefined ? 'dashboard' : tab )
 
-  const { id: _id } = useParams();
+  console.log( tab, _id )
+
   const [ state ] = useStoreContext();
   const { currentUser } = state
 
@@ -42,6 +43,8 @@ const Budget = () => {
     }
   })
 
+  console.log( budgetState, pageState )
+
   // onload run query
   useEffect(()=>{
     if( currentUser?._id ){
@@ -52,13 +55,13 @@ const Budget = () => {
   
   if( errorState ){
     return (
-      <InlineError text={ errorState} />
+      <InlineError text={ errorState } />
     )
   }
 
   // buttons
   const buttons = [
-    { text: 'Overview', desc: '', link: `home` },
+    { text: 'Overview', desc: '', link: `dashboard` },
     { text: 'Add Debit -', desc: '', link: `add-debit` },
     { text: 'Add Credit +', desc: '', link: `add-credit` },
     { text: 'Add Category +', desc: '', link: `add-category` }
@@ -77,7 +80,7 @@ const Budget = () => {
           )}
           { pageState === "add-debit" && (
             <>
-              <AddTransactionEntry id={ _id }/>
+              <AddTransactionEntry id={ _id } budgetState={ budgetState }/>
             </>
           )}
           { pageState === "add-category" && (

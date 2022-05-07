@@ -74,18 +74,15 @@ const resolvers = {
       createCategory: async( parent, { input }, context ) => {
         if( context.headers.authorization !== undefined ){
 
-          // const { budgetID, title, budgetedValueRange } = input
+          const { budgetID } = input
 
           const createBudgetCategory = await Category.create( input )
 
-          // console.log( budgetID, title, budgetedValueRange )
-
-          // const createBudgetCategory = {}
-
-          console.log( createBudgetCategory )
+          const addedToBudget = await Budget.findOneAndUpdate( { _id: budgetID},
+            { $push: { categories: createBudgetCategory._id } },
+            { new: true, runValidators: true } )      
           
-          
-          return createBudgetCategory
+          return addedToBudget
         }
         throw new AuthenticationError('Incorrect credentials');
       },
@@ -95,6 +92,7 @@ const resolvers = {
 
           // find budget by ID
           const findBudget = await Budget.findOne( { _id: input.budget } )
+            .populate( 'categories' )
           if( !findBudget ){
             throw new UserInputError('No Data Returned')
           }
