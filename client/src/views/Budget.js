@@ -7,7 +7,7 @@ import { InlineError } from '../components/Notifications'
 import { SpinLoader } from '../components/Loaders'
 import { NavStateContainer }from '../components/Menus'
 import { Title } from '../components/Layout'
-import { AddCategory } from './'
+import { AddCategory, AddTransactionEntry } from './'
 
 const Budget = () => {
   
@@ -72,12 +72,17 @@ const Budget = () => {
           <NavStateContainer buttons={ buttons } state={ pageState } setState={ setPageState }/>
           { pageState === "home" && (
             <>
-            <h3 className="container-description">{ budgetState.desc }</h3>
+              <h3 className="container-description">{ budgetState.desc }</h3>
+            </>
+          )}
+          { pageState === "add-debit" && (
+            <>
+              <AddTransactionEntry id={ _id }/>
             </>
           )}
           { pageState === "add-category" && (
             <>
-            <AddCategory id={ _id }/>
+              <AddCategory id={ _id }/>
             </>
           )}
         </section>}
