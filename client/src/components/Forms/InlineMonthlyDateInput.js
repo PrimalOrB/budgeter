@@ -20,16 +20,16 @@ const InlineMonthlyDateInput = ( { prop, input, setInput, label, minDate, maxDat
         <div className={ 'form-inline-date-monthly' } >
             <label htmlFor={ prop }>{ label }</label>
             { ( !minDate && !maxDate ) &&
-                <input name={ prop } type="month" onChange={ parseDate } value={ String( format( dateAddTZ( new Date( input[prop] ) ), 'yyyy-MM' ) ) }/>
+                <input name={ prop } type="month" onChange={ parseDate } value={ String( format( dateAddTZ( new Date( input[prop] ) ), 'yyyy-MM' ) ) } required="required"/>
             }
             { ( !minDate && maxDate ) &&
-                <input name={ prop } type="month" onChange={ parseDate } max={ String( format( dateAddTZ( maxDate ), 'yyyy-MM' ) )} value={ String( format( dateAddTZ( new Date( input[prop] ) ), 'yyyy-MM' ) ) }/>
+                <input name={ prop } type="month" onChange={ parseDate } max={ String( format( dateAddTZ( maxDate ), 'yyyy-MM' ) )} value={ String( format( dateAddTZ( new Date( input[prop] ) ), 'yyyy-MM' ) ) } required="required"/>
             }
             { ( minDate && !maxDate ) &&
-                <input name={ prop } type="month" onChange={ parseDate } min={ String( format( dateAddTZ( minDate ), 'yyyy-MM' ) )} value={ String( format( dateAddTZ( new Date( input[prop] ) ), 'yyyy-MM' ) ) }/>
+                <input name={ prop } type="month" onChange={ parseDate } min={ String( format( dateAddTZ( minDate ), 'yyyy-MM' ) )} value={ String( format( dateAddTZ( new Date( input[prop] ) ), 'yyyy-MM' ) ) } required="required"/>
             }
             { ( minDate && maxDate ) &&
-                <input name={ prop } type="month" onChange={ parseDate } min={ String( format( dateAddTZ( minDate ), 'yyyy-MM' ) )} max={ String( format( dateAddTZ( maxDate ), 'yyyy-MM' ) ) } value={ String( format( dateAddTZ( new Date( input[prop] ) ), 'yyyy-MM' ) ) }/>
+                <input name={ prop } type="month" onChange={ parseDate } min={ String( format( dateAddTZ( minDate ), 'yyyy-MM' ) )} max={ String( format( dateAddTZ( maxDate ), 'yyyy-MM' ) ) } value={ String( format( dateAddTZ( new Date( input[prop] ) ), 'yyyy-MM' ) ) } required="required"/>
             }
         </div>
     )

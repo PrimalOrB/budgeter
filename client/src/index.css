@@ -430,3 +430,13 @@ textarea:focus {
   background-color: white;
   border: 1px solid var(--highlight-color);
 }
+
+input[type="month"]::-webkit-clear-button,
+input[type="time"]::-ms-clear {
+  display: none;
+}
+
+input::-ms-clear {
+  width: 0;
+  height: 0;
+}

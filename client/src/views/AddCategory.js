@@ -33,7 +33,7 @@ const AddCategory = ( { id } ) => {
 
     // apply end date to current last entry, and add new entry which starts after
     if( !lastEntry.effectiveEndDate ){
-      const lastDate = Math.max( dateRemoveTZ( endOfMonth( new Date() ) ), dateRemoveTZ( endOfMonth( lastEntry.effectiveStartDate ) ) )
+      const lastDate = Math.max( dateRemoveTZ( endOfMonth( new Date() ) ), dateRemoveTZ( endOfMonth( add( lastEntry.effectiveStartDate, { months: 1 } ) ) ) )
       lastEntry.effectiveEndDate = dateRemoveTZ( endOfMonth( lastDate ) )
       let newRange = { ...initialRange, order: formInput.budgetedValueRange.length, effectiveStartDate: dateRemoveTZ( startOfMonth( add( lastDate, { months: 1 } ) ) ) }
       currentRanges.push( { ...lastEntry } )
