@@ -28,6 +28,13 @@ const typeDefs = gql`
         user: ID!
         budget: ID!
     }
+    
+    input TransactionInput {
+        title: String!
+        value: Float!
+        budgetID: ID!
+        categoryID: ID
+    }
 
     input UserIDInput {
         _id: ID
@@ -56,9 +63,12 @@ const typeDefs = gql`
 
     type Entry {
         _id: ID!
+        createdAt: Date!
         title: String!
         value: Float!
+        valueType: String!
         budgetID: ID!
+        userID: ID!
         categoryID: ID!
     }
 
@@ -83,6 +93,7 @@ const typeDefs = gql`
         login(email: String! ): Auth
         createBudget( input: BudgetInput! ): Budget
         createCategory( input: CategoryInput! ): Budget
+        createTransaction( input: TransactionInput! ): Budget
         queryBudget( input: BudgetQueryInput! ): Budget
         queryUserBudgets( input: UserIDInput! ): [ Budget ]
     }

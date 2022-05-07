@@ -14,9 +14,18 @@ const entrySchema = new Schema(
       type: Number,
       required: "Value required"
     },
+    valueType: {
+      type: String,
+      enum: ['debit','income'],
+      required: true
+    },
     budgetID: {
       type: Schema.Types.ObjectId,
       ref: 'Budget',
+    },
+    userID: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
     },
     categoryID: {
       type: Schema.Types.ObjectId,

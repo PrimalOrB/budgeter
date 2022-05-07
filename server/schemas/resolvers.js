@@ -1,4 +1,4 @@
-const { User, Budget, Category } = require( '../models' )
+const { User, Budget, Category, Entry } = require( '../models' )
 const { AuthenticationError, UserInputError } = require( 'apollo-server-express' )
 const { signToken } = require( '../utils/auth' )
 const dateScalar = require( './dateScalar' )
@@ -87,12 +87,47 @@ const resolvers = {
         throw new AuthenticationError('Incorrect credentials');
       },
 
+      createTransaction: async( parent, { input }, context ) => {
+        if( context.headers.authorization !== undefined ){
+
+          let { budgetID, categoryID } = input
+
+          const user = await User.findOne( { email: context.user.email } )
+
+          if( !user ){
+            throw new UserInputError('No User Found');
+          }
+
+          const matchCategory = await Category.findOne( { _id: categoryID } )
+
+          if( !matchCategory ){
+            throw new UserInputError('Category Not Found');
+          }
+
+          const newEntry = await Entry.create( { ...input, userId: user._id, valueType: matchCategory.categoryType } )
+
+          const budgetUpdate = await Budget.findOneAndUpdate(
+            { _id: budgetID },
+            { $push: { entries: newEntry._id } },
+            { new: true, runValidators: true } ) 
+
+          if( !budgetUpdate ){
+            throw new UserInputError('Budget Not Found');
+          }
+
+          return budgetUpdate
+        }
+        throw new AuthenticationError('Incorrect credentials');
+      },
+
       queryBudget: async( parent, { input }, context ) => {
         if( context.headers.authorization !== undefined ){
 
           // find budget by ID
           const findBudget = await Budget.findOne( { _id: input.budget } )
             .populate( 'categories' )
+            .populate( 'entries' )
+
           if( !findBudget ){
             throw new UserInputError('No Data Returned')
           }

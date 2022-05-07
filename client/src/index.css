@@ -57,6 +57,10 @@ hr {
   width: 100%;
 }
 
+li {
+  list-style: none;
+}
+
 .center {
   text-align: center;
 }
@@ -64,6 +68,31 @@ hr {
 .inline {
   display: block;
   width: 100%;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.italic {
+  font-style: italic;
+}
+
+.font-small {
+  font-size: 0.75rem;
+}
+
+.font-medium {
+  font-size: 0.85rem;
+  line-height: 1rem;
+}
+
+.font-reg {
+  font-size: 1rem
+}
+
+.indent-1 {
+  padding-left: 1rem
 }
 
 .notification {
@@ -74,6 +103,27 @@ hr {
 .error {
   color: red;
   font-weight: bold;
+}
+
+.colon::after{
+  content: ": "
+}
+
+/* Paddings */
+.padding-top-none {
+  padding-top: 0 !important;
+}
+
+.padding-top-sm {
+  padding-top: 0.15rem !important;
+}
+
+.padding-top-half {
+  padding-top: 0.5rem !important;
+}
+
+.padding-top-full {
+  padding-top: 1rem !important;
 }
 
 /* Margins */
@@ -101,7 +151,24 @@ hr {
   margin-bottom: 0 !important;
 }
 
+.margin-right-none {
+  margin-right: 0 !important;
+}
+
+.margin-right-half {
+  margin-right: 0.5rem !important;
+}
+
+.margin-right-full {
+  margin-right: 1rem !important;
+}
+
+
 /* Borders */
+.border-bot-hightlight-1 {
+  border-bottom: 1px solid var(--highlight-color);
+}
+
 .border-bot-hightlight {
   border-bottom: 2px solid var(--highlight-color);
 }
@@ -168,6 +235,15 @@ section {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+/* Sub Sections */
+.section-list {
+  width: 95%;
+  max-width: 700px;
+  border: 1px solid var(--highlight-color);
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.5rem;
 }
 
 /* Nav Menu & Nav Buttons */
@@ -240,6 +316,71 @@ section {
   flex-wrap: wrap;
 }
 
+.flex-transaction-line-sm {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.flex {
+  display: flex;
+}
+
+.wrap {
+  flex-wrap: wrap;
+}
+
+.f0 {
+  flex: 0
+}
+
+.f1 {
+  flex: 1
+}
+
+.f2 {
+  flex: 2
+}
+
+.f-full {
+  width: 100%
+}
+
+.f-valign {
+  align-items: center;
+}
+
+.positive {
+  color: green
+}
+
+.negative {
+  color: red
+}
+
+.negative:before {
+  content: '-'
+}
+
+.reverse {
+  color: orange
+}
+
+.reverse:before {
+  content: '-'
+}
+.reverse:after {
+  content: 'rev'
+}
+
+.credit {
+  color: orange
+}
+
+.credit:after {
+  content: 'cr'
+}
+
 /* Titles */
 .title {
   display: block;
@@ -272,6 +413,25 @@ section {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
   font-size: 1.5rem;
+}
+
+.sub-container-description {
+  display: block;
+  width: 100%;
+  color: var(--primary-color);
+  text-align: center;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+}
+
+/* Lists */
+.section-list .border-bot-hightlight-1:last-of-type{
+  border-bottom: none;
+}
+
+.section-list li:hover{
+  background-color: var(--tertiary-color);
 }
 
 /* Buttons */

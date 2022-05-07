@@ -25,6 +25,14 @@ export const CREATE_NEW_BUDGET_CATEGORY = gql`
   }
 `;
 
+export const CREATE_NEW_TRANSACTION = gql`
+  mutation createTransaction($input: TransactionInput! ) {
+    createTransaction(input: $input) {
+      _id
+    }
+  }
+`;
+
 export const QUERY_CURRENT_BUDGET = gql`
   mutation queryBudget($input: BudgetQueryInput! ) {
     queryBudget(input: $input) {
@@ -35,6 +43,15 @@ export const QUERY_CURRENT_BUDGET = gql`
         _id
         title
         categoryType
+      }
+      entries {
+        _id
+        createdAt
+        title
+        value
+        valueType
+        budgetID
+        categoryID
       }
     }
   }

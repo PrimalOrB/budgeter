@@ -1,5 +1,14 @@
+export function commaSeparatedNumberDisplay( value ){
+    return Math.floor( value ).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
 export function toCurrency( input ){
-    return '$'+input.toFixed(2)
+    if( isNaN( input ) ){
+        return '$'+0
+    }
+    let dollars = Math.floor( input )
+    let cents = ( input - dollars ).toFixed(2).split('.')[1]
+    return '$'+ commaSeparatedNumberDisplay( dollars )+'.'+cents
 }
 
 

@@ -7,7 +7,7 @@ import { InlineError } from '../components/Notifications'
 import { SpinLoader } from '../components/Loaders'
 import { NavStateContainer }from '../components/Menus'
 import { Title } from '../components/Layout'
-import { AddCategory, AddTransactionEntry } from './'
+import { AddCategory, AddTransactionEntry, RecentTransactions } from './'
 
 const Budget = () => {
   
@@ -65,23 +65,25 @@ const Budget = () => {
 
   return (
     <>
-      { queryLoading && <SpinLoader /> }
+      
       { budgetState?.title && <section className="">
           <Title text={ budgetState.title } additionalClass={ 'margin-bottom-none' }/>
           <NavStateContainer buttons={ buttons } state={ pageState } setState={ setPageState }/>
-          { pageState === "home" && (
+          { pageState === "dashboard" && (
             <>
               <h3 className="container-description">{ budgetState.desc }</h3>
+              <RecentTransactions categories={ budgetState.categories } transactions={ budgetState.entries.sort( ( a, b ) => b.createdAt - a.createdAt ).slice( 0, 5 ) } />
+
             </>
           )}
           { pageState === "add-debit" && (
             <>
-              <AddTransactionEntry categoryType={ 'debit' } budgetState={ budgetState }/>
+              <AddTransactionEntry categoryType={ 'debit' } budgetState={ budgetState } refetch={ queryBudget }/>
             </>
           )}
           { pageState === "add-income" && (
             <>
-              <AddTransactionEntry categoryType={ 'income' } budgetState={ budgetState }/>
+              <AddTransactionEntry categoryType={ 'income' } budgetState={ budgetState } refetch={ queryBudget }/>
             </>
           )}
           { pageState === "add-category" && (
@@ -90,6 +92,7 @@ const Budget = () => {
             </>
           )}
         </section>}
+        { queryLoading && <SpinLoader /> }
     </>
   )
 
