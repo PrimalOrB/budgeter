@@ -39,6 +39,7 @@ const Home = () => {
     if( currentUser?._id ){
       queryBudgets()
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   },[ currentUser ])
   
   return (

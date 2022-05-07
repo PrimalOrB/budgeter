@@ -4,8 +4,16 @@ import { setContext } from '@apollo/client/link/context';
 import { useAuth0 } from "@auth0/auth0-react";
 import { ApolloProvider, ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
 import { StoreProvider } from "./utils/GlobalState";
-import { FullPageSpinLoader, Header, Footer } from "./components";
-import { Home, AddBudget, Budget } from "./views";
+import { 
+  FullPageSpinLoader, 
+  Header, 
+  // Footer 
+} from "./components";
+import { 
+  Home, 
+  AddBudget, 
+  Budget
+ } from "./views";
 import ProtectedRoute from "./auth/protected-route";
 
 const httpLink = createHttpLink({

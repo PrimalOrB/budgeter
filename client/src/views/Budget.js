@@ -47,6 +47,7 @@ const Budget = () => {
     if( currentUser?._id ){
       queryBudget()
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   },[ currentUser ])
   
   if( errorState ){

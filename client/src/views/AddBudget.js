@@ -24,6 +24,7 @@ const AddBudget = () => {
         owner: state.currentUser.email
       } )
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   },[ state ])
 
   function validateForm( form ){
