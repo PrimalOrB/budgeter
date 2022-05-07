@@ -2,26 +2,26 @@ import React, { useState } from "react";
 import { ActionButton } from '../components/Buttons'
 import { InlineTextInput, BudgetValueRangeGroup } from '../components/Forms'
 import { InlineError, InlineNotification } from '../components/Notifications'
-import { isEmail } from '../utils/helpers'
 import { useMutation } from '@apollo/client'
-import { CREATE_NEW_BUDGET } from '../utils/mutations'
+import { CREATE_NEW_BUDGET_CATEGORY } from '../utils/mutations'
 import { useHistory } from "react-router-dom";
 import { Title } from '../components/Layout'
 import { startOfMonth, endOfMonth, add  } from 'date-fns'
+import { dateRemoveTZ } from '../utils/helpers'
 
 const AddCategory = ( { id } ) => {
 
-  const initialRange = { order: 0, effectiveStartDate: startOfMonth( new Date() ), effectiveEndDate: null, budgetedValue: 0 } 
+  const initialRange = { order: 0, effectiveStartDate: dateRemoveTZ( startOfMonth( new Date() ) ), effectiveEndDate: null, budgetedValue: 0 } 
 
   const [ formInput, setFormInput ] = useState( { budgetID: id, title: '', budgetedValueRange: [ { ...initialRange } ] } ) 
 
   const history = useHistory();
 
   function validateForm( form ){
-    if( form.title === undefined || form.desc === undefined || form.owner === undefined ){
+    if( form.title === undefined || form.budgetID === undefined || form.budgetedValueRange.length === 0 ){
       return false
     }
-    if( form.title.length > 0 && form.desc.length > 0 && form.owner !== null && isEmail( form.owner) ){
+    if( form.title.length > 0 && form.budgetID.length > 0 && form.budgetedValueRange.length > 0 ){
       return true
     }
     return false
@@ -33,13 +33,12 @@ const AddCategory = ( { id } ) => {
 
     // apply end date to current last entry, and add new entry which starts after
     if( !lastEntry.effectiveEndDate ){
-      const lastDate = Math.max( endOfMonth( new Date() ), endOfMonth( lastEntry.effectiveStartDate ) )
-      lastEntry.effectiveEndDate = endOfMonth( lastDate )
-      let newRange = { ...initialRange, order: formInput.budgetedValueRange.length, effectiveStartDate: startOfMonth( add( lastDate, { months: 1 } ) ) }
+      const lastDate = Math.max( dateRemoveTZ( endOfMonth( new Date() ) ), dateRemoveTZ( endOfMonth( lastEntry.effectiveStartDate ) ) )
+      lastEntry.effectiveEndDate = dateRemoveTZ( endOfMonth( lastDate ) )
+      let newRange = { ...initialRange, order: formInput.budgetedValueRange.length, effectiveStartDate: dateRemoveTZ( startOfMonth( add( lastDate, { months: 1 } ) ) ) }
       currentRanges.push( { ...lastEntry } )
       currentRanges.push( { ...newRange } )
     }
-
     return setFormInput( { ...formInput, budgetedValueRange: [ ...currentRanges ] } )
   }
 
@@ -66,6 +65,8 @@ const AddCategory = ( { id } ) => {
     return false
   }
 
+  // console.log( formInput )
+
   function sumbitForm(){
     // check form validity
     const valid = validateForm( formInput )
@@ -77,9 +78,8 @@ const AddCategory = ( { id } ) => {
         error: null
       });
 
-
       // send to submit
-      // return processSumbit()
+      return processSumbit()
     }
     // return error
     setFormInput({
@@ -89,19 +89,18 @@ const AddCategory = ( { id } ) => {
     return console.log( 'failed' )
   }
 
-  const [ processSumbit, { loading: createdLoading, error: createdError }] = useMutation(CREATE_NEW_BUDGET, {
+  const [ processSumbit, { loading: createdLoading, error: createdError }] = useMutation(CREATE_NEW_BUDGET_CATEGORY, {
     variables: { 
       input: {
-        owner: formInput.owner,
-        emails: formInput.emails,
+        budgetID: formInput.budgetID,
         title: formInput.title,
-        desc: formInput.desc
+        budgetedValueRange: formInput.budgetedValueRange.map(({ error, ...rest }) => rest)
       }
     },
     update: ( cache, data ) => {
       try {
         if( data ){
-          return history.push( `/budget/${ data.data.createBudget._id }` );
+          return history.push( `/budget/${ formInput.budgetID }` );
         }
       } catch (e) {
         console.error( createdError );

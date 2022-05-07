@@ -129,3 +129,15 @@ export function shortenedString( input, length ){
     }
     return `${ input.substring(0,length) }...`
 }
+
+export function dateRemoveTZ( date ){
+    const inputDate = new Date( date );
+    const dateOnly = new Date( inputDate.valueOf() - inputDate.getTimezoneOffset() * 60 * 1000 );
+    return dateOnly
+}
+
+export function dateAddTZ( date ){
+    const inputDate = new Date( date );
+    const dateOnly = new Date( inputDate.valueOf() + inputDate.getTimezoneOffset() * 60 * 1000 );
+    return dateOnly
+}

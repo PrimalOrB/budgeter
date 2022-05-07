@@ -17,6 +17,14 @@ export const CREATE_NEW_BUDGET = gql`
   }
 `;
 
+export const CREATE_NEW_BUDGET_CATEGORY = gql`
+  mutation createCategory($input: CategoryInput! ) {
+    createCategory(input: $input) {
+      _id
+    }
+  }
+`;
+
 export const QUERY_CURRENT_BUDGET = gql`
   mutation queryBudget($input: BudgetQueryInput! ) {
     queryBudget(input: $input) {

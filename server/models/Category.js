@@ -8,7 +8,7 @@ const categoryRangeSchema = new Schema(
     },
     effectiveStartDate: {
       type: Date,
-      default: Date.now,
+      required: true
     },
     effectiveEndDate: {
       type: Date
@@ -28,6 +28,7 @@ const categorySchema = new Schema(
     },
     title: {
       type: String,
+      trim: true,
       required: "Title required"
     },
     budgetID: {

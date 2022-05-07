@@ -3,11 +3,17 @@ const { gql } = require( 'apollo-server-express' );
 const typeDefs = gql`
     scalar Date
 
-    input BudgetCategoryInput {
-        title: String!
-        effectiveStartDate: Date
+    input CategoryRangeInput {
+        order: Int!
+        effectiveStartDate: Date!
         effectiveEndDate: Date
         budgetedValue: Float!
+    }
+
+    input CategoryInput {
+        budgetID: ID!
+        title: String!
+        budgetedValueRange: [ CategoryRangeInput ]
     }
 
     input BudgetInput {
@@ -74,6 +80,7 @@ const typeDefs = gql`
     type Mutation {
         login(email: String! ): Auth
         createBudget( input: BudgetInput! ): Budget
+        createCategory( input: CategoryInput! ): Budget
         queryBudget( input: BudgetQueryInput! ): Budget
         queryUserBudgets( input: UserIDInput! ): [ Budget ]
     }
