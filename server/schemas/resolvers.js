@@ -95,13 +95,13 @@ const resolvers = {
           const user = await User.findOne( { email: context.user.email } )
 
           if( !user ){
-            throw new UserInputError('No User Found');
+            return {}
           }
 
           const matchCategory = await Category.findOne( { _id: categoryID } )
 
           if( !matchCategory ){
-            throw new UserInputError('Category Not Found');
+            return {}
           }
 
           const newEntry = await Entry.create( { ...input, userId: user._id, valueType: matchCategory.categoryType } )
@@ -112,7 +112,7 @@ const resolvers = {
             { new: true, runValidators: true } ) 
 
           if( !budgetUpdate ){
-            throw new UserInputError('Budget Not Found');
+            return {}
           }
 
           return budgetUpdate
@@ -129,7 +129,7 @@ const resolvers = {
             .populate( 'entries' )
 
           if( !findBudget ){
-            throw new UserInputError('No Data Returned')
+            return {}
           }
           // ensure user is authorized
           const userMatch = findBudget.ownerIDs.includes( input.user )
@@ -148,7 +148,7 @@ const resolvers = {
           // find budget with ownerID containing userID
           const findBudgets = await Budget.find( { ownerIDs: { $all: [ input._id ] }  } )
           if( findBudgets.length === 0 ){
-            throw new UserInputError('No Data Returned')
+            return []
           }
 
           return findBudgets

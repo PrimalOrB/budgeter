@@ -16,7 +16,7 @@ const entrySchema = new Schema(
     },
     valueType: {
       type: String,
-      enum: ['debit','income'],
+      enum: ['expense','income'],
       required: true
     },
     budgetID: {

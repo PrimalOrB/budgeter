@@ -43,6 +43,12 @@ export const QUERY_CURRENT_BUDGET = gql`
         _id
         title
         categoryType
+        budgetedValueRange {
+          order
+          effectiveStartDate
+          effectiveEndDate
+          budgetedValue
+        }
       }
       entries {
         _id

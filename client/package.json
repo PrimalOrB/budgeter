@@ -12,6 +12,7 @@
     "jwt-decode": "^3.1.2",
     "multer": "^1.4.3",
     "react": "^16.14.0",
+    "react-chartjs-2": "^4.1.0",
     "react-dom": "^16.14.0",
     "react-icons": "^4.2.0",
     "react-router-dom": "^5.2.0",

@@ -1,3 +1,5 @@
+import { sub, format, startOfMonth } from 'date-fns'
+
 export function commaSeparatedNumberDisplay( value ){
     return Math.floor( value ).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
@@ -46,4 +48,67 @@ export function titleCaseString( str ){
         sentence[i] = sentence[i][0].toUpperCase() + sentence[i].slice(1);
     }
     return sentence
+}
+
+export function parseBudgetData( { budget, date, duration } ){
+    let months = new Array( duration ).fill().map( ( x, i ) => {
+        const createDate = sub( new Date( date ), { months: i } )
+        return { 
+            label: format( createDate , 'M/yy' ), 
+            date: startOfMonth( createDate ),
+            incomeTotal: 0,
+            expenseTotal: 0,
+            budgetedIncomeTotal: 0,
+            budgetedExpenseTotal: 0
+         }
+    } )
+
+    budget.categories.map( category => {
+        // map through months
+        months.map( month => {
+            // map through ranges
+            category.budgetedValueRange.map( range => {
+                // if no end date, and month >= range start date, then add
+                if( range.effectiveEndDate === null && month.date >= dateAddTZ( new Date( range.effectiveStartDate ) ) ){
+                    console.log( category.categoryType )
+                    if( category.categoryType === 'income' ){
+                        return month.budgetedIncomeTotal += range.budgetedValue
+                    }
+                    if( category.categoryType === 'expense' ){
+                        return month.budgetedExpenseTotal += range.budgetedValue
+                    }
+                }
+                // if month >= range start date, and month < range end date then add
+                if( month.date < dateAddTZ( new Date( range.effectiveEndDate ) ) && month.date >= dateAddTZ( new Date( range.effectiveStartDate ) ) ){
+                    if( category.categoryType === 'income' ){
+                        return month.budgetedIncomeTotal += range.budgetedValue
+                    }
+                    if( category.categoryType === 'expense' ){
+                        return month.budgetedExpenseTotal += range.budgetedValue
+                    }
+                }
+                return null
+            })
+            return null
+        } )
+        return null
+    } )
+
+    budget.entries.map( expense => {
+        let matchedMonth = months.filter( month => month.label === format( expense.createdAt , 'M/yy' ) )
+        console.log( matchedMonth )
+        if( matchedMonth.length === 1 ){
+            if( expense.valueType === 'income' ){
+                return matchedMonth[0].incomeTotal += expense.value
+            }
+            if( expense.valueType === 'expense' ){
+                return matchedMonth[0].expenseTotal += expense.value
+            }
+        }
+        return null
+    })
+
+    console.log( months )
+
+    return { months }
 }

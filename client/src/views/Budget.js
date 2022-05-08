@@ -8,6 +8,7 @@ import { SpinLoader } from '../components/Loaders'
 import { NavStateContainer }from '../components/Menus'
 import { Title } from '../components/Layout'
 import { AddCategory, AddTransactionEntry, RecentTransactions } from './'
+import { parseBudgetData } from '../utils/helpers'
 
 const Budget = () => {
   
@@ -18,6 +19,7 @@ const Budget = () => {
   const { currentUser } = state
 
   const [ budgetState, setBudgetState ] = useState( {} )
+  const [ parsedBudgetState, setParsedBudgetState ] = useState( {} )
   const [ errorState, setErrorState ] = useState()
 
   const [ queryBudget, { loading: queryLoading, error: queryError }] = useMutation(QUERY_CURRENT_BUDGET, {
@@ -48,6 +50,15 @@ const Budget = () => {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[ currentUser ])
+
+  // on data retrieval, parse budget
+  useEffect(()=>{
+    if( budgetState?.title ){
+      setParsedBudgetState( parseBudgetData( { budget: budgetState, date: new Date(), duration: 6 } ) )
+    }
+  },[budgetState])
+
+  console.log( parsedBudgetState )
   
   if( errorState ){
     return (

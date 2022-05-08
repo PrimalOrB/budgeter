@@ -4,7 +4,7 @@ import { toCurrency } from '../utils/helpers'
 
 const RecentTransactions = ( { categories, transactions } ) => {
   
-  console.log( transactions, categories )
+  // console.log( transactions, categories )
 
   return (
     <section>
@@ -27,8 +27,6 @@ const RecentTransactions = ( { categories, transactions } ) => {
           if( entry.valueType === "expense" && entry.value < 0){
             type = 2
           }
-
-          console.log( entry.valueType, entry.value, type )
 
           return ( 
             <li key={ `recent_${ entry._id }` } className={ 'flex-transaction-line-sm border-bot-hightlight-1 f-valign' }>

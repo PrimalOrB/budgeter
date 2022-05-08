@@ -28,7 +28,7 @@ const categorySchema = new Schema(
     },
     categoryType: {
       type: String,
-      enums: [ 'income','debit' ],
+      enums: [ 'income','expense' ],
       required: true
     },
     title: {
