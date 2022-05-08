@@ -110,5 +110,5 @@ export function parseBudgetData( { budget, date, duration } ){
 
     console.log( months )
 
-    return { months }
+    return months
 }

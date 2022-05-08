@@ -246,6 +246,11 @@ section {
   padding: 0.25rem 0.5rem;
 }
 
+.chart-full-section {
+  width: 100%;
+  height: 20rem;
+}
+
 /* Nav Menu & Nav Buttons */
 .nav-menu {
   display: flex;
