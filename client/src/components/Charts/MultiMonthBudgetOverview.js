@@ -66,9 +66,11 @@ const MultiMonthBudgetOverview = ( { data } ) => {
                     return 0
                 } ),
                 borderWidth: 8,
-                borderColor: 'rgba(200, 2, 255, 0.5)',
+                borderColor: '#71a9f7',
                 pointHoverBackgroundColor: 'rgba( 255, 255, 255, 1)',
-                pointHoverBorderWidth: 10,
+                pointHitRadius: 5,
+                pointHoverRadius: 8,
+                pointHoverBorderWidth: 3,
                 tension: 0.25
             },
             {
