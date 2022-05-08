@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Chart } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, BarElement, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 
@@ -8,6 +8,7 @@ const MultiMonthBudgetOverview = ( { data } ) => {
 
     const [ graphDataState, setGraphDataState ] = useState( null )
     const [ loadingState, setLoadingState ] = useState( true )
+    const maxYAxis = useRef( 0 )
 
     console.log( graphDataState )
 
@@ -61,10 +62,15 @@ const MultiMonthBudgetOverview = ( { data } ) => {
             datasets
         }
 
+        maxYAxis.current = Math.ceil( Math.max(...datasets.map( set => Math.abs( set.data.reduce(function(a, b) {
+            return Math.max(a, b);
+        }, -Infinity) ))) / 500 ) * 500
+
+        
         setGraphDataState( {
             ...newState
         } )
-
+        
         setLoadingState( false )
     }
 
@@ -75,20 +81,22 @@ const MultiMonthBudgetOverview = ( { data } ) => {
 
     const options = {
         plugins: {
-            title: {
-              display: false
-            },
-            legend: {
-                display: false
-            },
+                title: {
+                    display: false
+                },
+                legend: {
+                    display: false
+                },
           },
           responsive: true,
           scales: {
             x: {
-              reverse: true,
+                reverse: true,
             },
             y: {
-              stacked: true,
+                stacked: true,
+                min: -maxYAxis.current,
+                max: maxYAxis.current,
             },
           },
           maintainAspectRatio: false
