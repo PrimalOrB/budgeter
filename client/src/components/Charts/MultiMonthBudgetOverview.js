@@ -60,6 +60,18 @@ const MultiMonthBudgetOverview = ( { data } ) => {
         const labels = []
         const datasets = [
             {
+                type: 'line',
+                label: 'Balance',
+                data: new Array( data.length ).fill().map( ( x, i ) => {
+                    return 0
+                } ),
+                borderWidth: 8,
+                borderColor: 'rgba(200, 2, 255, 0.5)',
+                pointHoverBackgroundColor: 'rgba( 255, 255, 255, 1)',
+                pointHoverBorderWidth: 10,
+                tension: 0.25
+            },
+            {
                 type: 'bar',
                 label: 'Budgeted Income',
                 data: new Array( data.length ).fill().map( ( x, i ) => {
@@ -69,6 +81,7 @@ const MultiMonthBudgetOverview = ( { data } ) => {
                 borderWidth: 1,
                 borderColor: 'rgba(0, 128, 0, 1)',
                 stack: 'Stack 0',
+                barThickness: 25,
                 borderRadius: determineBorderRadius,
             },
             {
@@ -81,6 +94,7 @@ const MultiMonthBudgetOverview = ( { data } ) => {
                 borderWidth: 1,
                 borderColor: 'rgba(200, 0, 0, 1)',
                 stack: 'Stack 0',
+                barThickness: 25,
                 borderRadius: determineBorderRadius,
             },
             {
@@ -89,10 +103,9 @@ const MultiMonthBudgetOverview = ( { data } ) => {
                 data: new Array( data.length ).fill().map( ( x, i ) => {
                     return 0
                 } ),
-                backgroundColor: 'rgba(0, 128, 0, 0.5)',
-                borderWidth: 1,
-                borderColor: 'rgba(0, 128, 0, 1)',
+                backgroundColor: 'rgba(0, 128, 0, 1)',
                 stack: 'Stack 1',
+                barThickness: 25,
                 borderRadius: determineBorderRadius,
             },
             {
@@ -101,32 +114,22 @@ const MultiMonthBudgetOverview = ( { data } ) => {
                 data: new Array( data.length ).fill().map( ( x, i ) => {
                     return 0
                 } ),
-                backgroundColor: 'rgba(200, 0, 0, 0.5)',
-                borderWidth: 1,
-                borderColor: 'rgba(200, 0, 0, 1)',
+                backgroundColor: 'rgba(200, 0, 0, 1)',
                 stack: 'Stack 1',
+                barThickness: 25,
                 borderRadius: determineBorderRadius,
             },
-            {
-                type: 'line',
-                label: 'Balance',
-                data: new Array( data.length ).fill().map( ( x, i ) => {
-                    return 0
-                } ),
-                borderWidth: 3,
-                borderColor: 'rgba(200, 200, 100, 1)',
-                tension: 0.25
-            },
+            
         ]  
         
         data.map( ( month, i ) => {
             labels.push( month.label )    
-            datasets[0].data[i] = month.budgetedIncomeTotal
-            datasets[1].data[i] = - month.budgetedExpenseTotal 
-            datasets[2].data[i] = month.incomeTotal
-            datasets[3].data[i] = - month.expenseTotal               
-            datasets[4].data[i] += month.incomeTotal  
-            return datasets[4].data[i] -= month.expenseTotal  
+            datasets[1].data[i] = month.budgetedIncomeTotal
+            datasets[2].data[i] = - month.budgetedExpenseTotal 
+            datasets[3].data[i] = month.incomeTotal
+            datasets[4].data[i] = - month.expenseTotal               
+            datasets[0].data[i] += month.incomeTotal  
+            return datasets[0].data[i] -= month.expenseTotal  
         })
 
         const newState = {
@@ -166,9 +169,13 @@ const MultiMonthBudgetOverview = ( { data } ) => {
                 reverse: true,
             },
             y: {
+                display: false,
                 stacked: true,
-                min: -maxYAxis.current,
-                max: maxYAxis.current,
+                // min: -maxYAxis.current,
+                // max: maxYAxis.current,
+                grid: {
+                    display: false
+                }
             },
           },
           maintainAspectRatio: false
@@ -176,11 +183,13 @@ const MultiMonthBudgetOverview = ( { data } ) => {
 
     return (
         <>
-            <p>Chart</p>
-            <section className="chart-full-section">
-                { !loadingState &&
-                    <Chart type="bar" className='blanketChart' data={ graphDataState } options={ options } height={ 2.5 } width={ 10 }/>
-                }  
+            <section>
+                <h4 className="sub-container-description section-list-title">Chart</h4>
+                <section className="chart-full-section ">
+                    { !loadingState &&
+                        <Chart type="bar" className='blanketChart' data={ graphDataState } options={ options } height={ 2.5 } width={ 10 }/>
+                    }  
+                </section>
             </section>
         </>
     )

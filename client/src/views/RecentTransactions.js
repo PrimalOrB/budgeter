@@ -8,7 +8,7 @@ const RecentTransactions = ( { categories, transactions } ) => {
 
   return (
     <section>
-      <h4 className="sub-container-description">Recent Transactions</h4>
+      <h4 className="sub-container-description section-list-title">Recent Transactions</h4>
       <ul className="section-list">
         { transactions.length === 0 &&
           <li className={ 'flex-transaction-line-sm border-bot-hightlight-1 f-valign' }>No Recent Transactions</li>
