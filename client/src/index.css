@@ -126,6 +126,10 @@ li {
   padding-top: 1rem !important;
 }
 
+.padding-0-1 {
+  padding: 0 1rem;
+}
+
 /* Margins */
 .margin-top-full {
   margin-top: 1rem !important;
@@ -162,7 +166,6 @@ li {
 .margin-right-full {
   margin-right: 1rem !important;
 }
-
 
 /* Borders */
 .border-bot-hightlight-1 {
@@ -347,6 +350,14 @@ section {
 
 .wrap {
   flex-wrap: wrap;
+}
+
+.nowrap {
+  flex-wrap: nowrap;
+}
+
+.flex-just-space-around {
+  justify-content: space-around;
 }
 
 .f0 {

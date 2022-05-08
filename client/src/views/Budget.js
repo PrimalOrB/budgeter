@@ -23,6 +23,8 @@ const Budget = () => {
   const [ parsedBudgetState, setParsedBudgetState ] = useState( null )
   const [ errorState, setErrorState ] = useState()
 
+  const [ highlightMonthState, setHighlightMonthState ] = useState( null )
+
   const [ queryBudget, { loading: queryLoading, error: queryError }] = useMutation(QUERY_CURRENT_BUDGET, {
     variables: { 
       input: {
@@ -78,7 +80,7 @@ const Budget = () => {
             <>
               <h3 className="container-description">{ budgetState.desc }</h3>
               { parsedBudgetState &&
-                <MultiMonthBudgetOverview data={ parsedBudgetState } />
+                <MultiMonthBudgetOverview data={ parsedBudgetState } highlightMonthState={ highlightMonthState } setHighlightMonthState={ setHighlightMonthState }/>
               }
               <RecentTransactions categories={ budgetState.categories } transactions={ budgetState.entries.sort( ( a, b ) => b.createdAt - a.createdAt ).slice( 0, 5 ) } />
 

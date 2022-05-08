@@ -9,15 +9,11 @@ const determineBorderRadius = (context) => {
     let showBorder = false;
   
     if (context.datasetIndex === numDatasets - 1) {
-      // Last dataset, always a yes
       showBorder = true;
     } else if (context.parsed.y !== 0) {
-      // We show a radius when we're the highest value in a positive stack
-      // or the lowest value in a negative stack
       const sign = Math.sign(context.parsed.y);
       let matches = false;
-  
-      // Look for any other non-0 values in the same stack that have the same sign
+
       for (let i = context.datasetIndex + 1; i < numDatasets; i++) {
         const val = context.parsed._stacks.y[i];
         if (val && Math.sign(val) === sign) {
@@ -48,7 +44,9 @@ const determineBorderRadius = (context) => {
     return radius;
   };
 
-const MultiMonthBudgetOverview = ( { data } ) => {
+const MultiMonthBudgetOverview = ( { data, highlightMonthState, setHighlightMonthState } ) => {
+
+    console.log( data )
 
     const [ graphDataState, setGraphDataState ] = useState( null )
     const [ loadingState, setLoadingState ] = useState( true )
@@ -169,6 +167,7 @@ const MultiMonthBudgetOverview = ( { data } ) => {
           scales: {
             x: {
                 reverse: true,
+                display: false,
             },
             y: {
                 display: false,
@@ -191,6 +190,13 @@ const MultiMonthBudgetOverview = ( { data } ) => {
                     { !loadingState &&
                         <Chart type="bar" className='blanketChart' data={ graphDataState } options={ options } height={ 2.5 } width={ 10 }/>
                     }  
+                    <div className={ 'container-flex nowrap flex-just-space-around padding-0-1' }>
+                        { !loadingState &&
+                            graphDataState.labels.reverse().map( ( month, i ) => {
+                                return <p key={ `select_month_${ i }`}>{ month }</p>
+                            })
+                        }
+                    </div>
                 </div>
             </section>
         </>
