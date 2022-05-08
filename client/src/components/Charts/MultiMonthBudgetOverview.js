@@ -15,6 +15,7 @@ const MultiMonthBudgetOverview = ( { data } ) => {
         const labels = []
         const datasets = [
             {
+                type: 'bar',
                 label: 'Budgeted Income',
                 data: new Array( data.length ).fill().map( ( x, i ) => {
                     return 0
@@ -25,6 +26,7 @@ const MultiMonthBudgetOverview = ( { data } ) => {
                 stack: 'Stack 0'
             },
             {
+                type: 'bar',
                 label: 'Budgeted Expense',
                 data: new Array( data.length ).fill().map( ( x, i ) => {
                     return 0
@@ -34,12 +36,24 @@ const MultiMonthBudgetOverview = ( { data } ) => {
                 borderColor: 'rgba(200, 0, 0, 1)',
                 stack: 'Stack 0'
             },
+            {
+                type: 'line',
+                label: 'Balance',
+                data: new Array( data.length ).fill().map( ( x, i ) => {
+                    return 0
+                } ),
+                borderWidth: 3,
+                borderColor: 'rgba(200, 200, 100, 1)',
+                tension: 0.25
+            },
         ]  
         
         data.map( ( month, i ) => {
             labels.push( month.label )    
             datasets[0].data[i] = month.budgetedIncomeTotal
-            return datasets[1].data[i] = - month.budgetedExpenseTotal               
+            datasets[1].data[i] = - month.budgetedExpenseTotal               
+            datasets[2].data[i] += month.budgetedIncomeTotal  
+            return datasets[2].data[i] -= month.budgetedExpenseTotal  
         })
 
         const newState = {
