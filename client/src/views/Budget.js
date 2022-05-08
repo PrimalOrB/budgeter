@@ -58,7 +58,7 @@ const Budget = () => {
   // buttons
   const buttons = [
     { text: 'Overview', desc: '', link: `dashboard` },
-    { text: 'Add Debit -', desc: '', link: `add-debit` },
+    { text: 'Add Expense -', desc: '', link: `add-expense` },
     { text: 'Add Income +', desc: '', link: `add-income` },
     { text: 'Add Category +', desc: '', link: `add-category` }
   ]
@@ -76,9 +76,9 @@ const Budget = () => {
 
             </>
           )}
-          { pageState === "add-debit" && (
+          { pageState === "add-expense" && (
             <>
-              <AddTransactionEntry categoryType={ 'debit' } budgetState={ budgetState } refetch={ queryBudget }/>
+              <AddTransactionEntry categoryType={ 'expense' } budgetState={ budgetState } refetch={ queryBudget }/>
             </>
           )}
           { pageState === "add-income" && (

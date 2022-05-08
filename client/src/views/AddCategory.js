@@ -113,7 +113,7 @@ const AddCategory = ( { id } ) => {
     <section>
       <Title text={ `Create New Category` } />
       <form autoComplete="off">
-        <InlineSelectInput prop={ 'categoryType' } input={ formInput } setInput={ setFormInput } label={ 'Type' } optionList={ ['income','debit']  }/>
+        <InlineSelectInput prop={ 'categoryType' } input={ formInput } setInput={ setFormInput } label={ 'Type' } optionList={ ['income','expense']  }/>
         <InlineTextInput prop={ 'title' } input={ formInput } setInput={ setFormInput } label={ 'Category Name' }/>
         { formInput.budgetedValueRange.map( ( range, i ) => {
           return (

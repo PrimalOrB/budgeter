@@ -10,6 +10,9 @@ const RecentTransactions = ( { categories, transactions } ) => {
     <section>
       <h4 className="sub-container-description">Recent Transactions</h4>
       <ul className="section-list">
+        { transactions.length === 0 &&
+          <li className={ 'flex-transaction-line-sm border-bot-hightlight-1 f-valign' }>No Recent Transactions</li>
+        }
         { transactions.map( entry => {
           let type
           if( entry.valueType === "income" && entry.value > 0){
@@ -18,10 +21,10 @@ const RecentTransactions = ( { categories, transactions } ) => {
           if( entry.valueType === "income" && entry.value < 0){
             type = 3
           }
-          if( entry.valueType === "debit" && entry.value > 0){
+          if( entry.valueType === "expense" && entry.value > 0){
             type = 0
           }
-          if( entry.valueType === "debit" && entry.value < 0){
+          if( entry.valueType === "expense" && entry.value < 0){
             type = 2
           }
 
