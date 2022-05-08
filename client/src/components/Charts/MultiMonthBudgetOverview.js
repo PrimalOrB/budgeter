@@ -187,11 +187,11 @@ const MultiMonthBudgetOverview = ( { data } ) => {
         <>
             <section>
                 <h4 className="sub-container-description section-list-title">Chart</h4>
-                <section className="chart-full-section ">
+                <div className="chart-full-section ">
                     { !loadingState &&
                         <Chart type="bar" className='blanketChart' data={ graphDataState } options={ options } height={ 2.5 } width={ 10 }/>
                     }  
-                </section>
+                </div>
             </section>
         </>
     )
