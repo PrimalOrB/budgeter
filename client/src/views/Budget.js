@@ -10,6 +10,7 @@ import { MultiMonthBudgetOverview } from '../components/Charts'
 import { Title } from '../components/Layout'
 import { AddCategory, AddTransactionEntry, RecentTransactions } from './'
 import { parseBudgetData } from '../utils/helpers'
+import { format } from 'date-fns'
 
 const Budget = () => {
   
@@ -37,6 +38,7 @@ const Budget = () => {
         if( data.data.queryBudget ){
           setBudgetState( { ...data.data.queryBudget } )
           setParsedBudgetState( parseBudgetData( { budget: { ...data.data.queryBudget }, date: new Date(), duration: 6 } ) )
+          setHighlightMonthState( format( new Date(), 'M/yy' ) )
         }
       } catch (e) {
         console.log( e )

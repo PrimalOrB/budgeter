@@ -37,7 +37,7 @@ const RecentTransactions = ( { categories, transactions } ) => {
                 <span className='f1 font-medium'>
                   { entry.title }
                 </span>
-                <span className="indent-1 italic font-small f-full">
+                <span className="indent-1 italic font-small f-full padding-bottom-sm">
                   { format( entry.createdAt, 'M/dd/yy' ) }
                 </span>
               </div>

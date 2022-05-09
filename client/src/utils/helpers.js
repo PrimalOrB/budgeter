@@ -63,6 +63,8 @@ export function parseBudgetData( { budget, date, duration } ){
          }
     } )
 
+    months = months.reverse()
+
     budget.categories.map( category => {
         // map through months
         months.map( month => {
