@@ -12,21 +12,16 @@ const resolvers = {
 
     Mutation: {
       login: async( parent, { email }, context ) => {
-        console.log( 'auth' + context.headers.authorization )
         if( context.headers.authorization !== undefined ){
           let _id
 
           // check for user
           const checkUser = await User.findOne( { email: email } )
 
-          console.log( 'user' + checkUser )
-
           // if user, assign _id
           if( checkUser ){
             _id = checkUser._id
           }
-
-          console.log( 'id' + _id )
 
           // if no user, create user
           if( !checkUser ){
