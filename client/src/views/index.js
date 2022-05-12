@@ -1,11 +1,11 @@
-import Home from './Home'
-import AddBudget from './AddBudget'
-import Budget from './Budget'
+import Home from './home'
+import AddBudget from './addBudget'
+import Budget from './budget'
 import AddCategory from './AddCategory'
-import EditCategory from './EditCategory'
-import AddTransactionEntry from './AddTransaction'
-import RecentTransactions from './RecentTransactions'
-import AllCategories from './AllCategories'
+import EditCategory from './editCategory'
+import AddTransactionEntry from './addTransaction'
+import RecentTransactions from './recentTransactions'
+import AllCategories from './allCategories'
 
 export { 
     Home,
