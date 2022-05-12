@@ -87,6 +87,25 @@ const resolvers = {
         throw new AuthenticationError('Incorrect credentials');
       },
 
+      updateCategory: async( parent, { input }, context ) => {
+        if( context.headers.authorization !== undefined ){
+          
+          console.log( input )
+
+          const { categoryID, title, budgetedValueRange } = input
+
+          const updatedCategory = await Category.findOneAndUpdate( { _id: categoryID },
+            { title, budgetedValueRange },
+            { new: true, runValidators: true } )  
+
+
+          console.log( updatedCategory )
+
+          return updatedCategory
+        }
+        throw new AuthenticationError('Incorrect credentials');
+      },
+
       createTransaction: async( parent, { input }, context ) => {
         if( context.headers.authorization !== undefined ){
 
@@ -104,7 +123,9 @@ const resolvers = {
             return {}
           }
 
-          const newEntry = await Entry.create( { ...input, userId: user._id, valueType: matchCategory.categoryType } )
+          const newEntry = await Entry.create( { ...input, userID: user._id, valueType: matchCategory.categoryType } )
+
+          console.log( newEntry )
 
           const budgetUpdate = await Budget.findOneAndUpdate(
             { _id: budgetID },
@@ -126,7 +147,10 @@ const resolvers = {
           // find budget by ID
           const findBudget = await Budget.findOne( { _id: input.budget } )
             .populate( 'categories' )
-            .populate( 'entries' )
+            .populate({
+              path: 'entries',
+              populate: "userID"}
+            )
 
           if( !findBudget ){
             return {}
@@ -152,6 +176,22 @@ const resolvers = {
           }
 
           return findBudgets
+        }
+        throw new AuthenticationError('Incorrect credentials');
+      },
+
+      queryCategory: async( parent, { input }, context ) => {
+        if( context.headers.authorization !== undefined ){
+
+          
+          const matchCategory = await Category.findOne( { _id: input._id } )
+          
+          console.log( matchCategory )
+          if( !matchCategory ){
+            return {}
+          }
+
+          return matchCategory
         }
         throw new AuthenticationError('Incorrect credentials');
       },

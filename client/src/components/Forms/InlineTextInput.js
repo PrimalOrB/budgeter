@@ -10,7 +10,7 @@ const InlineTextInput = ( { prop, input, setInput, label, placeholder } ) => {
     return (
         <div className={ 'form-inline-text' } >
             <label htmlFor={ prop }>{ label }</label>
-            <input name={ prop } type="text" onChange={ updateInput } placeholder={ placeholder } autoComplete="off"/>
+            <input name={ prop } type="text" onChange={ updateInput } value={ input[prop] } placeholder={ placeholder } autoComplete="off"/>
         </div>
     )
 };

@@ -25,6 +25,14 @@ export const CREATE_NEW_BUDGET_CATEGORY = gql`
   }
 `;
 
+export const UPDATE_BUDGET_CATEGORY = gql`
+  mutation updateCategory($input: CategoryUpdateInput! ) {
+    updateCategory(input: $input) {
+      _id
+    }
+  }
+`;
+
 export const CREATE_NEW_TRANSACTION = gql`
   mutation createTransaction($input: TransactionInput! ) {
     createTransaction(input: $input) {
@@ -42,6 +50,7 @@ export const QUERY_CURRENT_BUDGET = gql`
       categories {
         _id
         title
+        budgetID
         categoryType
         budgetedValueRange {
           order
@@ -58,6 +67,11 @@ export const QUERY_CURRENT_BUDGET = gql`
         valueType
         budgetID
         categoryID
+        userID {
+          email
+          userInitials
+          userColor
+        }
       }
     }
   }
@@ -71,4 +85,21 @@ export const QUERY_ALL_USER_BUDGETS = gql`
       desc
     }
   }
+`;
+
+export const QUERY_BUDGET_CATEGORY = gql`
+mutation queryCategory($input: CategoryIDInput! ) {
+  queryCategory(input: $input) {
+    _id
+      title
+      budgetID
+      categoryType
+      budgetedValueRange {
+        order
+        effectiveStartDate
+        effectiveEndDate
+        budgetedValue
+      }
+  }
+}
 `;

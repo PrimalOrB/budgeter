@@ -4,8 +4,6 @@ import { toCurrency } from '../utils/helpers'
 
 const RecentTransactions = ( { categories, transactions } ) => {
   
-  // console.log( transactions, categories )
-
   return (
     <section>
       <h4 className="sub-container-description section-list-title">Recent Transactions</h4>
@@ -44,6 +42,9 @@ const RecentTransactions = ( { categories, transactions } ) => {
               <span className={ `bold f0${ type === 0 ? ' negative' : ''}${ type === 1 ? ' positive' : ''}${ type === 2 ? ' credit' : ''}${ type === 3 ? ' reverse' : ''}` }>
                 { toCurrency( Math.abs( entry.value ) ) }
               </span>
+              <span className='f0 initials-icon' style={{ backgroundColor: entry.userID.userColor ? `#${ entry.userID.userColor }` : '#BBBBBB' }}>
+                  { entry.userID.userInitials ? entry.userID.userInitials.toUpperCase() : entry.userID.email[0].toUpperCase() }
+                </span>
             </li> )
         })}
       </ul>

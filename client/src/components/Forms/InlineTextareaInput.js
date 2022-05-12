@@ -8,9 +8,9 @@ const InlineTextboxInput = ( { prop, input, setInput, label } ) => {
     }
 
     return (
-        <div className={ 'form-inline-text' } onChange={ updateInput }>
+        <div className={ 'form-inline-text' }>
             <label htmlFor={ prop }>{ label }</label>
-            <textarea name={ prop } rows={ 3 } />
+            <textarea name={ prop } rows={ 3 } onChange={ updateInput } value={ input[prop] } />
         </div>
     )
 };

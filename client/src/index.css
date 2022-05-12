@@ -96,6 +96,10 @@ li {
   padding-left: 1rem
 }
 
+.endent-1 {
+  padding-right: 1rem
+}
+
 .notification {
   color: green;
   font-weight: bold;
@@ -362,6 +366,10 @@ section {
 
 .flex-just-space-around {
   justify-content: space-around;
+}
+
+.flex-center {
+  justify-content: center;
 }
 
 .f0 {
@@ -665,4 +673,19 @@ input::-ms-clear {
 
 .border-t-r-rad-half {
   border-top-right-radius: 0.5rem;
+}
+
+/* Styled Elements */
+.initials-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--secondary-color);
+  font-size: 0.6rem;
+  font-weight: bold;
+  margin-left: 1rem;
+  padding-top: 2px
 }

@@ -46,13 +46,9 @@ const determineBorderRadius = (context) => {
 
 const MultiMonthBudgetOverview = ( { data, highlightMonthState, setHighlightMonthState } ) => {
 
-    console.log( highlightMonthState )
-
     const [ graphDataState, setGraphDataState ] = useState( null )
     const [ loadingState, setLoadingState ] = useState( true )
     const maxYAxis = useRef( 0 )
-
-    console.log( graphDataState )
 
     const createGraphData = () => {
         const labels = []
@@ -192,7 +188,6 @@ const MultiMonthBudgetOverview = ( { data, highlightMonthState, setHighlightMont
                     <div className={ 'container-flex nowrap flex-just-space-around padding-0-1 margin-1rem-2px-full-neg' }>
                         { !loadingState &&
                             graphDataState.labels.map( ( month, i ) => {
-                                console.log( highlightMonthState === month )
                                 return <span key={ `select_month_${ i }`} className={ `bold border-t-l-rad-half border-t-r-rad-half border-l-t-r-highlight-1 nav-button ${ month === highlightMonthState && 'nav-button-active' }` } onClick={ () => setHighlightMonthState( month ) }>{ month }</span>
                             })
                         }

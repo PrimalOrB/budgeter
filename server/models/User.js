@@ -6,6 +6,17 @@ const userSchema = new Schema(
       type: Date,
       default: Date.now,
     },
+    userInitials: {
+      type: String,
+      trim: true,
+      uppercase: true,
+      minlength: 1,
+      maxlength: 2
+    },
+    userColor: {
+      type: String,
+      trim: true
+    },
     email: {
       type: String,
       required: true,

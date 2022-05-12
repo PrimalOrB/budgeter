@@ -51,7 +51,7 @@ const App = () => {
             <Switch>
               <ProtectedRoute exact path="/" component={ Home } />
               <ProtectedRoute exact path="/add-budget" component={ AddBudget } />
-              <ProtectedRoute exact path="/budget/:id/:tab?" component={ Budget } />
+              <ProtectedRoute exact path="/budget/:id/:tab?/:cat?" component={ Budget } />
             </Switch>
           </main>
         </div>

@@ -17,6 +17,12 @@ const typeDefs = gql`
         budgetedValueRange: [ CategoryRangeInput ]
     }
 
+    input CategoryUpdateInput {
+        categoryID: ID!
+        title: String!
+        budgetedValueRange: [ CategoryRangeInput ]
+    }
+
     input BudgetInput {
         owner: String!
         emails: [ String ]
@@ -37,11 +43,17 @@ const typeDefs = gql`
     }
 
     input UserIDInput {
-        _id: ID
+        _id: ID!
+    }
+
+    input CategoryIDInput {
+        _id: ID!
     }
 
     type User {
         _id: ID
+        userInitials: String
+        userColor: String
         email: String
         budgets: [ID]
     }
@@ -68,7 +80,7 @@ const typeDefs = gql`
         value: Float!
         valueType: String!
         budgetID: ID!
-        userID: ID!
+        userID: User
         categoryID: ID!
     }
 
@@ -93,9 +105,11 @@ const typeDefs = gql`
         login(email: String! ): Auth
         createBudget( input: BudgetInput! ): Budget
         createCategory( input: CategoryInput! ): Budget
+        updateCategory( input: CategoryUpdateInput! ): Category
         createTransaction( input: TransactionInput! ): Budget
         queryBudget( input: BudgetQueryInput! ): Budget
         queryUserBudgets( input: UserIDInput! ): [ Budget ]
+        queryCategory( input: CategoryIDInput! ): Category
     }
     
 `;

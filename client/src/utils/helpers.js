@@ -72,7 +72,6 @@ export function parseBudgetData( { budget, date, duration } ){
             category.budgetedValueRange.map( range => {
                 // if no end date, and month >= range start date, then add
                 if( range.effectiveEndDate === null && month.date >= dateAddTZ( new Date( range.effectiveStartDate ) ) ){
-                    console.log( category.categoryType )
                     if( category.categoryType === 'income' ){
                         return month.budgetedIncomeTotal += range.budgetedValue
                     }
@@ -98,7 +97,6 @@ export function parseBudgetData( { budget, date, duration } ){
 
     budget.entries.map( expense => {
         let matchedMonth = months.filter( month => month.label === format( expense.createdAt , 'M/yy' ) )
-        console.log( matchedMonth )
         if( matchedMonth.length === 1 ){
             if( expense.valueType === 'income' ){
                 return matchedMonth[0].incomeTotal += expense.value
@@ -109,8 +107,6 @@ export function parseBudgetData( { budget, date, duration } ){
         }
         return null
     })
-
-    console.log( months )
 
     return months
 }

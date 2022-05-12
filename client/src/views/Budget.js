@@ -8,7 +8,7 @@ import { SpinLoader } from '../components/Loaders'
 import { NavStateContainer } from '../components/Menus'
 import { MultiMonthBudgetOverview } from '../components/Charts'
 import { Title } from '../components/Layout'
-import { AddCategory, AddTransactionEntry, RecentTransactions } from './'
+import { AddCategory, AddTransactionEntry, RecentTransactions, AllCategories, EditCategory } from './'
 import { parseBudgetData } from '../utils/helpers'
 import { format } from 'date-fns'
 
@@ -98,9 +98,19 @@ const Budget = () => {
               <AddTransactionEntry categoryType={ 'income' } budgetState={ budgetState } refetch={ queryBudget }/>
             </>
           )}
+          { pageState === "categories" && (
+            <>
+              <AllCategories categories={ budgetState.categories } setPageState={ setPageState }/>
+            </>
+          )}
           { pageState === "add-category" && (
             <>
               <AddCategory id={ _id }/>
+            </>
+          )}
+           { pageState === "edit-category" && (
+            <>
+              <EditCategory/>
             </>
           )}
         </section>}
