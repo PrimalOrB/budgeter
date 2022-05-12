@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react'
 import { useParams } from 'react-router';
 import { ActionButton } from '../components/Buttons'
 import { InlineTextInput, BudgetValueRangeGroup, InlineSelectInput } from '../components/Forms'
 import { InlineError, InlineNotification } from '../components/Notifications'
 import { useMutation } from '@apollo/client'
 import { QUERY_BUDGET_CATEGORY, UPDATE_BUDGET_CATEGORY } from '../utils/mutations'
-import { useHistory } from "react-router-dom";
+import { useHistory } from 'react-router-dom'
 import { Title } from '../components/Layout'
 import { startOfMonth, endOfMonth, add  } from 'date-fns'
 import { dateRemoveTZ } from '../utils/helpers'

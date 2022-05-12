@@ -1,9 +1,9 @@
-import React from "react";
+import React from 'react'
 import { Title } from '../components/Layout'
 import { format } from 'date-fns'
 import { toCurrency } from '../utils/helpers'
 import { FaEdit } from 'react-icons/fa'
-import { useHistory } from "react-router-dom";
+import { useHistory } from 'react-router-dom'
 
 const AllCategories = ( { categories, setPageState } ) => { 
 

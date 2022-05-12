@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react'
 import { ActionButton } from '../components/Buttons'
 import { InlineSelectInput, InlineTextareaInput, InlineNumberInput } from '../components/Forms'
 import { InlineError, InlineNotification } from '../components/Notifications'

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import { ActionButton } from '../components/Buttons'
 import { InlineTextInput, InlineTextareaInput, InlineListDisplay, InlineEmailInput } from '../components/Forms'
 import { InlineError, InlineNotification } from '../components/Notifications'
@@ -6,7 +6,7 @@ import { useStoreContext } from '../utils/GlobalState'
 import { isEmail } from '../utils/helpers'
 import { useMutation } from '@apollo/client'
 import { CREATE_NEW_BUDGET } from '../utils/mutations'
-import { useHistory } from "react-router-dom";
+import { useHistory } from 'react-router-dom'
 import { Title } from '../components/Layout'
 
 const AddBudget = () => {
