@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
+import 'chart.js/auto';
 import { Chart } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, BarElement, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+// import { Chart as ChartJS, CategoryScale, BarElement, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 
-ChartJS.register( CategoryScale, BarElement, LinearScale, PointElement, LineElement, Title, Tooltip, Legend );
+// ChartJS.register( CategoryScale, BarElement, LinearScale, PointElement, LineElement, Title, Tooltip, Legend );
 
 const determineBorderRadius = (context) => {
     const numDatasets = context.chart.data.datasets.length;

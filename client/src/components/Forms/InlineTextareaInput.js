@@ -4,7 +4,7 @@ const InlineTextboxInput = ( { prop, input, setInput, label } ) => {
 
     function updateInput( e ){
         const { name, value } = e.target
-        setInput( { ...input, [name]: value.trim() })
+        setInput( { ...input, [name]: value })
     }
 
     return (
