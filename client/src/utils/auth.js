@@ -2,8 +2,9 @@ import decode from 'jwt-decode';
 
 class AuthService {
     // retrieve data saved in token
-    getProfile( token ) {
-      token = token || this.getToken()
+    getProfile( ) {
+      // token = token || this.getToken()
+      console.log( this.getToken() )
       return decode(this.getToken());
     }
   

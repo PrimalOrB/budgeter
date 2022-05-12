@@ -29,12 +29,12 @@ const Header = () => {
       const { data } = await login({
         variables: { email: user.email }
       } );
+      Auth.login(data.login.token);
       const userID = Auth.getProfile( data.login.token )
       dispatch({
         type: UPDATE_USER,
         currentUser: { email: userID.data.email, _id: userID.data._id}
       });
-      Auth.login(data.login.token);
     } catch (e) {
       console.error(e);
     }
