@@ -90,16 +90,11 @@ const resolvers = {
       updateCategory: async( parent, { input }, context ) => {
         if( context.headers.authorization !== undefined ){
           
-          console.log( input )
-
           const { categoryID, title, budgetedValueRange } = input
 
           const updatedCategory = await Category.findOneAndUpdate( { _id: categoryID },
             { title, budgetedValueRange },
             { new: true, runValidators: true } )  
-
-
-          console.log( updatedCategory )
 
           return updatedCategory
         }
