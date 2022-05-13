@@ -15,7 +15,7 @@ const AllCategories = ( { categories, setPageState } ) => {
   }
   
   return (
-    <section>
+    <section className="full-container">
       <Title text={ `Manage Categories` } />
       <h4 className="sub-container-description section-list-title">Expense Categories</h4>
       <ul className="section-list">

@@ -141,7 +141,7 @@ const EditCategory = () => {
   })
 
   return (
-    <section>
+    <section className="full-container">
       <Title text={ `Edit Category` } />
       { errorState 
         ?

@@ -66,7 +66,7 @@ const AddTransactionEntry = ( { categoryType, budgetState, refetch } ) => {
   })
 
   return (
-    <section>
+    <section className="full-container">
       <Title text={ `Add ${ categoryType }` } />
       <form autoComplete="off">
         <InlineSelectInput prop={ 'categoryID' } input={ formInput } setInput={ setFormInput } label={ 'Category' } optionList={ budgetState.categories.filter( category => category.categoryType === categoryType ) }/>

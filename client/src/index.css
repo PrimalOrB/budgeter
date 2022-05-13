@@ -772,7 +772,12 @@ input::-ms-clear {
   }
   
   .chart-full-section #multi-month-menu {
-    margin-top: calc( -1.2rem - 3px );
+    margin-top: calc( -1.2rem - 2px );
+  }
+
+  .full-container {
+    grid-column-start: 1;
+    grid-column-end: span 2;
   }
 
   .nav-button,

@@ -119,7 +119,7 @@ const Budget = () => {
               )}            
           </>
         }
-        { queryLoading && <SpinLoader /> }
+        { queryLoading && <section className="full-container"><SpinLoader /></section> }
     </>
   )
 

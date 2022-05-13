@@ -110,7 +110,7 @@ const AddCategory = ( { id } ) => {
   })
 
   return (
-    <section>
+    <section className="full-container">
       <Title text={ `Create New Category` } />
       <form autoComplete="off">
         <InlineSelectInput prop={ 'categoryType' } input={ formInput } setInput={ setFormInput } label={ 'Type' } optionList={ ['income','expense']  }/>
