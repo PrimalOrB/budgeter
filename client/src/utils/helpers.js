@@ -50,6 +50,14 @@ export function titleCaseString( str ){
     return sentence
 }
 
+export function sumNumericArray( arr ){
+    return arr.reduce((a, b) => a + b, 0)
+}
+
+export function sumPropArray( arr, prop ){
+    return arr.reduce((a, b) => a + (b[prop] || 0), 0)
+}
+
 export function parseBudgetData( { budget, date, duration } ){
     let months = new Array( duration ).fill().map( ( x, i ) => {
         const createDate = sub( new Date( date ), { months: i } )

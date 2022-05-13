@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { format } from 'date-fns'
-import { toCurrency } from '../utils/helpers'
+import { toCurrency, sumPropArray } from '../utils/helpers'
 import { SingleMonthCategoryCost } from '../components/Charts'
 import { FaCaretDown, FaCaretUp } from 'react-icons/fa'
 
@@ -29,6 +29,9 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
           <span className="f1 bold">
             Expenses
           </span>
+          <span className="f1">
+            { toCurrency( sumPropArray( expenseByMonth, 'value' ) ) }
+          </span>
         </li>
         { expandedState.expense &&
            expenseByMonth.map( entry => {
@@ -48,6 +51,9 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
           </span>
           <span className="f1 bold">
             Income
+          </span>
+          <span className="f1">
+            { toCurrency( sumPropArray( incomeByMonth, 'value' ) ) }
           </span>
         </li>
         { expandedState.income &&
