@@ -62,8 +62,16 @@ li {
   list-style: none;
 }
 
+.left {
+  text-align: left;
+}
+
 .center {
   text-align: center;
+}
+
+.right {
+  text-align: right !important;
 }
 
 .inline {
@@ -112,6 +120,16 @@ li {
 
 .colon::after{
   content: ": "
+}
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
 }
 
 /* Paddings */
@@ -263,12 +281,46 @@ section {
   max-width: 700px;
   border: 1px solid var(--highlight-color);
   border-radius: 0.5rem;
-  padding: 0.25rem 0.5rem;
+  padding: 0.25rem 0.5rem 0 0.5rem;
   background-color: white;
 }
 
 .monthly-group-detail {
   margin-bottom: 0;
+  background-color: var(--tertiary-color);
+  transition: 0.25s ease all;
+}
+
+.monthly-group-detail:hover {
+  background-color: var(--highlight-2-color);
+}
+
+.monthly-group-detail > li {
+  padding-bottom: 0.25rem;
+}
+
+.monthly-group-detail > li:nth-child(n + 2) {
+  padding: 0.25rem 0 0.25rem 1rem;
+  border-top: 1px solid var(--highlight-2-color);
+  background: white;
+  background: linear-gradient(
+    90deg,
+    rgba( 255, 255, 255, 0 ) 0%,
+    rgba( 255, 255, 255, 0.75 ) 5%,
+    rgba( 255, 255, 255, 0.75 ) 95%,
+    rgba( 255, 255, 255, 0 ) 100%
+  );
+}
+
+.monthly-group-detail > li:nth-child(n + 2):hover {
+  background: white;
+  background: linear-gradient(
+    90deg,
+    rgba( 255, 255, 255, 0 ) 0%,
+    rgba( 255, 255, 255, 1 ) 5%,
+    rgba( 255, 255, 255, 1 ) 95%,
+    rgba( 255, 255, 255, 0 ) 100%
+  );
 }
 
 .chart-full-section {
