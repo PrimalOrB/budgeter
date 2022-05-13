@@ -77,11 +77,8 @@ const Budget = () => {
       
       { budgetState?.title && 
         <>
-          {/* <section className=""> */}
             <Title id={ "budget-title" } text={ budgetState.title } additionalClass={ 'margin-bottom-none' }/>
             <NavStateContainer id={ "budget-menu" } buttons={ buttons } state={ pageState } setState={ setPageState } addClass={ "margin-top-none" }/>
-          {/* </section>
-          <section className="budget-container"> */}
               { pageState === "dashboard" && (
                 <>
                   <h3 id="budget-description" className="container-description">{ budgetState.desc }</h3>
@@ -120,7 +117,6 @@ const Budget = () => {
                   <EditCategory/>
                 </>
               )}            
-            {/* </section> */}
           </>
         }
         { queryLoading && <SpinLoader /> }

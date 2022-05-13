@@ -186,10 +186,10 @@ const MultiMonthBudgetOverview = ( { data, highlightMonthState, setHighlightMont
                     { !loadingState &&
                         <Chart type="bar" className='blanketChart' data={ graphDataState } options={ options } height={ 2.5 } width={ 10 }/>
                     }  
-                    <div className={ 'container-flex nowrap flex-just-space-around padding-0-1 margin-1rem-2px-full-neg' }>
+                    <div id="multi-month-menu" className={ 'container-flex nowrap' }>
                         { !loadingState &&
                             graphDataState.labels.map( ( month, i ) => {
-                                return <span key={ `select_month_${ i }`} className={ `bold border-t-l-rad-half border-t-r-rad-half border-l-t-r-highlight-1 nav-button ${ month === highlightMonthState && 'nav-button-active' }` } onClick={ () => setHighlightMonthState( month ) }>{ month }</span>
+                                return <span key={ `select_month_${ i }`} className={ `nav-button ${ month === highlightMonthState && 'nav-button-active' }` } onClick={ () => setHighlightMonthState( month ) }>{ month }</span>
                             })
                         }
                     </div>

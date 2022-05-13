@@ -314,6 +314,29 @@ section {
   border-bottom: 3px inset var(--highlight-color);
 }
 
+.chart-full-section #multi-month-menu {
+  margin-top: calc( -1.5rem - 1px );
+  margin-left: calc( -0.5rem );
+  width: calc( 100% + 1rem );
+  justify-content: space-evenly;
+}
+
+.chart-full-section #multi-month-menu .nav-button {
+  width: 100%;
+  justify-content: center;
+  border-top: 1px solid var(--highlight-color);
+  border-right: 1px solid var(--highlight-color);
+}
+
+.chart-full-section #multi-month-menu .nav-button:first-of-type {
+  border-radius: 0 0 0 0.5rem;
+}
+
+.chart-full-section #multi-month-menu .nav-button:last-of-type {
+  border-radius: 0 0 0.5rem 0;
+  border-right: none;
+}
+
 .logout,
 .login,
 .username-block {
@@ -748,6 +771,9 @@ input::-ms-clear {
     margin: 0.5rem
   }
   
+  .chart-full-section #multi-month-menu {
+    margin-top: calc( -1.2rem - 3px );
+  }
 
   .nav-button,
   .username-block {
