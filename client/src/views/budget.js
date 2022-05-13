@@ -8,9 +8,9 @@ import { SpinLoader } from '../components/Loaders'
 import { NavStateContainer } from '../components/Menus'
 import { MultiMonthBudgetOverview } from '../components/Charts'
 import { Title } from '../components/Layout'
-import { AddCategory, AddTransactionEntry, RecentTransactions, AllCategories, EditCategory } from './'
+import { AddCategory, AddTransactionEntry, RecentTransactions, AllCategories, EditCategory, MonthSummary } from './'
 import { parseBudgetData } from '../utils/helpers'
-import { format } from 'date-fns'
+import { format, startOfMonth, endOfMonth } from 'date-fns'
 
 const Budget = () => {
   
@@ -24,7 +24,7 @@ const Budget = () => {
   const [ parsedBudgetState, setParsedBudgetState ] = useState( null )
   const [ errorState, setErrorState ] = useState()
 
-  const [ highlightMonthState, setHighlightMonthState ] = useState( null )
+  const [ highlightMonthState, setHighlightMonthState ] = useState( format( new Date(), 'M/yy' ) )
 
   const [ queryBudget, { loading: queryLoading, error: queryError }] = useMutation(QUERY_CURRENT_BUDGET, {
     variables: { 
@@ -75,45 +75,54 @@ const Budget = () => {
   return (
     <>
       
-      { budgetState?.title && <section className="">
-          <Title text={ budgetState.title } additionalClass={ 'margin-bottom-none' }/>
-          <NavStateContainer buttons={ buttons } state={ pageState } setState={ setPageState } addClass={ "margin-top-none" }/>
-          { pageState === "dashboard" && (
-            <>
-              <h3 className="container-description">{ budgetState.desc }</h3>
-              { parsedBudgetState &&
-                <MultiMonthBudgetOverview data={ parsedBudgetState } highlightMonthState={ highlightMonthState } setHighlightMonthState={ setHighlightMonthState }/>
-              }
-              <RecentTransactions categories={ budgetState.categories } transactions={ budgetState.entries.sort( ( a, b ) => b.createdAt - a.createdAt ).slice( 0, 5 ) } />
+      { budgetState?.title && 
+        <>
+          {/* <section className=""> */}
+            <Title id={ "budget-title" } text={ budgetState.title } additionalClass={ 'margin-bottom-none' }/>
+            <NavStateContainer id={ "budget-menu" } buttons={ buttons } state={ pageState } setState={ setPageState } addClass={ "margin-top-none" }/>
+          {/* </section>
+          <section className="budget-container"> */}
+              { pageState === "dashboard" && (
+                <>
+                  <h3 id="budget-description" className="container-description">{ budgetState.desc }</h3>
+                  { parsedBudgetState &&
+                    <MultiMonthBudgetOverview data={ parsedBudgetState } highlightMonthState={ highlightMonthState } setHighlightMonthState={ setHighlightMonthState }/>
+                  }
+                  <RecentTransactions categories={ budgetState.categories } transactions={ budgetState.entries.sort( ( a, b ) => b.createdAt - a.createdAt ).slice( 0, 6 ) } />
+                  <MonthSummary highlightMonthState={ highlightMonthState }categories={ budgetState.categories } transactions={ budgetState.entries
+                    .filter( entry => entry.createdAt >= startOfMonth( new Date( `20${Number( highlightMonthState.split('/')[1] )}`, Number( highlightMonthState.split('/')[0] ) ) - 1, 1 ) && entry.createdAt <= endOfMonth( new Date( `20${Number( highlightMonthState.split('/')[1] )}`, Number( highlightMonthState.split('/')[0] ) ) - 1, 1 ) )
+                    .sort( ( a, b ) => b.createdAt - a.createdAt ) } />
 
-            </>
-          )}
-          { pageState === "add-expense" && (
-            <>
-              <AddTransactionEntry categoryType={ 'expense' } budgetState={ budgetState } refetch={ queryBudget }/>
-            </>
-          )}
-          { pageState === "add-income" && (
-            <>
-              <AddTransactionEntry categoryType={ 'income' } budgetState={ budgetState } refetch={ queryBudget }/>
-            </>
-          )}
-          { pageState === "categories" && (
-            <>
-              <AllCategories categories={ budgetState.categories } setPageState={ setPageState }/>
-            </>
-          )}
-          { pageState === "add-category" && (
-            <>
-              <AddCategory id={ _id }/>
-            </>
-          )}
-           { pageState === "edit-category" && (
-            <>
-              <EditCategory/>
-            </>
-          )}
-        </section>}
+                </>
+              )}
+              { pageState === "add-expense" && (
+                <>
+                  <AddTransactionEntry categoryType={ 'expense' } budgetState={ budgetState } refetch={ queryBudget }/>
+                </>
+              )}
+              { pageState === "add-income" && (
+                <>
+                  <AddTransactionEntry categoryType={ 'income' } budgetState={ budgetState } refetch={ queryBudget }/>
+                </>
+              )}
+              { pageState === "categories" && (
+                <>
+                  <AllCategories categories={ budgetState.categories } setPageState={ setPageState }/>
+                </>
+              )}
+              { pageState === "add-category" && (
+                <>
+                  <AddCategory id={ _id }/>
+                </>
+              )}
+              { pageState === "edit-category" && (
+                <>
+                  <EditCategory/>
+                </>
+              )}            
+            {/* </section> */}
+          </>
+        }
         { queryLoading && <SpinLoader /> }
     </>
   )

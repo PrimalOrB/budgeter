@@ -2,11 +2,15 @@ import React from 'react'
 import { format } from 'date-fns'
 import { toCurrency } from '../utils/helpers'
 
-const RecentTransactions = ( { categories, transactions } ) => {
+const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
+  
+  const date = new Date( `20${Number( highlightMonthState.split('/')[1] )}`, Number( highlightMonthState.split('/')[0] ) - 1, 1 )
+
+  console.log( transactions )
   
   return (
-    <section id="recent-transactions" >
-      <h4 className="sub-container-description section-list-title">Recent Transactions</h4>
+    <section id="month-summary" >
+      <h4 className="sub-container-description section-list-title">{ format( date, "MMMM yyyy" ) }</h4>
       <ul className="section-list">
         { transactions.length === 0 &&
           <li className={ 'flex-transaction-line-sm border-bot-hightlight-1 f-valign' }>No Recent Transactions</li>
@@ -54,4 +58,4 @@ const RecentTransactions = ( { categories, transactions } ) => {
 
 };
 
-export default RecentTransactions;
+export default MonthSummary;

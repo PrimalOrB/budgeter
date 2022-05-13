@@ -6,6 +6,7 @@ import EditCategory from './editCategory'
 import AddTransactionEntry from './addTransaction'
 import RecentTransactions from './recentTransactions'
 import AllCategories from './allCategories'
+import MonthSummary from './monthSummary'
 
 export { 
     Home,
@@ -15,5 +16,6 @@ export {
     EditCategory,
     AddTransactionEntry,
     RecentTransactions,
-    AllCategories
+    AllCategories,
+    MonthSummary
  };
