@@ -135,6 +135,7 @@ li {
   padding-top: 1rem !important;
 }
 
+
 .padding-0-1 {
   padding: 0 1rem;
 }
@@ -254,13 +255,20 @@ section {
 
 /* Sub Sections */
 .section-list,
-.chart-full-section {
+.chart-full-section,
+.dual-doughnut-container,
+.monthly-group-detail
+ {
   width: 100%;
   max-width: 700px;
   border: 1px solid var(--highlight-color);
   border-radius: 0.5rem;
   padding: 0.25rem 0.5rem;
   background-color: white;
+}
+
+.monthly-group-detail {
+  margin-bottom: 0;
 }
 
 .chart-full-section {
@@ -384,6 +392,11 @@ section {
   display: grid;
   grid-template-columns: 50% 50%;
   margin-bottom: -0.5rem;
+}
+
+.dual-doughnut-container {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 .dual-doughnut-container > div {
@@ -722,12 +735,32 @@ input::-ms-clear {
   border-bottom: 2px solid var(--highlight-color) !important;
 }
 
+.border_b_none {
+  border-bottom: none
+}
+
+.border-t-l-rad-none {
+  border-top-left-radius: 0;
+}
+
+.border-t-r-rad-none {
+  border-top-right-radius: 0;
+}
+
 .border-t-l-rad-half {
   border-top-left-radius: 0.5rem;
 }
 
 .border-t-r-rad-half {
   border-top-right-radius: 0.5rem;
+}
+
+.border-b-l-rad-none {
+  border-bottom-left-radius: 0
+}
+
+.border-b-r-rad-none {
+  border-bottom-right-radius: 0
 }
 
 /* Styled Elements */
