@@ -1,3 +1,4 @@
 import MultiMonthBudgetOverview from './MultiMonthBudgetOverview'
+import SingleMonthCategoryCost from './SingleMonthCategoryCost'
 
-export { MultiMonthBudgetOverview };
+export { MultiMonthBudgetOverview, SingleMonthCategoryCost };

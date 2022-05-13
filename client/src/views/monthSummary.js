@@ -1,16 +1,20 @@
 import React from 'react'
 import { format } from 'date-fns'
 import { toCurrency } from '../utils/helpers'
+import { SingleMonthCategoryCost } from '../components/Charts'
+
 
 const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
   
   const date = new Date( `20${Number( highlightMonthState.split('/')[1] )}`, Number( highlightMonthState.split('/')[0] ) - 1, 1 )
 
-  console.log( transactions )
-  
   return (
     <section id="month-summary" >
       <h4 className="sub-container-description section-list-title">{ format( date, "MMMM yyyy" ) }</h4>
+      <div className="dual-doughnut-container">
+        <SingleMonthCategoryCost valueType="expense" activeDate={ date } highlightMonthState={ highlightMonthState } categories={ categories.filter( category => category.categoryType === 'expense' ) } transactions={ transactions.filter( entry => entry.valueType === 'expense' ) } />
+        <SingleMonthCategoryCost valueType="income" activeDate={ date } highlightMonthState={ highlightMonthState } categories={ categories.filter( category => category.categoryType === 'income' ) } transactions={ transactions.filter( entry => entry.valueType === 'income' ) } />
+      </div>
       <ul className="section-list">
         { transactions.length === 0 &&
           <li className={ 'flex-transaction-line-sm border-bot-hightlight-1 f-valign' }>No Recent Transactions</li>

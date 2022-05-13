@@ -267,6 +267,11 @@ section {
   height: 15rem
 }
 
+.chart-half-section {
+  height: 15rem;
+  width: 15rem;
+}
+
 .section-list-title{
   width: 95%;
   max-width: 700px;
@@ -369,6 +374,23 @@ section {
 .budget-container {
   width: 100%;
   display: grid;
+}
+
+.dual-doughnut-container {
+  width: 100%;
+  max-width: 700px;
+  border-left: 1px solid var(--highlight-color);
+  border-right: 1px solid var(--highlight-color);
+  display: grid;
+  grid-template-columns: 50% 50%;
+  margin-bottom: -0.5rem;
+}
+
+.dual-doughnut-container > div {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
 }
 
 /* Flex Containers */

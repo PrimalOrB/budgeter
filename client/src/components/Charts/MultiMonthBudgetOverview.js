@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import 'chart.js/auto';
 import { Chart } from 'react-chartjs-2';
-// import { Chart as ChartJS, CategoryScale, BarElement, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
-
-// ChartJS.register( CategoryScale, BarElement, LinearScale, PointElement, LineElement, Title, Tooltip, Legend );
 
 const determineBorderRadius = (context) => {
     const numDatasets = context.chart.data.datasets.length;
@@ -182,7 +179,7 @@ const MultiMonthBudgetOverview = ( { data, highlightMonthState, setHighlightMont
         <>
             <section id="multi-month-overview">
                 <h4 className="sub-container-description section-list-title">6 Month Overview</h4>
-                <div className="chart-full-section ">
+                <div className="chart-full-section">
                     { !loadingState &&
                         <Chart type="bar" className='blanketChart' data={ graphDataState } options={ options } height={ 2.5 } width={ 10 }/>
                     }  
