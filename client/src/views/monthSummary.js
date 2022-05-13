@@ -56,13 +56,13 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
 
             const category = categories.filter( category => category._id === entry )
             const entries = expenseByMonth.filter( entry => entry.categoryID === category[0]._id )
-
+            
             if( entries.length === 0 ){
               return null
             }
 
             return (
-              <BudgetCategoryExpandableList key={ entry._id } category={ category[0].title } data={ entries } />
+              <BudgetCategoryExpandableList key={ `exp_${ category[0]._id }` } category={ category[0].title } data={ entries } />
             )
           })
         }
@@ -91,7 +91,7 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
             }
 
             return (
-              <BudgetCategoryExpandableList key={ entry._id } category={ category[0].title } data={ entries } />
+              <BudgetCategoryExpandableList key={ `inc_${ category[0]._id }` } category={ category[0].title } data={ entries } />
             )
           })
         }
