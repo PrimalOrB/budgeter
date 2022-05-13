@@ -77,7 +77,7 @@ const Budget = () => {
       
       { budgetState?.title && <section className="">
           <Title text={ budgetState.title } additionalClass={ 'margin-bottom-none' }/>
-          <NavStateContainer buttons={ buttons } state={ pageState } setState={ setPageState }/>
+          <NavStateContainer buttons={ buttons } state={ pageState } setState={ setPageState } addClass={ "margin-top-none" }/>
           { pageState === "dashboard" && (
             <>
               <h3 className="container-description">{ budgetState.desc }</h3>
