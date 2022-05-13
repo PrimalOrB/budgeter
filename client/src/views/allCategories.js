@@ -96,7 +96,7 @@ const AllCategories = ( { categories, setPageState } ) => {
                   }
                   
                 </span>
-              <span className='f0 font-medium bold endent-1'>
+              <span className='f0 font-medium bold endent-1' onClick={ () => setEdit( { budget: category.budgetID, category: category._id } ) }>
                 { FaEdit() }
               </span>
             </li>
