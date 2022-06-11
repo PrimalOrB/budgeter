@@ -106,9 +106,9 @@ const resolvers = {
       createTransaction: async( parent, { input }, context ) => {
         if( context.headers.authorization !== undefined ){
 
-          let { budgetID, categoryID } = input
+          let { budgetID, categoryID, userID } = input
 
-          const user = await User.findOne( { email: context.user.email } )
+          const user = await User.findOne( { _id: userID } )
 
           if( !user ){
             return {}
@@ -121,8 +121,6 @@ const resolvers = {
           }
 
           const newEntry = await Entry.create( { ...input, userID: user._id, valueType: matchCategory.categoryType } )
-
-          console.log( newEntry )
 
           const budgetUpdate = await Budget.findOneAndUpdate(
             { _id: budgetID },

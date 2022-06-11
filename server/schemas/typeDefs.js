@@ -39,8 +39,9 @@ const typeDefs = gql`
         title: String!
         value: Float!
         budgetID: ID!
-        categoryID: ID
-        createdAt: Date
+        categoryID: ID!
+        createdAt: Date!
+        userID: ID!
     }
 
     input UserIDInput {
