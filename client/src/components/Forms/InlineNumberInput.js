@@ -26,7 +26,7 @@ const InlineNumberInput = ( { prop, input, setInput, label, placeholder, decimal
     return (
         <div className={ 'form-inline-number' } >
             <label htmlFor={ prop }>{ label }</label>
-            <input name={ prop } type="number" value={ inputControl.value } step="0.01" onChange={ updateInput } onFocus={ focusLocalInput } onBlur={ setCorrectedInput } placeholder={ placeholder } autoComplete="off"/>
+            <input name={ prop } type="number" value={ inputControl[prop] } step="0.01" onChange={ updateInput } onFocus={ focusLocalInput } onBlur={ setCorrectedInput } placeholder={ placeholder } autoComplete="off"/>
         </div>
     )
 };
