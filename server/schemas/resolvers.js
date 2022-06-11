@@ -2,6 +2,7 @@ const { User, Budget, Category, Entry } = require( '../models' )
 const { AuthenticationError, UserInputError } = require( 'apollo-server-express' )
 const { signToken } = require( '../utils/auth' )
 const dateScalar = require( './dateScalar' )
+const { extractPropAsStrToArr } = require( '../utils/helpers')
 
 const resolvers = {
     Date: dateScalar,
@@ -143,16 +144,21 @@ const resolvers = {
           // find budget by ID
           const findBudget = await Budget.findOne( { _id: input.budget } )
             .populate( 'categories' )
+            .populate( 'ownerIDs' )
             .populate({
               path: 'entries',
               populate: "userID"}
-            )
+          )
 
           if( !findBudget ){
             return {}
           }
+
+          // gather owner IDs
+          const owners = extractPropAsStrToArr( findBudget.ownerIDs, '_id' )
+
           // ensure user is authorized
-          const userMatch = findBudget.ownerIDs.includes( input.user )
+          const userMatch = owners.includes( input.user )
           if( !userMatch ){
             throw new UserInputError('Incorrect credentials');
           }

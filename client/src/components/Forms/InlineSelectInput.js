@@ -14,6 +14,9 @@ const InlineSelectInput = ( { prop, input, setInput, label, optionList } ) => {
             <select name={ prop } type="number" value={ input[prop] } onChange={ updateInput }>
                 <option disabled></option>
                 { optionList.map( option => {
+                    if( option.email ){
+                        option.title = option.email
+                    }
                     return <option key={ option._id || option } value={ option._id || option }>{ titleCaseString( option.title || option ) }</option>
                 })}
             </select>

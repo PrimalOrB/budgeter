@@ -47,6 +47,10 @@ export const QUERY_CURRENT_BUDGET = gql`
       _id
       title
       desc
+      ownerIDs {
+        _id
+        email
+      }
       categories {
         _id
         title

@@ -5,11 +5,14 @@ import { InlineError, InlineNotification } from '../components/Notifications'
 import { Title } from '../components/Layout'
 import { useMutation } from '@apollo/client'
 import { CREATE_NEW_TRANSACTION } from '../utils/mutations'
+import { useStoreContext } from '../utils/GlobalState'
 
 const AddTransactionEntry = ( { categoryType, budgetState, refetch } ) => {
 
-  const initialFormState = { categoryID: '', title: '', value: 0, createdAt: new Date() }
-
+  const [ state ] = useStoreContext();
+  
+  const initialFormState = { categoryID: '', title: '', value: 0, createdAt: new Date(), userID: { ...state.currentUser._id }  }
+  
   const [ formInput, setFormInput ] = useState( { ...initialFormState } ) 
 
   function validateForm( form ){
@@ -51,7 +54,8 @@ const AddTransactionEntry = ( { categoryType, budgetState, refetch } ) => {
         value: formInput.value,
         budgetID: budgetState._id,
         categoryID: formInput.categoryID,
-        createdAt: formInput.createdAt
+        createdAt: formInput.createdAt,
+        userID: formInput.userID
       }
     },
     update: ( cache, data ) => {
@@ -76,6 +80,7 @@ const AddTransactionEntry = ( { categoryType, budgetState, refetch } ) => {
         <InlineTextareaInput prop={ 'title' } input={ formInput } setInput={ setFormInput } label={ 'Description' }/>
         <InlineNumberInput prop={ `value` } input={ formInput } setInput={ setFormInput } label={ 'Monthly Value' }/>      
         <InlineDateInput prop={ `createdAt` } input={ formInput } setInput={ setFormInput } label={ 'Transaction Date' }/>
+        <InlineSelectInput prop={ 'userID' } input={ formInput } setInput={ setFormInput } label={ 'User' } optionList={ budgetState.ownerIDs }/>
         { formInput.error && <InlineError text={ formInput.error }/> }
       </form>
       { createdLoading ? <InlineNotification text={ 'Submit processing' }/> :  <ActionButton action={ sumbitForm } text={ 'Submit' } additionalClass={ null } /> }

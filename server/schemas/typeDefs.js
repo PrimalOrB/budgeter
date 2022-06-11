@@ -87,7 +87,7 @@ const typeDefs = gql`
 
     type Budget {
         _id: ID!
-        ownerIDs: [ID!]
+        ownerIDs: [ User ]
         title: String!
         desc: String!
         categories: [ Category ]
