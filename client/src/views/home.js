@@ -3,7 +3,7 @@ import { ButtonContainer }from '../components/Menus'
 import { useMutation } from '@apollo/client'
 import { QUERY_ALL_USER_BUDGETS } from '../utils/mutations'
 import { useStoreContext } from '../utils/GlobalState'
-import { SpinLoader } from '../components/Loaders'
+import { FullPageSpinLoader } from '../components/Loaders'
 
 const Home = () => {
 
@@ -44,9 +44,9 @@ const Home = () => {
   
   return (
     <>
-      { queryLoading && <SpinLoader /> }
+      { queryLoading && <FullPageSpinLoader /> }
       { budgetState.length > 0 &&
-        <ButtonContainer title={ 'Your Budgets'} buttons={ budgetState }/>
+        <ButtonContainer title={ 'Your Budgets'} buttons={ budgetState } span={ 'full-width-section' }/>
       }
     </>
   )

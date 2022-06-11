@@ -2,11 +2,11 @@ import React from "react";
 import { PrimaryButton } from '../Buttons'
 import { Title } from '../Layout'
 
-const ButtonContainer = ( { buttons, title } ) => {
+const ButtonContainer = ( { buttons, title, span } ) => {
 
     return (
         <>
-        <section>
+        <section className={ span ? span : '' }>
             { title && <Title text={ title } /> }
             <div className="container-grid-full">
                 { buttons.map( ( x, i ) => {

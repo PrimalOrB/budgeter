@@ -44,10 +44,10 @@ export function dateAddTZ( date ){
 
 export function titleCaseString( str ){
     let sentence = str.toLowerCase().split(" ");
-    for(let i = 0; i< sentence.length; i++){
+    for( let i = 0; i < sentence.length; i++ ){
         sentence[i] = sentence[i][0].toUpperCase() + sentence[i].slice(1);
     }
-    return sentence
+    return sentence.join(' ')
 }
 
 export function sumNumericArray( arr ){

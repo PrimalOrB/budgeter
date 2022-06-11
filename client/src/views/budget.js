@@ -4,7 +4,7 @@ import { useMutation } from '@apollo/client'
 import { QUERY_CURRENT_BUDGET } from '../utils/mutations'
 import { useStoreContext } from '../utils/GlobalState'
 import { InlineError } from '../components/Notifications'
-import { SpinLoader } from '../components/Loaders'
+import { FullPageSpinLoader } from '../components/Loaders'
 import { NavStateContainer } from '../components/Menus'
 import { MultiMonthBudgetOverview } from '../components/Charts'
 import { Title } from '../components/Layout'
@@ -119,7 +119,7 @@ const Budget = () => {
               )}            
           </>
         }
-        { queryLoading && <section className="full-container"><SpinLoader /></section> }
+        { queryLoading && <section className="full-container"><FullPageSpinLoader /></section> }
     </>
   )
 

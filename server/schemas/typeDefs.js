@@ -40,6 +40,7 @@ const typeDefs = gql`
         value: Float!
         budgetID: ID!
         categoryID: ID
+        createdAt: Date
     }
 
     input UserIDInput {

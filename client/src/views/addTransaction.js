@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { ActionButton } from '../components/Buttons'
-import { InlineSelectInput, InlineTextareaInput, InlineNumberInput } from '../components/Forms'
+import { InlineSelectInput, InlineTextareaInput, InlineNumberInput, InlineDateInput } from '../components/Forms'
 import { InlineError, InlineNotification } from '../components/Notifications'
 import { Title } from '../components/Layout'
 import { useMutation } from '@apollo/client'
@@ -8,7 +8,7 @@ import { CREATE_NEW_TRANSACTION } from '../utils/mutations'
 
 const AddTransactionEntry = ( { categoryType, budgetState, refetch } ) => {
 
-  const initialFormState = { categoryID: '', title: '', value: 0 }
+  const initialFormState = { categoryID: '', title: '', value: 0, createdAt: new Date() }
 
   const [ formInput, setFormInput ] = useState( { ...initialFormState } ) 
 
@@ -50,7 +50,8 @@ const AddTransactionEntry = ( { categoryType, budgetState, refetch } ) => {
         title: formInput.title,
         value: formInput.value,
         budgetID: budgetState._id,
-        categoryID: formInput.categoryID
+        categoryID: formInput.categoryID,
+        createdAt: formInput.createdAt
       }
     },
     update: ( cache, data ) => {
@@ -65,13 +66,16 @@ const AddTransactionEntry = ( { categoryType, budgetState, refetch } ) => {
   }
   })
 
+  console.log( formInput )
+
   return (
     <section className="full-container">
       <Title text={ `Add ${ categoryType }` } />
       <form autoComplete="off">
         <InlineSelectInput prop={ 'categoryID' } input={ formInput } setInput={ setFormInput } label={ 'Category' } optionList={ budgetState.categories.filter( category => category.categoryType === categoryType ) }/>
         <InlineTextareaInput prop={ 'title' } input={ formInput } setInput={ setFormInput } label={ 'Description' }/>
-        <InlineNumberInput prop={ `value` } input={ formInput } setInput={ setFormInput } label={ 'Monthly Value' } min={ 0 }/>      
+        <InlineNumberInput prop={ `value` } input={ formInput } setInput={ setFormInput } label={ 'Monthly Value' }/>      
+        <InlineDateInput prop={ `createdAt` } input={ formInput } setInput={ setFormInput } label={ 'Transaction Date' }/>
         { formInput.error && <InlineError text={ formInput.error }/> }
       </form>
       { createdLoading ? <InlineNotification text={ 'Submit processing' }/> :  <ActionButton action={ sumbitForm } text={ 'Submit' } additionalClass={ null } /> }
