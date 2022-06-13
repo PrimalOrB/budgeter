@@ -16,7 +16,7 @@ const entrySchema = new Schema(
     },
     valueType: {
       type: String,
-      enum: ['expense','income'],
+      enum: ['expense','income','transfer'],
       required: true
     },
     budgetID: {
@@ -24,6 +24,10 @@ const entrySchema = new Schema(
       ref: 'Budget',
     },
     userID: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+    },
+    toUserID: {
         type: Schema.Types.ObjectId,
         ref: 'User',
     },

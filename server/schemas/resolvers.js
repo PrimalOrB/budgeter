@@ -136,6 +136,39 @@ const resolvers = {
         throw new AuthenticationError('Incorrect credentials');
       },
 
+      createTransfer: async( parent, { input }, context ) => {
+        if( context.headers.authorization !== undefined ){
+
+          let { budgetID, userID, toUserID } = input
+
+          const user = await User.findOne( { _id: userID } )
+
+          if( !user ){
+            return {}
+          }
+
+          const userTo = await User.findOne( { _id: toUserID } )
+
+          if( !userTo ){
+            return {}
+          }
+
+          const newEntry = await Entry.create( { ...input, userID: user._id, valueType: 'transfer', title: `Transfer from ${ user.userInitials } to ${ userTo.userInitials }` } )
+
+          const budgetUpdate = await Budget.findOneAndUpdate(
+            { _id: budgetID },
+            { $push: { entries: newEntry._id } },
+            { new: true, runValidators: true } ) 
+
+          if( !budgetUpdate ){
+            return {}
+          }
+
+          return budgetUpdate
+        }
+        throw new AuthenticationError('Incorrect credentials');
+      },
+
       queryBudget: async( parent, { input }, context ) => {
         if( context.headers.authorization !== undefined ){
 
@@ -145,8 +178,8 @@ const resolvers = {
             .populate( 'ownerIDs' )
             .populate({
               path: 'entries',
-              populate: "userID"}
-          )
+              populate: [ "userID", "toUserID" ]
+            })
 
           if( !findBudget ){
             return {}

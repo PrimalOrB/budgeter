@@ -8,9 +8,11 @@ import { FullPageSpinLoader } from '../components/Loaders'
 import { NavStateContainer } from '../components/Menus'
 import { MultiMonthBudgetOverview } from '../components/Charts'
 import { Title } from '../components/Layout'
-import { AddCategory, AddTransactionEntry, RecentTransactions, AllCategories, EditCategory, MonthSummary } from './'
+import { AddCategory, AddTransactionEntry, AddTransferEntry, RecentTransactions, AllCategories, EditCategory, MonthSummary } from './'
 import { parseBudgetData } from '../utils/helpers'
 import { format, startOfMonth, endOfMonth } from 'date-fns'
+import { FaCaretUp, FaCaretDown } from 'react-icons/fa'
+import { BiTransferAlt } from 'react-icons/bi'
 
 const Budget = () => {
   
@@ -66,10 +68,11 @@ const Budget = () => {
   // buttons
   const buttons = [
     { text: 'Overview', desc: '', link: `dashboard` },
-    { text: 'Add Expense -', desc: '', link: `add-expense` },
-    { text: 'Add Income +', desc: '', link: `add-income` },
+    { text: 'Add Expense', desc: '', link: `add-expense`, svg: FaCaretDown, svgClass:'sub' },
+    { text: 'Add Income', desc: '', link: `add-income`, svg: FaCaretUp, svgClass:'add' },
+    { text: 'Transfer', desc: '', link: `add-transfer`, svg: BiTransferAlt, svgClass:'transfer' },
     { text: 'Categories', desc: '', link: `categories` },
-    { text: 'Add Category +', desc: '', link: `add-category` }
+    { text: 'Add Category +', desc: '', link: `add-category` },
   ]
 
   return (
@@ -100,6 +103,11 @@ const Budget = () => {
               { pageState === "add-income" && (
                 <>
                   <AddTransactionEntry categoryType={ 'income' } budgetState={ budgetState } refetch={ queryBudget }/>
+                </>
+              )}
+              { pageState === "add-transfer" && (
+                <>
+                  <AddTransferEntry categoryType={ 'transfer' } budgetState={ budgetState } refetch={ queryBudget }/>
                 </>
               )}
               { pageState === "categories" && (

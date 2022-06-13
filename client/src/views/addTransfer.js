@@ -1,25 +1,25 @@
 import React, { useState } from 'react'
 import { ActionButton } from '../components/Buttons'
-import { InlineSelectInput, InlineTextareaInput, InlineNumberInput, InlineDateInput, InlineUserInput } from '../components/Forms'
+import { InlineNumberInput, InlineDateInput, InlineUserInput } from '../components/Forms'
 import { InlineError, InlineNotification } from '../components/Notifications'
 import { Title } from '../components/Layout'
 import { useMutation } from '@apollo/client'
-import { CREATE_NEW_TRANSACTION } from '../utils/mutations'
+import { CREATE_NEW_TRANSFER } from '../utils/mutations'
 import { useStoreContext } from '../utils/GlobalState'
 
-const AddTransactionEntry = ( { categoryType, budgetState, refetch } ) => {
+const AddTransferEntry = ( { categoryType, budgetState, refetch } ) => {
 
   const [ state ] = useStoreContext();
   
-  const initialFormState = { categoryID: '', title: '', value: 0, createdAt: new Date(), userID: state.currentUser._id  }
+  const initialFormState = { value: 0, createdAt: new Date(), userID: state.currentUser._id, toUserID: ''  }
   
   const [ formInput, setFormInput ] = useState( { ...initialFormState } ) 
 
   function validateForm( form ){
-    if( form.categoryID === undefined || form.title === undefined || form.value === undefined ){
+    if( form.value === undefined || form.userID === form.toUserID || form.userID === '' || form.toUserID === ''  ){
       return false
     }
-    if( form.categoryID.length > 0 && form.title.length > 0 && form.value !== 0 ){
+    if( form.value !== 0 && form.userID !== form.toUserID && form.userID !== '' && form.toUserID !== '' ){
       return true
     }
     return false
@@ -47,15 +47,14 @@ const AddTransactionEntry = ( { categoryType, budgetState, refetch } ) => {
     return console.log( 'failed' )
   }
 
-  const [ processSumbit, { loading: createdLoading, error: createdError }] = useMutation(CREATE_NEW_TRANSACTION, {
+  const [ processSumbit, { loading: createdLoading, error: createdError }] = useMutation(CREATE_NEW_TRANSFER, {
     variables: { 
-      input: {
-        title: formInput.title,
+      input: { 
         value: formInput.value,
         budgetID: budgetState._id,
-        categoryID: formInput.categoryID,
         createdAt: formInput.createdAt,
-        userID: formInput.userID
+        userID: formInput.userID,
+        toUserID: formInput.userID
       }
     },
     update: ( cache, data ) => {
@@ -70,17 +69,14 @@ const AddTransactionEntry = ( { categoryType, budgetState, refetch } ) => {
   }
   })
 
-  console.log( formInput )
-
   return (
     <section className="full-container">
       <Title text={ `Add ${ categoryType }` } />
       <form autoComplete="off">
-        <InlineSelectInput prop={ 'categoryID' } input={ formInput } setInput={ setFormInput } label={ 'Category' } optionList={ budgetState.categories.filter( category => category.categoryType === categoryType ) }/>
-        <InlineTextareaInput prop={ 'title' } input={ formInput } setInput={ setFormInput } label={ 'Description' }/>
+        <InlineUserInput prop={ 'userID' } input={ formInput } setInput={ setFormInput } label={ 'From User' } optionList={ budgetState.ownerIDs }/>
         <InlineNumberInput prop={ `value` } input={ formInput } setInput={ setFormInput } label={ 'Value' }/>      
         <InlineDateInput prop={ `createdAt` } input={ formInput } setInput={ setFormInput } label={ 'Transaction Date' }/>
-        <InlineUserInput prop={ 'userID' } input={ formInput } setInput={ setFormInput } label={ 'User' } optionList={ budgetState.ownerIDs }/>
+        <InlineUserInput prop={ 'toUserID' } input={ formInput } setInput={ setFormInput } label={ 'To User' } optionList={ budgetState.ownerIDs }/>
         { formInput.error && <InlineError text={ formInput.error }/> }
       </form>
       { createdLoading ? <InlineNotification text={ 'Submit processing' }/> :  <ActionButton action={ sumbitForm } text={ 'Submit' } additionalClass={ null } /> }
@@ -89,4 +85,4 @@ const AddTransactionEntry = ( { categoryType, budgetState, refetch } ) => {
 
 };
 
-export default AddTransactionEntry;
+export default AddTransferEntry;

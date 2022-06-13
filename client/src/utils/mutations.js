@@ -41,6 +41,14 @@ export const CREATE_NEW_TRANSACTION = gql`
   }
 `;
 
+export const CREATE_NEW_TRANSFER = gql`
+  mutation createTransfer($input: TransferInput! ) {
+    createTransfer(input: $input) {
+      _id
+    }
+  }
+`;
+
 export const QUERY_CURRENT_BUDGET = gql`
   mutation queryBudget($input: BudgetQueryInput! ) {
     queryBudget(input: $input) {
@@ -72,6 +80,13 @@ export const QUERY_CURRENT_BUDGET = gql`
         budgetID
         categoryID
         userID {
+          _id
+          email
+          userInitials
+          userColor
+        }
+        toUserID {
+          _id
           email
           userInitials
           userColor

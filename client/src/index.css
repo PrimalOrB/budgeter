@@ -108,6 +108,10 @@ li {
   padding-right: 1rem
 }
 
+.mobile-hide {
+  display: none !important;
+}
+
 .notification {
   color: green;
   font-weight: bold;
@@ -553,12 +557,49 @@ section {
   content: 'rev'
 }
 
+.transfer-text {
+  color: orange
+}
+
 .credit {
   color: orange
 }
 
 .credit:after {
   content: 'cr'
+}
+
+.add {
+  margin-left: 0
+}
+
+.add svg {
+  height: 1.5rem;
+  width: 1.5rem;
+  fill: green;
+  margin: 0 0.5rem !important
+}
+
+.sub {
+  margin-left: 0
+}
+
+.sub svg {
+  height: 1.5rem;
+  width: 1.5rem;
+  fill: red;
+  margin: 0 0.5rem !important
+}
+
+.transfer {
+  margin-left: 0
+}
+
+.transfer svg {
+  height: 1.5rem;
+  width: 1.5rem;
+  fill: orange;
+  margin: 0 0.5rem !important
 }
 
 /* Titles */
@@ -876,6 +917,22 @@ input::-ms-clear {
       "description description"
       "multi-month-overview month-summary"
       "recent-transactions month-summary"; 
+  }
+
+  .mobile-hide {
+    display: initial !important;
+  }
+  
+  .add {
+    margin-left: 0.5rem
+  }
+  
+  .sub {
+    margin-left: 0.5rem
+  }
+
+  .transfer {
+    margin-left: 0.5rem
   }
 
   #budget-title {

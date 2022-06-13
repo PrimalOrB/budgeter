@@ -25,13 +25,22 @@ const RecentTransactions = ( { categories, transactions } ) => {
           if( entry.valueType === "expense" && entry.value < 0){
             type = 2
           }
+          if( entry.valueType === "transfer"){
+            type = 4
+          }
 
           return ( 
             <li key={ `recent_${ entry._id }` } className={ 'flex-transaction-line-sm border-bot-hightlight-1 f-valign' }>
               <div className="flex f1 wrap padding-top-sm">
-                <span className="margin-right-half colon bold f0 font-medium">
-                  { categories.filter( category => category._id === entry.categoryID )[0].title }
-                </span>
+                { entry.valueType === 'transfer' ?
+                  <span className="margin-right-half colon bold f0 font-medium">
+                    Transfer
+                  </span>
+                :
+                  <span className="margin-right-half colon bold f0 font-medium">
+                    { categories.filter( category => category._id === entry.categoryID )[0].title }
+                  </span>
+                }
                 <span className='f1 font-medium'>
                   { entry.title }
                 </span>
@@ -39,7 +48,7 @@ const RecentTransactions = ( { categories, transactions } ) => {
                   { format( entry.createdAt, 'M/dd/yy' ) }
                 </span>
               </div>
-              <span className={ `bold f0${ type === 0 ? ' negative' : ''}${ type === 1 ? ' positive' : ''}${ type === 2 ? ' credit' : ''}${ type === 3 ? ' reverse' : ''}` }>
+              <span className={ `bold f0${ type === 0 ? ' negative' : ''}${ type === 1 ? ' positive' : ''}${ type === 2 ? ' credit' : ''}${ type === 3 ? ' reverse' : ''}${ type === 4 ? ' transfer-text' : ''}` }>
                 { toCurrency( Math.abs( entry.value ) ) }
               </span>
               <span className='f0 initials-icon' style={{ backgroundColor: entry.userID.userColor ? `#${ entry.userID.userColor }` : '#BBBBBB' }}>
