@@ -34,9 +34,14 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
       const matchUser = uniqueUsers.findIndex( user => { return user.userID === entry.userID._id } )
       if( matchUser >= 0 ){
         uniqueUsers[matchUser].expensesTotal  += entry.value
-        if( !entry.individualEntry ){
-          uniqueUsers[matchUser].expensesShared  += entry.value
-        }
+      }
+      return entry
+    })
+  const expenseByMonthShared = transactions.filter( entry => entry.valueType === 'expense' && !entry.individualEntry )
+    .map( entry => {
+      const matchUser = uniqueUsers.findIndex( user => { return user.userID === entry.userID._id } )
+      if( matchUser >= 0 ){
+        uniqueUsers[matchUser].expensesShared  += entry.value
       }
       return entry
     })
@@ -46,9 +51,14 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
       const matchUser = uniqueUsers.findIndex( user => { return user.userID === entry.userID._id } )
       if( matchUser >= 0 ){
         uniqueUsers[matchUser].incomeTotal  += entry.value
-        if( !entry.individualEntry ){
-          uniqueUsers[matchUser].incomeShared  += entry.value
-        }
+      }
+      return entry
+    })
+  const incomeByMonthShared = transactions.filter( entry => entry.valueType === 'income' && !entry.individualEntry )
+    .map( entry => {
+      const matchUser = uniqueUsers.findIndex( user => { return user.userID === entry.userID._id } )
+      if( matchUser >= 0 ){
+        uniqueUsers[matchUser].incomeShared  += entry.value
       }
       return entry
     })
@@ -66,10 +76,11 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
   })
   // run balances
   uniqueUsers.map( user => {
-    user.portionTotalExpenses = ( user.expensesTotal - user.transfersOut ) / sumPropArray( expenseByMonth, 'value' )
-    user.portionSharedIncome = ( user.incomeTotal + user.transfersIn ) / sumPropArray( incomeByMonth, 'value' )
-    user.balanceTotal = ( user.incomeTotal - user.transfersIn ) - ( user.expensesTotal + user.transfersOut )
-    return user.responsibleExpenses = sumPropArray( expenseByMonth, 'value' ) * user.portionSharedIncome
+    user.portionSharedExpenses = user.expensesShared / sumPropArray( expenseByMonthShared, 'value' )
+    user.portionSharedIncome = user.incomeShared  / sumPropArray( incomeByMonthShared, 'value' )
+    user.responsibleExpenses = sumPropArray( expenseByMonthShared, 'value' ) * user.portionSharedIncome
+    user.balanceAfterTransfer = user.responsibleExpenses - user.transfersOut + user.transfersIn
+    return user.userBalance = user.balanceAfterTransfer - user.portionSharedExpenses
   })
   
   console.log( uniqueUsers )
@@ -108,8 +119,9 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
                   <li>Transfers In: { toCurrency( user.transfersIn ) }</li>
                   <li>Total Expenses %: { ( user.portionTotalExpenses * 100 ).toFixed(1) }%</li>
                   <li>Total Income %: { ( user.portionSharedIncome * 100 ).toFixed(1) }%</li>
-                  <li>Total Balance: { toCurrency( user.balanceTotal ) }</li>
                   <li>User Expense Responsibility: { toCurrency( user.responsibleExpenses ) }</li>
+                  <li>User After Transfers: { toCurrency( user.balanceAfterTransfer ) }</li>
+                  <li>User Balance: { toCurrency( user.userBalance ) }</li>
               </ul>
              )
            })
