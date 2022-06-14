@@ -45,6 +45,25 @@ export const EDIT_TRANSACTION = gql`
   mutation editTransaction($input: TransactionInput! ) {
     editTransaction(input: $input) {
       _id
+      createdAt
+      title
+      value
+      valueType
+      budgetID
+      categoryID
+      userID {
+        _id
+        email
+        userInitials
+        userColor
+      }
+      toUserID {
+        _id
+        email
+        userInitials
+        userColor
+      }
+      individualEntry
     }
   }
 `;
@@ -61,6 +80,25 @@ export const EDIT_TRANSFER = gql`
   mutation editTransfer($input: TransferInput! ) {
     editTransfer(input: $input) {
       _id
+      createdAt
+      title
+      value
+      valueType
+      budgetID
+      categoryID
+      userID {
+        _id
+        email
+        userInitials
+        userColor
+      }
+      toUserID {
+        _id
+        email
+        userInitials
+        userColor
+      }
+      individualEntry
     }
   }
 `;

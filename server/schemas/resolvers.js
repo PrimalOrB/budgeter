@@ -161,6 +161,7 @@ const resolvers = {
             { _id: entryID },
             { title, value, categoryID, createdAt, userID, individualEntry },
             { new: true, runValidators: true } ) 
+            .populate('userID')
 
           if( !entryUpdate ){
             return {}
@@ -225,6 +226,8 @@ const resolvers = {
             { _id: entryID },
             { entryID, value, createdAt, userID, toUserID, title: `Transfer from ${ user.userInitials } to ${ userTo.userInitials }` },
             { new: true, runValidators: true } )
+            .populate('userID')
+            .populate('toUserID')
 
           if( !updateEntry ){
             return {}

@@ -5,11 +5,8 @@ import { InlineError, InlineNotification } from '../components/Notifications'
 import { Title } from '../components/Layout'
 import { useMutation } from '@apollo/client'
 import { EDIT_TRANSFER } from '../utils/mutations'
-import { useHistory } from 'react-router-dom'
 
-const EditTransferEntry = ( { budgetState, editingID } ) => {
-
-  const history = useHistory();
+const EditTransferEntry = ( { budgetState, setBudgetState, editingID, setPageState } ) => {
 
   const incomingEditData = budgetState.entries.find( x => x._id === editingID )
 
@@ -18,10 +15,10 @@ const EditTransferEntry = ( { budgetState, editingID } ) => {
   const [ formInput, setFormInput ] = useState( { ...initialFormState } ) 
 
   function validateForm( form ){
-    if( form.value === undefined || form.userID === '' || form.toUserID === ''  ){
+    if( form.value === undefined || form.userID === form.toUserID || form.userID === '' || form.toUserID === ''  ){
       return false
     }
-    if( form.value !== 0 && form.userID !== '' && form.toUserID !== '' ){
+    if( form.value !== 0 && form.userID !== form.toUserID && form.userID !== '' && form.toUserID !== '' ){
       return true
     }
     return false
@@ -63,13 +60,16 @@ const EditTransferEntry = ( { budgetState, editingID } ) => {
     update: ( cache, data ) => {
       try {
         if( data ){
-          history.push( `/budget/${ budgetState._id }` );
-          return window.location.reload()
+          const newBudgetState = { ...budgetState }
+          newBudgetState.entries = [ ...newBudgetState.entries.filter( entry => entry._id !== data.data.editTransfer._id ), data.data.editTransfer ]
+          console.log( newBudgetState )
+          setBudgetState( { ...newBudgetState } )
+          return setPageState( 'dashboard' )
         }
       } catch (e) {
         console.error( createdError );
       }
-  }
+    }
   })
 
   return (

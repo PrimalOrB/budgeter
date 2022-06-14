@@ -6,11 +6,8 @@ import { Title } from '../components/Layout'
 import { useMutation } from '@apollo/client'
 import { EDIT_TRANSACTION } from '../utils/mutations'
 import { MdPerson, MdPeople } from 'react-icons/md'
-import { useHistory } from 'react-router-dom'
 
-const EditTransactionEntry = ( { budgetState, editingID } ) => {
-
-  const history = useHistory();
+const EditTransactionEntry = ( { budgetState, setBudgetState, editingID, setPageState } ) => {
 
   const incomingEditData = budgetState.entries.find( x => x._id === editingID )
 
@@ -66,8 +63,10 @@ const EditTransactionEntry = ( { budgetState, editingID } ) => {
     update: ( cache, data ) => {
       try {
         if( data ){
-          history.push( `/budget/${ budgetState._id }` );
-          return window.location.reload()
+          const newBudgetState = { ...budgetState }
+          newBudgetState.entries = [ ...newBudgetState.entries.filter( entry => entry._id !== data.data.editTransaction._id ), data.data.editTransaction ]
+          setBudgetState( { ...newBudgetState } )
+          return setPageState( 'dashboard' )
         }
       } catch (e) {
         console.error( createdError );

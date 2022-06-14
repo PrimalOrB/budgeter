@@ -8,7 +8,7 @@ import { CREATE_NEW_TRANSACTION } from '../utils/mutations'
 import { useStoreContext } from '../utils/GlobalState'
 import { MdPerson, MdPeople } from 'react-icons/md'
 
-const AddTransactionEntry = ( { categoryType, budgetState, refetch } ) => {
+const AddTransactionEntry = ( { categoryType, budgetState, refetch, setPageState } ) => {
 
   const [ state ] = useStoreContext();
   
@@ -64,6 +64,7 @@ const AddTransactionEntry = ( { categoryType, budgetState, refetch } ) => {
       try {
         if( data ){
           refetch()
+          setPageState( 'dashboard' )
           return setFormInput( { ...initialFormState } )
         }
       } catch (e) {

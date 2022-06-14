@@ -7,7 +7,7 @@ import { useMutation } from '@apollo/client'
 import { CREATE_NEW_TRANSFER } from '../utils/mutations'
 import { useStoreContext } from '../utils/GlobalState'
 
-const AddTransferEntry = ( { categoryType, budgetState, refetch } ) => {
+const AddTransferEntry = ( { categoryType, budgetState, refetch, setPageState } ) => {
 
   const [ state ] = useStoreContext();
   
@@ -61,6 +61,7 @@ const AddTransferEntry = ( { categoryType, budgetState, refetch } ) => {
       try {
         if( data ){
           refetch()
+          setPageState( 'dashboard' )
           return setFormInput( { ...initialFormState } )
         }
       } catch (e) {

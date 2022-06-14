@@ -98,17 +98,17 @@ const Budget = () => {
               )}
               { pageState === "add-expense" && (
                 <>
-                  <AddTransactionEntry categoryType={ 'expense' } budgetState={ budgetState } refetch={ queryBudget }/>
+                  <AddTransactionEntry categoryType={ 'expense' } budgetState={ budgetState } setPageState={ setPageState } refetch={ queryBudget }/>
                 </>
               )}
               { pageState === "add-income" && (
                 <>
-                  <AddTransactionEntry categoryType={ 'income' } budgetState={ budgetState } refetch={ queryBudget }/>
+                  <AddTransactionEntry categoryType={ 'income' } budgetState={ budgetState } setPageState={ setPageState } refetch={ queryBudget }/>
                 </>
               )}
               { pageState === "add-transfer" && (
                 <>
-                  <AddTransferEntry categoryType={ 'transfer' } budgetState={ budgetState } refetch={ queryBudget }/>
+                  <AddTransferEntry categoryType={ 'transfer' } budgetState={ budgetState } setPageState={ setPageState } refetch={ queryBudget }/>
                 </>
               )}
               { pageState === "categories" && (
@@ -123,12 +123,12 @@ const Budget = () => {
               )}
               { pageState === "edit-transaction" && (
                 <>
-                  <EditTransactionEntry editingID={ editingTransaction } budgetState={ budgetState }/>
+                  <EditTransactionEntry editingID={ editingTransaction } budgetState={ budgetState } setPageState={ setPageState } setBudgetState={ setBudgetState }/>
                 </>
               )} 
               { pageState === "edit-transfer" && (
                 <>
-                  <EditTransferEntry editingID={ editingTransaction } budgetState={ budgetState }/>
+                  <EditTransferEntry editingID={ editingTransaction } budgetState={ budgetState } setPageState={ setPageState } setBudgetState={ setBudgetState }/>
                 </>
               )} 
               { pageState === "edit-category" && (
