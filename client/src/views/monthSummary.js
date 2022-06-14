@@ -2,17 +2,18 @@ import React, { useState } from 'react'
 import { format } from 'date-fns'
 import { toCurrency, sumPropArray } from '../utils/helpers'
 import { SingleMonthCategoryCost } from '../components/Charts'
-import { BudgetCategoryExpandableList } from '../components/Layout'
+import { BudgetCategoryExpandableList, BudgetCategoryEntriesExpandableList } from '../components/Layout'
 import { FaCaretDown, FaCaretUp } from 'react-icons/fa'
 
 const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
   
   const date = new Date( `20${Number( highlightMonthState.split('/')[1] )}`, Number( highlightMonthState.split('/')[0] ) - 1, 1 )
 
-  const [ expandedState, setExpandedState ] = useState( { income: false, expense: false, balance: false } )
+  const [ expandedState, setExpandedState ] = useState( { income: false, expense: false, balance: false, transfers: false } )
 
   const expenseByMonth = transactions.filter( entry => entry.valueType === 'expense' )
   const incomeByMonth = transactions.filter( entry => entry.valueType === 'income' )
+  const transferByMonth = transactions.filter( entry => entry.valueType === 'transfer' )
 
   return (
     <section id="month-summary" >
@@ -22,6 +23,7 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
         <SingleMonthCategoryCost valueType="income" activeDate={ date } highlightMonthState={ highlightMonthState } categories={ categories.filter( category => category.categoryType === 'income' ) } transactions={ incomeByMonth } />
       </div>
 
+        {/* balances section */}
       <ul className="monthly-group-detail border-b-l-rad-none border-b-r-rad-none border_b_none">        
         <li className="flex nowrap flex-just-space-around f-full" onClick={ () => setExpandedState( { ...expandedState, balance: !expandedState.balance } ) }>
           <span className="f0 margin-right-half">
@@ -39,6 +41,7 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
         }
       </ul> 
 
+        {/* expenses section */}
       <ul className="monthly-group-detail border-b-l-rad-none border-b-r-rad-none border_b_none border-t-l-rad-none border-t-r-rad-none">        
         <li className="flex nowrap flex-just-space-around f-full" onClick={ () => setExpandedState( { ...expandedState, expense: !expandedState.expense } ) }>
           <span className="f0 margin-right-half">
@@ -68,7 +71,8 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
         }
       </ul>   
 
-      <ul className="monthly-group-detail border-t-l-rad-none border-t-r-rad-none">        
+        {/* income section */}
+      <ul className="monthly-group-detail border-b-l-rad-none border-b-r-rad-none border_b_none border-t-l-rad-none border-t-r-rad-none">        
         <li className="flex nowrap flex-just-space-around f-full" onClick={ () => setExpandedState( { ...expandedState, income: !expandedState.income } ) }>
           <span className="f0 margin-right-half">
             { expandedState.income ? FaCaretUp() : FaCaretDown() }
@@ -95,7 +99,29 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
             )
           })
         }
-      </ul>   
+      </ul>  
+
+        {/* transfer section */}
+      <ul className="monthly-group-detail border-t-l-rad-none border-t-r-rad-none">        
+        <li className="flex nowrap flex-just-space-around f-full" onClick={ () => setExpandedState( { ...expandedState, transfers: !expandedState.transfers } ) }>
+          <span className="f0 margin-right-half">
+            { expandedState.transfers ? FaCaretUp() : FaCaretDown() }
+          </span>
+          <span className="f1 bold noselect">
+            Transfers
+          </span>
+          <span className="f1 bold right">
+            { toCurrency( sumPropArray( transferByMonth, 'value' ) ) }
+          </span>
+        </li>
+        { expandedState.transfers &&
+          transferByMonth.map( transfer => {
+            return ( 
+              <BudgetCategoryEntriesExpandableList key={ transfer._id } entry={ transfer } />
+            )
+          })
+        }
+      </ul>  
     </section>
   )
 

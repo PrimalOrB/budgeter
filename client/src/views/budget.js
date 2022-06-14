@@ -11,7 +11,7 @@ import { Title } from '../components/Layout'
 import { AddCategory, AddTransactionEntry, AddTransferEntry, RecentTransactions, AllCategories, EditCategory, MonthSummary } from './'
 import { parseBudgetData } from '../utils/helpers'
 import { format, startOfMonth, endOfMonth } from 'date-fns'
-import { FaCaretUp, FaCaretDown } from 'react-icons/fa'
+import { FaCaretUp, FaCaretDown, FaFolder, FaFolderPlus, FaHome } from 'react-icons/fa'
 import { BiTransferAlt } from 'react-icons/bi'
 
 const Budget = () => {
@@ -67,12 +67,12 @@ const Budget = () => {
 
   // buttons
   const buttons = [
-    { text: 'Overview', desc: '', link: `dashboard` },
+    { text: 'Overview', desc: '', link: `dashboard`, svg: FaHome, svgClass: 'icon-margin' },
     { text: 'Add Expense', desc: '', link: `add-expense`, svg: FaCaretDown, svgClass:'sub' },
     { text: 'Add Income', desc: '', link: `add-income`, svg: FaCaretUp, svgClass:'add' },
     { text: 'Transfer', desc: '', link: `add-transfer`, svg: BiTransferAlt, svgClass:'transfer' },
-    { text: 'Categories', desc: '', link: `categories` },
-    { text: 'Add Category +', desc: '', link: `add-category` },
+    { text: 'Categories', desc: '', link: `categories`, svg: FaFolder, svgClass: 'icon-margin' },
+    { text: 'Add Category', desc: '', link: `add-category`, svg: FaFolderPlus, svgClass: 'icon-margin' },
   ]
 
   return (

@@ -67,7 +67,8 @@ export function parseBudgetData( { budget, date, duration } ){
             incomeTotal: 0,
             expenseTotal: 0,
             budgetedIncomeTotal: 0,
-            budgetedExpenseTotal: 0
+            budgetedExpenseTotal: 0,
+            transferTotal: 0
          }
     } )
 
@@ -103,14 +104,17 @@ export function parseBudgetData( { budget, date, duration } ){
         return null
     } )
 
-    budget.entries.map( expense => {
-        let matchedMonth = months.filter( month => month.label === format( expense.createdAt , 'M/yy' ) )
+    budget.entries.map( entry => {
+        let matchedMonth = months.filter( month => month.label === format( entry.createdAt , 'M/yy' ) )
         if( matchedMonth.length === 1 ){
-            if( expense.valueType === 'income' ){
-                return matchedMonth[0].incomeTotal += expense.value
+            if( entry.valueType === 'income' ){
+                return matchedMonth[0].incomeTotal += entry.value
             }
-            if( expense.valueType === 'expense' ){
-                return matchedMonth[0].expenseTotal += expense.value
+            if( entry.valueType === 'expense' ){
+                return matchedMonth[0].expenseTotal += entry.value
+            }
+            if( entry.valueType === 'transfer' ){
+                return matchedMonth[0].transferTotal += entry.value
             }
         }
         return null

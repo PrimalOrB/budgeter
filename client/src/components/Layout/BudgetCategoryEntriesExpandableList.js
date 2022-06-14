@@ -5,7 +5,6 @@ import { MdSubdirectoryArrowRight } from 'react-icons/md'
 
 const BudgetCategoryEntriesExpandableList = ( { entry } ) => {
 
-    console.log( entry )
     let type
     if( entry.valueType === "income" && entry.value > 0){
         type = 1
@@ -19,6 +18,9 @@ const BudgetCategoryEntriesExpandableList = ( { entry } ) => {
     if( entry.valueType === "expense" && entry.value < 0){
         type = 2
     }
+    if( entry.valueType === "transfer" ){
+        type = 4
+    }
 
     return (
         <li key={ `recent_${ entry._id }` } className={ 'margin-left-full-half flex fullWidth f-valign' }>
@@ -31,7 +33,7 @@ const BudgetCategoryEntriesExpandableList = ( { entry } ) => {
             <span className='f2 font-medium'>
                 { entry.title }
             </span>
-            <span className={ `bold right f1${ type === 0 ? ' negative' : ''}${ type === 1 ? ' positive' : ''}${ type === 2 ? ' credit' : ''}${ type === 3 ? ' reverse' : ''}` }>
+            <span className={ `bold right f1${ type === 0 ? ' negative' : ''}${ type === 1 ? ' positive' : ''}${ type === 2 ? ' credit' : ''}${ type === 3 ? ' reverse' : ''}${ type === 4 ? ' transfer-text' : ''}` }>
                 { toCurrency( Math.abs( entry.value ) ) }
             </span>
             <span className='f0 initials-icon' style={{ backgroundColor: entry.userID.userColor ? `#${ entry.userID.userColor }` : '#BBBBBB' }}>

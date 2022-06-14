@@ -273,10 +273,6 @@ main {
   flex-wrap: wrap;
 }
 
-main > section {
-  /* margin-top: 1.5rem; */
-}
-
 main > section:first-child {
   margin-top: 0;
   border: none;
@@ -368,12 +364,12 @@ section {
 /* Nav Menu & Nav Buttons */
 .nav-menu {
   display: flex;
-  justify-content: center;
+  justify-content: space-evenly;
 }
 
 .nav-button,
-.username-block {
-  display: flex;
+.username-block {  
+  display: flex;  
   text-align: center;
   padding: 0.4rem 0.6rem;
   font-size: 0.75rem;
@@ -381,6 +377,11 @@ section {
   background-color: var(--tertiary-color);
   border-bottom: 3px inset var(--highlight-2-color);
   transition: 0.25s ease all;
+}
+
+.nav-button {
+  flex: 1;
+  justify-content: center;
 }
 
 .nav-button svg {
@@ -601,6 +602,19 @@ section {
   fill: orange;
   margin: 0 0.5rem !important
 }
+
+.icon-margin {
+  margin-left: 0
+}
+
+.icon-margin svg {
+  height: 1.5rem;
+  width: 1.5rem;
+  fill: var(--primary-color);
+  margin: 0 0.5rem !important
+}
+
+
 
 /* Titles */
 .title {
@@ -902,7 +916,7 @@ input::-ms-clear {
 }
 
 /* Media */
-@media screen and (min-width: 750px) {
+@media screen and (min-width: 1000px) {
   main {
     width: 100%;
     max-width: 1800px;
@@ -917,6 +931,14 @@ input::-ms-clear {
       "description description"
       "multi-month-overview month-summary"
       "recent-transactions month-summary"; 
+  }
+
+  .nav-menu {
+    justify-content: center;
+  }
+
+  .nav-button {
+    flex: initial;
   }
 
   .mobile-hide {
