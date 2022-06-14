@@ -65,9 +65,9 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
   })
   // run balances
   uniqueUsers.map( user => {
-    user.portionTotalExpenses = user.expensesTotal / sumPropArray( expenseByMonth, 'value' )
-    user.portionSharedIncome = user.incomeTotal / sumPropArray( incomeByMonth, 'value' )
-    return user.balanceTotal = user.incomeTotal - user.expensesTotal
+    user.portionTotalExpenses = ( user.expensesTotal - user.transfersIn ) / sumPropArray( expenseByMonth, 'value' )
+    user.portionSharedIncome = ( user.incomeTotal + user.transfersOut ) / sumPropArray( incomeByMonth, 'value' )
+    return user.balanceTotal = ( user.incomeTotal - user.transfersOut ) - ( user.expensesTotal - user.transfersIn )
   })
   
   console.log( uniqueUsers )
