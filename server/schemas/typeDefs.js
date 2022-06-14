@@ -93,6 +93,7 @@ const typeDefs = gql`
         userID: User
         toUserID: User
         categoryID: ID
+        inividualEntry: Boolean
     }
 
     type Budget {

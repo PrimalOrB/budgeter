@@ -765,7 +765,8 @@ form,
 .form-inline-number,
 .form-inline-date-monthly,
 .form-inline-date,
-.form-inline-select {
+.form-inline-select,
+.form-inline-checkbox {
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -841,6 +842,58 @@ form,
 textarea:focus {
   background-color: white;
   border: 1px solid var(--highlight-color);
+}
+
+.form-inline-checkbox input {
+  height: 0;
+  width: 0;
+  visibility: hidden;
+}
+
+.form-inline-checkbox label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  width: 100px;
+  height: 50px;
+  background-color: var(--tertiary-color);
+  border-radius: 100px;
+  position: relative;
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--highlight-2-color);
+  transition: background-color, border-color 0.2s;
+}
+
+.form-inline-checkbox .checked {
+  border-color: var(--highlight-color);
+  background-color: var(--highlight-2-color);
+}
+
+.form-inline-checkbox .switch-handle {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 45px;
+  height: 45px;
+  border-radius: 45px;
+  transition: 0.2s;
+  background: #fff;
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--highlight-2-color);
+}
+
+.form-inline-checkbox .checked .switch-handle {
+  left: calc(100% - 2px);
+  transform: translateX(-100%);
+  border-color: var(--highlight-color);
+}
+
+.form-inline-checkbox label:active .switch-handle {
+  width: 60px;
 }
 
 input[type="month"]::-webkit-clear-button,
@@ -1018,7 +1071,8 @@ input::-ms-clear {
   .form-inline-number,
   .form-inline-date-monthly,
   .form-inline-date,
-  .form-inline-select {
+  .form-inline-select,
+  .form-inline-checkbox {
     flex-direction: row;
     margin: 0.5rem 0 0.5rem 0;
   }

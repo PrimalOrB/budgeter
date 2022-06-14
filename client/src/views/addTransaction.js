@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { ActionButton } from '../components/Buttons'
-import { InlineSelectInput, InlineTextareaInput, InlineNumberInput, InlineDateInput, InlineUserInput } from '../components/Forms'
+import { InlineSelectInput, InlineTextareaInput, InlineNumberInput, InlineDateInput, InlineUserInput, InlineSwitchTwoWay } from '../components/Forms'
 import { InlineError, InlineNotification } from '../components/Notifications'
 import { Title } from '../components/Layout'
 import { useMutation } from '@apollo/client'
@@ -11,7 +11,7 @@ const AddTransactionEntry = ( { categoryType, budgetState, refetch } ) => {
 
   const [ state ] = useStoreContext();
   
-  const initialFormState = { categoryID: '', title: '', value: 0, createdAt: new Date(), userID: state.currentUser._id  }
+  const initialFormState = { categoryID: '', title: '', value: 0, createdAt: new Date(), userID: state.currentUser._id, inividualEntry: false  }
   
   const [ formInput, setFormInput ] = useState( { ...initialFormState } ) 
 
@@ -81,6 +81,8 @@ const AddTransactionEntry = ( { categoryType, budgetState, refetch } ) => {
         <InlineNumberInput prop={ `value` } input={ formInput } setInput={ setFormInput } label={ 'Value' }/>      
         <InlineDateInput prop={ `createdAt` } input={ formInput } setInput={ setFormInput } label={ 'Transaction Date' }/>
         <InlineUserInput prop={ 'userID' } input={ formInput } setInput={ setFormInput } label={ 'User' } optionList={ budgetState.ownerIDs }/>
+        <InlineSwitchTwoWay prop={ `inividualEntry` } input={ formInput } setInput={ setFormInput } label={ 'Value' }/>   
+
         { formInput.error && <InlineError text={ formInput.error }/> }
       </form>
       { createdLoading ? <InlineNotification text={ 'Submit processing' }/> :  <ActionButton action={ sumbitForm } text={ 'Submit' } additionalClass={ null } /> }

@@ -34,6 +34,10 @@ const entrySchema = new Schema(
     categoryID: {
       type: Schema.Types.ObjectId,
       ref: 'Category',
+    },
+    inividualEntry: {
+      type: Boolean,
+      default: false
     }
   },
 )
