@@ -780,7 +780,8 @@ form,
 .form-inline-number > *,
 .form-inline-date-monthly > *,
 .form-inline-date > *,
-.form-inline-select > * {
+.form-inline-select > *,
+.form-inline-checkbox > * {
   width: calc( 100% - 1rem )
 }
 
@@ -788,7 +789,8 @@ form,
 .form-inline-number > label,
 .form-inline-date-monthly > label,
 .form-inline-date > label,
-.form-inline-select > label {
+.form-inline-select > label,
+.form-inline-checkbox > label {
   flex: 1;
   font-weight: bold;
   text-align: left;
@@ -803,7 +805,8 @@ form,
 .form-inline-number > input,
 .form-inline-date-monthly > input,
 .form-inline-date > input,
-.form-inline-select > select {
+.form-inline-select > select,
+.form-inline-checkbox > div {
   flex: 4;
   font-weight: bold;
   outline: none;
@@ -829,7 +832,8 @@ form,
 .form-inline-number > label::after,
 .form-inline-date-monthly > label::after,
 .form-inline-date > label::after,
-.form-inline-select > label::after {
+.form-inline-select > label::after,
+.form-inline-checkbox > label::after {
   content: ":";
   margin-right: 0.5rem;
 }
@@ -844,13 +848,46 @@ textarea:focus {
   border: 1px solid var(--highlight-color);
 }
 
+.form-inline-checkbox {
+  display: flex;
+  align-items: center;
+}
+
+.form-inline-checkbox > div {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.form-inline-checkbox > div > * {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.form-inline-checkbox-container {
+  flex: 0;
+}
+
+.form-inline-checkbox-svg {
+  margin: 0 2rem
+}
+
+.form-inline-checkbox-svg svg {
+  height: 3rem;
+  width: 3rem
+}
+
 .form-inline-checkbox input {
   height: 0;
   width: 0;
   visibility: hidden;
+  margin: 0;
+  padding: 0;
 }
 
-.form-inline-checkbox label {
+.form-inline-checkbox div label {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -874,7 +911,7 @@ textarea:focus {
 .form-inline-checkbox .switch-handle {
   content: '';
   position: absolute;
-  top: 2px;
+  top: 1px;
   left: 2px;
   width: 45px;
   height: 45px;
@@ -887,12 +924,12 @@ textarea:focus {
 }
 
 .form-inline-checkbox .checked .switch-handle {
-  left: calc(100% - 2px);
+  left: calc(100% - 1px);
   transform: translateX(-100%);
   border-color: var(--highlight-color);
 }
 
-.form-inline-checkbox label:active .switch-handle {
+.form-inline-checkbox div label:active .switch-handle {
   width: 60px;
 }
 
@@ -1063,7 +1100,8 @@ input::-ms-clear {
   .form-inline-number > *
   .form-inline-date-monthly > *,
   .form-inline-date > *,
-  .form-inline-select > * {
+  .form-inline-select > *,
+  .form-inline-checkbox  > * {
     width: auto
   }
 
@@ -1081,7 +1119,8 @@ input::-ms-clear {
   .form-inline-number > label,
   .form-inline-date-monthly > label,
   .form-inline-date > label,
-  .form-inline-select > label {
+  .form-inline-select > label,
+  .form-inline-checkbox > label {
     text-align: right;
     padding-bottom: 0;
   }

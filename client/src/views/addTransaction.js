@@ -6,6 +6,7 @@ import { Title } from '../components/Layout'
 import { useMutation } from '@apollo/client'
 import { CREATE_NEW_TRANSACTION } from '../utils/mutations'
 import { useStoreContext } from '../utils/GlobalState'
+import { MdPerson, MdPeople } from 'react-icons/md'
 
 const AddTransactionEntry = ( { categoryType, budgetState, refetch } ) => {
 
@@ -81,7 +82,7 @@ const AddTransactionEntry = ( { categoryType, budgetState, refetch } ) => {
         <InlineNumberInput prop={ `value` } input={ formInput } setInput={ setFormInput } label={ 'Value' }/>      
         <InlineDateInput prop={ `createdAt` } input={ formInput } setInput={ setFormInput } label={ 'Transaction Date' }/>
         <InlineUserInput prop={ 'userID' } input={ formInput } setInput={ setFormInput } label={ 'User' } optionList={ budgetState.ownerIDs }/>
-        <InlineSwitchTwoWay prop={ `inividualEntry` } input={ formInput } setInput={ setFormInput } label={ 'Value' }/>   
+        <InlineSwitchTwoWay prop={ `inividualEntry` } input={ formInput } setInput={ setFormInput } label={ `${ formInput.inividualEntry ? 'Individual Entry' : 'Shared Entry' }` } falseIcon={ MdPeople } trueIcon={ MdPerson }/>   
 
         { formInput.error && <InlineError text={ formInput.error }/> }
       </form>
