@@ -54,7 +54,7 @@ const AddTransferEntry = ( { categoryType, budgetState, refetch } ) => {
         budgetID: budgetState._id,
         createdAt: formInput.createdAt,
         userID: formInput.userID,
-        toUserID: formInput.userID
+        toUserID: formInput.toUserID
       }
     },
     update: ( cache, data ) => {
