@@ -11,9 +11,31 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
 
   const [ expandedState, setExpandedState ] = useState( { income: false, expense: false, balance: false, transfers: false } )
 
+  const uniqueUsers = [...new Set(transactions.map (entry => entry.userID._id ) ) ].map( userID => { return { userID, incomeTotal: 0, expensesTotal: 0, incomeShared: 0, expensesShared: 0 } } )
   const expenseByMonth = transactions.filter( entry => entry.valueType === 'expense' )
+    .map( entry => {
+      const matchUser = uniqueUsers.findIndex( user => { return user.userID === entry.userID._id } )
+      if( matchUser >= 0 ){
+        uniqueUsers[matchUser].expensesTotal  += entry.value
+        if( !entry.individualEntry ){
+          uniqueUsers[matchUser].expensesShared  += entry.value
+        }
+      }
+      return entry
+    })
   const incomeByMonth = transactions.filter( entry => entry.valueType === 'income' )
+    .map( entry => {
+      const matchUser = uniqueUsers.findIndex( user => { return user.userID === entry.userID._id } )
+      if( matchUser >= 0 ){
+        uniqueUsers[matchUser].incomeTotal  += entry.value
+        if( !entry.individualEntry ){
+          uniqueUsers[matchUser].incomeShared  += entry.value
+        }
+      }
+      return entry
+    })
   const transferByMonth = transactions.filter( entry => entry.valueType === 'transfer' )
+  console.log( uniqueUsers )
 
   return (
     <section id="month-summary" >
@@ -37,7 +59,17 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
           </span>
         </li>
         { expandedState.balance &&
-           'Balance'
+           uniqueUsers.map( user => {
+             return (
+              <ul key={ user.userID }>
+                { user.userID }
+                  <li>Total Expenses: { toCurrency( user.expensesTotal ) }</li>
+                  <li>Total Income: { toCurrency( user.incomeTotal ) }</li>
+                  <li>Shared Expenses: { toCurrency( user.expensesShared ) }</li>
+                  <li>Shared Income: { toCurrency( user.incomeShared ) }</li>
+              </ul>
+             )
+           })
         }
       </ul> 
 
