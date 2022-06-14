@@ -42,6 +42,7 @@ const typeDefs = gql`
         categoryID: ID!
         createdAt: Date!
         userID: ID!
+        individualEntry: Boolean
     }
 
     input TransferInput {
@@ -93,7 +94,7 @@ const typeDefs = gql`
         userID: User
         toUserID: User
         categoryID: ID
-        inividualEntry: Boolean
+        individualEntry: Boolean
     }
 
     type Budget {

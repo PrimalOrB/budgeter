@@ -1,6 +1,6 @@
 import React from "react";
 
-const InlineSwitchTwoWay = ( { prop, input, setInput, label, placeholder, decimals, falseIcon, trueIcon } ) => {
+const InlineSwitchTwoWay = ( { prop, input, setInput, label, falseIcon, trueIcon } ) => {
 
     function updateInput( e ){
         const { name } = e.target
@@ -11,7 +11,7 @@ const InlineSwitchTwoWay = ( { prop, input, setInput, label, placeholder, decima
         <div className={ 'form-inline-checkbox' } >
             <label htmlFor={ prop }>{ label }</label>
             <div>
-                <div className={ 'form-inline-checkbox-svg' }>
+                <div className={ `form-inline-checkbox-svg${ !input[prop] ? ' svg-checked' : '' }` } onClick={ () => setInput( { ...input, [prop]: false, error: null } ) }>
                     { falseIcon() }
                 </div>
                 <div className={ 'form-inline-checkbox-container' }>
@@ -20,7 +20,7 @@ const InlineSwitchTwoWay = ( { prop, input, setInput, label, placeholder, decima
                         <span className={ 'switch-handle' } />
                     </label>
                 </div>
-                <div className={ 'form-inline-checkbox-svg' }>
+                <div className={ `form-inline-checkbox-svg${ input[prop] ? ' svg-checked' : '' }` } onClick={ () => setInput( { ...input, [prop]: true, error: null } ) }>
                     { trueIcon() }
                 </div>
             </div>

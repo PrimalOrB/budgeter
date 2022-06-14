@@ -876,7 +876,21 @@ textarea:focus {
 
 .form-inline-checkbox-svg svg {
   height: 3rem;
-  width: 3rem
+  width: 3rem;
+  fill: var(--highlight-2-color);
+  transition: 0.25s ease all;
+  filter: drop-shadow(3px 3px 3px var(--highlight-color));
+}
+
+.form-inline-checkbox-svg:hover svg {
+  transform: translateX(2px);
+  transform: translateY(2px);
+  filter: drop-shadow(2px 2px 2px var(--highlight-color));
+}
+
+.svg-checked svg {
+  fill: var(--highlight-color);
+  filter: drop-shadow(3px 3px 3px var(--primary-color));
 }
 
 .form-inline-checkbox input {
@@ -1003,6 +1017,16 @@ input::-ms-clear {
   font-weight: bold;
   margin-left: 1rem;
   padding-top: 2px
+}
+
+.individual-icon {
+  margin-left: 1rem;
+}
+
+.individual-icon svg{
+  fill: var(--highlight-color);
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 /* Media */

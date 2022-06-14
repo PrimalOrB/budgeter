@@ -35,7 +35,7 @@ const entrySchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'Category',
     },
-    inividualEntry: {
+    individualEntry: {
       type: Boolean,
       default: false
     }

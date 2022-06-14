@@ -91,6 +91,7 @@ export const QUERY_CURRENT_BUDGET = gql`
           userInitials
           userColor
         }
+        individualEntry
       }
     }
   }

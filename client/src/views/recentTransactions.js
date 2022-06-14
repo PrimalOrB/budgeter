@@ -1,6 +1,7 @@
 import React from 'react'
 import { format } from 'date-fns'
 import { toCurrency } from '../utils/helpers'
+import { MdPerson, MdPeople } from 'react-icons/md'
 
 const RecentTransactions = ( { categories, transactions } ) => {
   
@@ -53,7 +54,10 @@ const RecentTransactions = ( { categories, transactions } ) => {
               </span>
               <span className='f0 initials-icon' style={{ backgroundColor: entry.userID.userColor ? `#${ entry.userID.userColor }` : '#BBBBBB' }}>
                   { entry.userID.userInitials ? entry.userID.userInitials.toUpperCase() : entry.userID.email[0].toUpperCase() }
-                </span>
+              </span>
+              <span className='f0 individual-icon'>
+                { entry.individualEntry ? MdPerson() : MdPeople() }
+            </span>
             </li> )
         })}
       </ul>

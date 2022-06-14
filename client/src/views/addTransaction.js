@@ -12,7 +12,7 @@ const AddTransactionEntry = ( { categoryType, budgetState, refetch } ) => {
 
   const [ state ] = useStoreContext();
   
-  const initialFormState = { categoryID: '', title: '', value: 0, createdAt: new Date(), userID: state.currentUser._id, inividualEntry: false  }
+  const initialFormState = { categoryID: '', title: '', value: 0, createdAt: new Date(), userID: state.currentUser._id, individualEntry: false  }
   
   const [ formInput, setFormInput ] = useState( { ...initialFormState } ) 
 
@@ -56,7 +56,8 @@ const AddTransactionEntry = ( { categoryType, budgetState, refetch } ) => {
         budgetID: budgetState._id,
         categoryID: formInput.categoryID,
         createdAt: formInput.createdAt,
-        userID: formInput.userID
+        userID: formInput.userID,
+        individualEntry: formInput.individualEntry
       }
     },
     update: ( cache, data ) => {
@@ -71,8 +72,6 @@ const AddTransactionEntry = ( { categoryType, budgetState, refetch } ) => {
   }
   })
 
-  console.log( formInput )
-
   return (
     <section className="full-container">
       <Title text={ `Add ${ categoryType }` } />
@@ -82,8 +81,7 @@ const AddTransactionEntry = ( { categoryType, budgetState, refetch } ) => {
         <InlineNumberInput prop={ `value` } input={ formInput } setInput={ setFormInput } label={ 'Value' }/>      
         <InlineDateInput prop={ `createdAt` } input={ formInput } setInput={ setFormInput } label={ 'Transaction Date' }/>
         <InlineUserInput prop={ 'userID' } input={ formInput } setInput={ setFormInput } label={ 'User' } optionList={ budgetState.ownerIDs }/>
-        <InlineSwitchTwoWay prop={ `inividualEntry` } input={ formInput } setInput={ setFormInput } label={ `${ formInput.inividualEntry ? 'Individual Entry' : 'Shared Entry' }` } falseIcon={ MdPeople } trueIcon={ MdPerson }/>   
-
+        <InlineSwitchTwoWay prop={ `individualEntry` } input={ formInput } setInput={ setFormInput } label={ `${ formInput.individualEntry ? 'Individual Entry' : 'Shared Entry' }` } falseIcon={ MdPeople } trueIcon={ MdPerson }/>   
         { formInput.error && <InlineError text={ formInput.error }/> }
       </form>
       { createdLoading ? <InlineNotification text={ 'Submit processing' }/> :  <ActionButton action={ sumbitForm } text={ 'Submit' } additionalClass={ null } /> }

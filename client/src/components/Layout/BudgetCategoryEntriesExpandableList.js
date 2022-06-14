@@ -1,7 +1,7 @@
 import React from "react";
 import { toCurrency } from '../../utils/helpers'
 import { format } from 'date-fns'
-import { MdSubdirectoryArrowRight } from 'react-icons/md'
+import { MdSubdirectoryArrowRight, MdPerson, MdPeople } from 'react-icons/md'
 
 const BudgetCategoryEntriesExpandableList = ( { entry } ) => {
 
@@ -38,6 +38,9 @@ const BudgetCategoryEntriesExpandableList = ( { entry } ) => {
             </span>
             <span className='f0 initials-icon' style={{ backgroundColor: entry.userID.userColor ? `#${ entry.userID.userColor }` : '#BBBBBB' }}>
                 { entry.userID.userInitials ? entry.userID.userInitials.toUpperCase() : entry.userID.email[0].toUpperCase() }
+            </span>
+            <span className='f0 individual-icon'>
+                { entry.individualEntry ? MdPerson() : MdPeople() }
             </span>
         </li>
     )
