@@ -80,7 +80,8 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
     user.portionSharedIncome = user.incomeShared  / sumPropArray( incomeByMonthShared, 'value' )
     user.responsibleExpenses = sumPropArray( expenseByMonthShared, 'value' ) * user.portionSharedIncome
     user.balanceAfterTransfer = user.responsibleExpenses - user.transfersOut + user.transfersIn
-    return user.userBalance = user.balanceAfterTransfer - user.portionSharedExpenses
+    user.subUserBalance = user.balanceAfterTransfer - user.portionSharedExpenses
+    return user.userBalance = user.subUserBalance - user.portionSharedExpenses
   })
   
   console.log( uniqueUsers )
@@ -121,7 +122,8 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
                   <li>Total Income %: { ( user.portionSharedIncome * 100 ).toFixed(1) }%</li>
                   <li>User Expense Responsibility: { toCurrency( user.responsibleExpenses ) }</li>
                   <li>User After Transfers: { toCurrency( user.balanceAfterTransfer ) }</li>
-                  <li>User Balance: { toCurrency( user.userBalance ) }</li>
+                  <li>User Balance: { toCurrency( user.subUserBalance ) }</li>
+                  <li>Final Balance: { toCurrency( user.userBalance ) }</li>
               </ul>
              )
            })
