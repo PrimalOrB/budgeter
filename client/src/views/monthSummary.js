@@ -25,7 +25,8 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
       balanceTotal: 0,
       portionSharedExpenses: 0,
       portionSharedIncome: 0,
-      balanceShared: 0
+      balanceShared: 0,
+      responsibleExpenses: 0
      } } )
   // add expenses to users
   const expenseByMonth = transactions.filter( entry => entry.valueType === 'expense' )
@@ -65,9 +66,10 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
   })
   // run balances
   uniqueUsers.map( user => {
-    user.portionTotalExpenses = ( user.expensesTotal - user.transfersIn ) / sumPropArray( expenseByMonth, 'value' )
-    user.portionSharedIncome = ( user.incomeTotal + user.transfersOut ) / sumPropArray( incomeByMonth, 'value' )
-    return user.balanceTotal = ( user.incomeTotal - user.transfersOut ) - ( user.expensesTotal - user.transfersIn )
+    user.portionTotalExpenses = ( user.expensesTotal - user.transfersOut ) / sumPropArray( expenseByMonth, 'value' )
+    user.portionSharedIncome = ( user.incomeTotal + user.transfersIn ) / sumPropArray( incomeByMonth, 'value' )
+    user.balanceTotal = ( user.incomeTotal - user.transfersIn ) - ( user.expensesTotal + user.transfersOut )
+    return user.responsibleExpenses = sumPropArray( expenseByMonth, 'value' ) * user.portionSharedIncome
   })
   
   console.log( uniqueUsers )
@@ -106,7 +108,8 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
                   <li>Transfers In: { toCurrency( user.transfersIn ) }</li>
                   <li>Total Expenses %: { ( user.portionTotalExpenses * 100 ).toFixed(1) }%</li>
                   <li>Total Income %: { ( user.portionSharedIncome * 100 ).toFixed(1) }%</li>
-                  <li>Total Balance: { user.balanceTotal }</li>
+                  <li>Total Balance: { toCurrency( user.balanceTotal ) }</li>
+                  <li>User Expense Responsibility: { toCurrency( user.responsibleExpenses ) }</li>
               </ul>
              )
            })
