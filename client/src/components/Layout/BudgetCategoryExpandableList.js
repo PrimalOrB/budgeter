@@ -4,7 +4,7 @@ import { MdSubdirectoryArrowRight } from 'react-icons/md'
 import { BudgetCategoryEntriesExpandableList } from './'
 import { sumPropArray, toCurrency } from '../../utils/helpers'
 
-const BudgetCategoryExpandableList = ( { category, data } ) => {
+const BudgetCategoryExpandableList = ( { category, data, setPageState, setEditingTransaction } ) => {
 
     const [ expandedState, setExpandedState ] = useState( false )
 
@@ -27,7 +27,7 @@ const BudgetCategoryExpandableList = ( { category, data } ) => {
         { expandedState && 
             data.map( entry => {
                 return (
-                    <BudgetCategoryEntriesExpandableList key={ entry._id } entry={ entry } />
+                    <BudgetCategoryEntriesExpandableList key={ entry._id } entry={ entry } setPageState={ setPageState } setEditingTransaction={ setEditingTransaction }/>
                 )
             })
         }

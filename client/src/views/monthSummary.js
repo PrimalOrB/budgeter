@@ -5,7 +5,7 @@ import { SingleMonthCategoryCost } from '../components/Charts'
 import { BudgetCategoryExpandableList, BudgetCategoryEntriesExpandableList } from '../components/Layout'
 import { FaCaretDown, FaCaretUp } from 'react-icons/fa'
 
-const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
+const MonthSummary = ( { highlightMonthState, categories, transactions, setPageState, setEditingTransaction } ) => {
   
   const date = new Date( `20${Number( highlightMonthState.split('/')[1] )}`, Number( highlightMonthState.split('/')[0] ) - 1, 1 )
 
@@ -83,8 +83,6 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
     return user.userBalance = user.balanceAfterTransfer - user.expensesShared
   })
   
-  console.log( uniqueUsers )
-
   return (
     <section id="month-summary" >
       <h4 className="sub-container-description section-list-title">{ format( date, "MMMM yyyy" ) }</h4>
@@ -152,7 +150,7 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
             }
 
             return (
-              <BudgetCategoryExpandableList key={ `exp_${ category[0]._id }` } category={ category[0].title } data={ entries } />
+              <BudgetCategoryExpandableList key={ `exp_${ category[0]._id }` } category={ category[0].title } data={ entries } setPageState={ setPageState } setEditingTransaction={ setEditingTransaction } />
             )
           })
         }
@@ -182,7 +180,7 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
             }
 
             return (
-              <BudgetCategoryExpandableList key={ `inc_${ category[0]._id }` } category={ category[0].title } data={ entries } />
+              <BudgetCategoryExpandableList key={ `inc_${ category[0]._id }` } category={ category[0].title } data={ entries } setPageState={ setPageState } setEditingTransaction={ setEditingTransaction }/>
             )
           })
         }
@@ -204,7 +202,7 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
         { expandedState.transfers &&
           transferByMonth.map( transfer => {
             return ( 
-              <BudgetCategoryEntriesExpandableList key={ transfer._id } entry={ transfer } />
+              <BudgetCategoryEntriesExpandableList key={ transfer._id } entry={ transfer } setPageState={ setPageState }/>
             )
           })
         }

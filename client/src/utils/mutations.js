@@ -41,6 +41,14 @@ export const CREATE_NEW_TRANSACTION = gql`
   }
 `;
 
+export const EDIT_TRANSACTION = gql`
+  mutation editTransaction($input: TransactionInput! ) {
+    editTransaction(input: $input) {
+      _id
+    }
+  }
+`;
+
 export const CREATE_NEW_TRANSFER = gql`
   mutation createTransfer($input: TransferInput! ) {
     createTransfer(input: $input) {

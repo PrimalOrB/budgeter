@@ -1,9 +1,15 @@
 import React from "react";
 import { toCurrency } from '../../utils/helpers'
 import { format } from 'date-fns'
+import { FaEdit } from 'react-icons/fa'
 import { MdSubdirectoryArrowRight, MdPerson, MdPeople } from 'react-icons/md'
 
-const BudgetCategoryEntriesExpandableList = ( { entry } ) => {
+const BudgetCategoryEntriesExpandableList = ( { entry, setPageState, setEditingTransaction } ) => {
+
+    function setEdit( entry ){
+        setEditingTransaction( entry._id )
+        setPageState( 'edit-transaction' )
+    }
 
     let type
     if( entry.valueType === "income" && entry.value > 0){
@@ -41,6 +47,9 @@ const BudgetCategoryEntriesExpandableList = ( { entry } ) => {
             </span>
             <span className='f0 individual-icon'>
                 { entry.individualEntry ? MdPerson() : MdPeople() }
+            </span>
+            <span className='f0 individual-icon' onClick={ () => setEdit( entry ) }>
+                { FaEdit() }
             </span>
         </li>
     )

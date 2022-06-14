@@ -106,9 +106,9 @@ const resolvers = {
       createTransaction: async( parent, { input }, context ) => {
         if( context.headers.authorization !== undefined ){
 
-          let { budgetID, categoryID, userID, inividualEntry } = input
+          let { budgetID, categoryID, userID, individualEntry } = input
 
-          inividualEntry = inividualEntry || false
+          individualEntry = individualEntry || false
 
           const user = await User.findOne( { _id: userID } )
 
@@ -122,7 +122,7 @@ const resolvers = {
             return {}
           }
 
-          const newEntry = await Entry.create( { ...input, userID: user._id, valueType: matchCategory.categoryType, inividualEntry } )
+          const newEntry = await Entry.create( { ...input, userID: user._id, valueType: matchCategory.categoryType, individualEntry } )
 
           const budgetUpdate = await Budget.findOneAndUpdate(
             { _id: budgetID },
@@ -134,6 +134,39 @@ const resolvers = {
           }
 
           return budgetUpdate
+        }
+        throw new AuthenticationError('Incorrect credentials');
+      },
+
+      editTransaction: async( parent, { input }, context ) => {
+        if( context.headers.authorization !== undefined ){
+
+          let { entryID, title, value, categoryID, createdAt, userID, individualEntry } = input
+
+          individualEntry = individualEntry || false
+
+          const user = await User.findOne( { _id: userID } )
+
+          if( !user ){
+            return {}
+          }
+
+          const matchCategory = await Category.findOne( { _id: categoryID } )
+
+          if( !matchCategory ){
+            return {}
+          }
+
+          const entryUpdate = await Entry.findOneAndUpdate( 
+            { _id: entryID },
+            { title, value, categoryID, createdAt, userID, individualEntry },
+            { new: true, runValidators: true } ) 
+
+          if( !entryUpdate ){
+            return {}
+          }
+
+          return entryUpdate
         }
         throw new AuthenticationError('Incorrect credentials');
       },

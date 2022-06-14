@@ -36,6 +36,7 @@ const typeDefs = gql`
     }
     
     input TransactionInput {
+        entryID: ID
         title: String!
         value: Float!
         budgetID: ID!
@@ -120,6 +121,7 @@ const typeDefs = gql`
         createCategory( input: CategoryInput! ): Budget
         updateCategory( input: CategoryUpdateInput! ): Category
         createTransaction( input: TransactionInput! ): Budget
+        editTransaction( input: TransactionInput! ): Budget
         createTransfer( input: TransferInput! ): Budget
         queryBudget( input: BudgetQueryInput! ): Budget
         queryUserBudgets( input: UserIDInput! ): [ Budget ]

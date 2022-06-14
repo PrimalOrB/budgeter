@@ -8,7 +8,7 @@ import { FullPageSpinLoader } from '../components/Loaders'
 import { NavStateContainer } from '../components/Menus'
 import { MultiMonthBudgetOverview } from '../components/Charts'
 import { Title } from '../components/Layout'
-import { AddCategory, AddTransactionEntry, AddTransferEntry, RecentTransactions, AllCategories, EditCategory, MonthSummary } from './'
+import { AddCategory, AddTransactionEntry, EditTransactionEntry, AddTransferEntry, RecentTransactions, AllCategories, EditCategory, MonthSummary } from './'
 import { parseBudgetData } from '../utils/helpers'
 import { format, startOfMonth, endOfMonth } from 'date-fns'
 import { FaCaretUp, FaCaretDown, FaFolder, FaFolderPlus, FaHome } from 'react-icons/fa'
@@ -25,6 +25,7 @@ const Budget = () => {
   const [ budgetState, setBudgetState ] = useState( {} )
   const [ parsedBudgetState, setParsedBudgetState ] = useState( null )
   const [ errorState, setErrorState ] = useState()
+  const [ editingTransaction, setEditingTransaction ] = useState( null )
 
   const [ highlightMonthState, setHighlightMonthState ] = useState( format( new Date(), 'M/yy' ) )
 
@@ -89,7 +90,7 @@ const Budget = () => {
                     <MultiMonthBudgetOverview data={ parsedBudgetState } highlightMonthState={ highlightMonthState } setHighlightMonthState={ setHighlightMonthState }/>
                   }
                   <RecentTransactions categories={ budgetState.categories } transactions={ budgetState.entries.sort( ( a, b ) => b.createdAt - a.createdAt ).slice( 0, 6 ) } />
-                  <MonthSummary highlightMonthState={ highlightMonthState }categories={ budgetState.categories } transactions={ budgetState.entries
+                  <MonthSummary highlightMonthState={ highlightMonthState } categories={ budgetState.categories } setPageState={ setPageState } setEditingTransaction={ setEditingTransaction } transactions={ budgetState.entries
                     .filter( entry => entry.createdAt >= startOfMonth( new Date( `20${Number( highlightMonthState.split('/')[1] )}`, Number( highlightMonthState.split('/')[0] ) ) - 1, 1 ) && entry.createdAt <= endOfMonth( new Date( `20${Number( highlightMonthState.split('/')[1] )}`, Number( highlightMonthState.split('/')[0] ) ) - 1, 1 ) )
                     .sort( ( a, b ) => b.createdAt - a.createdAt ) } />
 
@@ -120,6 +121,11 @@ const Budget = () => {
                   <AddCategory id={ _id }/>
                 </>
               )}
+              { pageState === "edit-transaction" && (
+                <>
+                  <EditTransactionEntry editingID={ editingTransaction } budgetState={ budgetState }/>
+                </>
+              )} 
               { pageState === "edit-category" && (
                 <>
                   <EditCategory/>

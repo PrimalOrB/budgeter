@@ -45,8 +45,6 @@ const EditCategory = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[])
 
-  console.log( formInput )
-
   const initialRange = { order: 0, effectiveStartDate: dateRemoveTZ( startOfMonth( new Date() ) ), effectiveEndDate: null, budgetedValue: 0 } 
 
   const history = useHistory();
