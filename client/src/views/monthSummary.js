@@ -11,7 +11,23 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
 
   const [ expandedState, setExpandedState ] = useState( { income: false, expense: false, balance: false, transfers: false } )
 
-  const uniqueUsers = [...new Set(transactions.map (entry => entry.userID._id ) ) ].map( userID => { return { userID, incomeTotal: 0, expensesTotal: 0, incomeShared: 0, expensesShared: 0 } } )
+  const uniqueUsers = [...new Set(transactions.map (entry => entry.userID._id ) ) ]
+    .map( userID => { return { 
+      userID, 
+      incomeTotal: 0, 
+      expensesTotal: 0, 
+      incomeShared: 0, 
+      expensesShared: 0, 
+      transfersOut: 0, 
+      transfersIn: 0,
+      portionTotalExpenses: 0,
+      portionTotalIncome: 0,
+      balanceTotal: 0,
+      portionSharedExpenses: 0,
+      portionSharedIncome: 0,
+      balanceShared: 0
+     } } )
+  // add expenses to users
   const expenseByMonth = transactions.filter( entry => entry.valueType === 'expense' )
     .map( entry => {
       const matchUser = uniqueUsers.findIndex( user => { return user.userID === entry.userID._id } )
@@ -23,6 +39,7 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
       }
       return entry
     })
+  // add income to users
   const incomeByMonth = transactions.filter( entry => entry.valueType === 'income' )
     .map( entry => {
       const matchUser = uniqueUsers.findIndex( user => { return user.userID === entry.userID._id } )
@@ -34,7 +51,25 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
       }
       return entry
     })
-  const transferByMonth = transactions.filter( entry => entry.valueType === 'transfer' )
+  // add transfers to users
+  const transferByMonth = transactions.filter( entry => entry.valueType === 'transfer' ).map( entry => {
+    const matchUserOut = uniqueUsers.findIndex( user => { return user.userID === entry.userID._id } )
+    if( matchUserOut >= 0 ){
+      uniqueUsers[matchUserOut].transfersOut  += entry.value
+    }
+    const matchUserIn = uniqueUsers.findIndex( user => { return user.userID === entry.userID._id } )
+    if( matchUserIn >= 0 ){
+      uniqueUsers[matchUserIn].transfersIn  += entry.value
+    }
+    return entry
+  })
+  // run balances
+  uniqueUsers.map( user => {
+    user.portionTotalExpenses = user.expensesTotal / sumPropArray( expenseByMonth, 'value' )
+    user.portionSharedIncome = user.incomeTotal / sumPropArray( incomeByMonth, 'value' )
+    return user.balanceTotal = sumPropArray( incomeByMonth, 'value' ) - sumPropArray( expenseByMonth, 'value' )
+  })
+  
   console.log( uniqueUsers )
 
   return (
@@ -67,6 +102,11 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
                   <li>Total Income: { toCurrency( user.incomeTotal ) }</li>
                   <li>Shared Expenses: { toCurrency( user.expensesShared ) }</li>
                   <li>Shared Income: { toCurrency( user.incomeShared ) }</li>
+                  <li>Transfers Out: { toCurrency( user.transfersOut ) }</li>
+                  <li>Transfers In: { toCurrency( user.transfersIn ) }</li>
+                  <li>Total Expenses %: { user.portionTotalExpenses * 100 }%</li>
+                  <li>Total Income %: { user.portionSharedIncome * 100 }%</li>
+                  <li>Total Balance: { user.balanceTotal }</li>
               </ul>
              )
            })
