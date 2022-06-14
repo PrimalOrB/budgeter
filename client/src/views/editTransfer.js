@@ -1,28 +1,27 @@
 import React, { useState } from 'react'
 import { ActionButton } from '../components/Buttons'
-import { InlineSelectInput, InlineTextareaInput, InlineNumberInput, InlineDateInput, InlineUserInput, InlineSwitchTwoWay } from '../components/Forms'
+import { InlineNumberInput, InlineDateInput, InlineUserInput } from '../components/Forms'
 import { InlineError, InlineNotification } from '../components/Notifications'
 import { Title } from '../components/Layout'
 import { useMutation } from '@apollo/client'
-import { EDIT_TRANSACTION } from '../utils/mutations'
-import { MdPerson, MdPeople } from 'react-icons/md'
+import { EDIT_TRANSFER } from '../utils/mutations'
 import { useHistory } from 'react-router-dom'
 
-const EditTransactionEntry = ( { budgetState, editingID } ) => {
+const EditTransferEntry = ( { budgetState, editingID } ) => {
 
   const history = useHistory();
 
   const incomingEditData = budgetState.entries.find( x => x._id === editingID )
 
-  const initialFormState = { categoryID: incomingEditData.categoryID, title: incomingEditData.title, value: incomingEditData.value, createdAt: incomingEditData.createdAt, userID: incomingEditData.userID._id, individualEntry: incomingEditData.individualEntry || false  }
+  const initialFormState = { value: incomingEditData.value, createdAt: incomingEditData.createdAt, userID: incomingEditData.userID._id, toUserID: incomingEditData.toUserID._id  }
   
   const [ formInput, setFormInput ] = useState( { ...initialFormState } ) 
 
   function validateForm( form ){
-    if( form.categoryID === undefined || form.title === undefined || form.value === undefined ){
+    if( form.value === undefined || form.userID === '' || form.toUserID === ''  ){
       return false
     }
-    if( form.categoryID.length > 0 && form.title.length > 0 && form.value !== 0 ){
+    if( form.value !== 0 && form.userID !== '' && form.toUserID !== '' ){
       return true
     }
     return false
@@ -50,17 +49,15 @@ const EditTransactionEntry = ( { budgetState, editingID } ) => {
     return console.log( 'failed' )
   }
 
-  const [ processSumbit, { loading: createdLoading, error: createdError }] = useMutation(EDIT_TRANSACTION, {
+  const [ processSumbit, { loading: createdLoading, error: createdError }] = useMutation(EDIT_TRANSFER, {
     variables: { 
-      input: {
+      input: { 
         entryID: editingID,
-        title: formInput.title,
         value: formInput.value,
         budgetID: budgetState._id,
-        categoryID: formInput.categoryID,
         createdAt: formInput.createdAt,
         userID: formInput.userID,
-        individualEntry: formInput.individualEntry
+        toUserID: formInput.toUserID
       }
     },
     update: ( cache, data ) => {
@@ -72,25 +69,23 @@ const EditTransactionEntry = ( { budgetState, editingID } ) => {
       } catch (e) {
         console.error( createdError );
       }
-    }
+  }
   })
 
   return (
     <section className="full-container">
       <Title text={ `Edit ${ incomingEditData.valueType }` } />
       <form autoComplete="off">
-        <InlineSelectInput prop={ 'categoryID' } input={ formInput } setInput={ setFormInput } label={ 'Category' } optionList={ budgetState.categories.filter( category => category.categoryType === incomingEditData.valueType ) }/>
-        <InlineTextareaInput prop={ 'title' } input={ formInput } setInput={ setFormInput } label={ 'Description' }/>
+        <InlineUserInput prop={ 'userID' } input={ formInput } setInput={ setFormInput } label={ 'From User' } optionList={ budgetState.ownerIDs }/>
         <InlineNumberInput prop={ `value` } input={ formInput } setInput={ setFormInput } label={ 'Value' }/>      
         <InlineDateInput prop={ `createdAt` } input={ formInput } setInput={ setFormInput } label={ 'Transaction Date' }/>
-        <InlineUserInput prop={ 'userID' } input={ formInput } setInput={ setFormInput } label={ 'User' } optionList={ budgetState.ownerIDs }/>
-        <InlineSwitchTwoWay prop={ `individualEntry` } input={ formInput } setInput={ setFormInput } label={ `${ formInput.individualEntry ? 'Individual Entry' : 'Shared Entry' }` } falseIcon={ MdPeople } trueIcon={ MdPerson }/>   
+        <InlineUserInput prop={ 'toUserID' } input={ formInput } setInput={ setFormInput } label={ 'To User' } optionList={ budgetState.ownerIDs }/>
         { formInput.error && <InlineError text={ formInput.error }/> }
       </form>
-      { createdLoading ? <InlineNotification text={ 'Submit processing' }/> :  <ActionButton action={ sumbitForm } text={ 'Submit Edit' } additionalClass={ null } /> }
+      { createdLoading ? <InlineNotification text={ 'Submit processing' }/> :  <ActionButton action={ sumbitForm } text={ 'Submit' } additionalClass={ null } /> }
     </section>
   )
 
 };
 
-export default EditTransactionEntry;
+export default EditTransferEntry;

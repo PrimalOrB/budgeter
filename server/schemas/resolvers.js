@@ -204,6 +204,37 @@ const resolvers = {
         throw new AuthenticationError('Incorrect credentials');
       },
 
+      editTransfer: async( parent, { input }, context ) => {
+        if( context.headers.authorization !== undefined ){
+
+          let { entryID, value, createdAt, userID, toUserID } = input
+
+          const user = await User.findOne( { _id: userID } )
+
+          if( !user ){
+            return {}
+          }
+
+          const userTo = await User.findOne( { _id: toUserID } )
+
+          if( !userTo ){
+            return {}
+          }
+
+          const updateEntry = await Entry.findOneAndUpdate( 
+            { _id: entryID },
+            { entryID, value, createdAt, userID, toUserID, title: `Transfer from ${ user.userInitials } to ${ userTo.userInitials }` },
+            { new: true, runValidators: true } )
+
+          if( !updateEntry ){
+            return {}
+          }
+
+          return updateEntry
+        }
+        throw new AuthenticationError('Incorrect credentials');
+      },
+
       queryBudget: async( parent, { input }, context ) => {
         if( context.headers.authorization !== undefined ){
 

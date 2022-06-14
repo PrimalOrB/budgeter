@@ -57,6 +57,14 @@ export const CREATE_NEW_TRANSFER = gql`
   }
 `;
 
+export const EDIT_TRANSFER = gql`
+  mutation editTransfer($input: TransferInput! ) {
+    editTransfer(input: $input) {
+      _id
+    }
+  }
+`;
+
 export const QUERY_CURRENT_BUDGET = gql`
   mutation queryBudget($input: BudgetQueryInput! ) {
     queryBudget(input: $input) {

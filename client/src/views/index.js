@@ -6,6 +6,7 @@ import EditCategory from './editCategory'
 import AddTransactionEntry from './addTransaction'
 import EditTransactionEntry from './editTransaction'
 import AddTransferEntry from './addTransfer'
+import EditTransferEntry from './editTransfer'
 import RecentTransactions from './recentTransactions'
 import AllCategories from './allCategories'
 import MonthSummary from './monthSummary'
@@ -19,6 +20,7 @@ export {
     AddTransactionEntry,
     EditTransactionEntry,
     AddTransferEntry,
+    EditTransferEntry,
     RecentTransactions,
     AllCategories,
     MonthSummary

@@ -202,7 +202,7 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
         { expandedState.transfers &&
           transferByMonth.map( transfer => {
             return ( 
-              <BudgetCategoryEntriesExpandableList key={ transfer._id } entry={ transfer } setPageState={ setPageState }/>
+              <BudgetCategoryEntriesExpandableList key={ transfer._id } entry={ transfer } setPageState={ setPageState } setEditingTransaction={ setEditingTransaction }/>
             )
           })
         }

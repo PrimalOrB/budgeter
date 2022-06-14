@@ -6,9 +6,9 @@ import { MdSubdirectoryArrowRight, MdPerson, MdPeople } from 'react-icons/md'
 
 const BudgetCategoryEntriesExpandableList = ( { entry, setPageState, setEditingTransaction } ) => {
 
-    function setEdit( entry ){
+    function setEdit( { entry, type } ){
         setEditingTransaction( entry._id )
-        setPageState( 'edit-transaction' )
+        setPageState( `edit-${ type }` )
     }
 
     let type
@@ -48,9 +48,16 @@ const BudgetCategoryEntriesExpandableList = ( { entry, setPageState, setEditingT
             <span className='f0 individual-icon'>
                 { entry.individualEntry ? MdPerson() : MdPeople() }
             </span>
-            <span className='f0 individual-icon' onClick={ () => setEdit( entry ) }>
-                { FaEdit() }
-            </span>
+            { entry.valueType === 'transfer'
+                ?
+                <span className='f0 individual-icon' onClick={ () => setEdit( { entry, type: 'transfer' } ) }>
+                    Test
+                </span>
+                :
+                <span className='f0 individual-icon' onClick={ () => setEdit( { entry, type: 'transaction' } ) }>
+                    { FaEdit() }
+                </span>
+            }
         </li>
     )
 };

@@ -8,7 +8,7 @@ import { FullPageSpinLoader } from '../components/Loaders'
 import { NavStateContainer } from '../components/Menus'
 import { MultiMonthBudgetOverview } from '../components/Charts'
 import { Title } from '../components/Layout'
-import { AddCategory, AddTransactionEntry, EditTransactionEntry, AddTransferEntry, RecentTransactions, AllCategories, EditCategory, MonthSummary } from './'
+import { AddCategory, AddTransactionEntry, EditTransactionEntry, AddTransferEntry, EditTransferEntry, RecentTransactions, AllCategories, EditCategory, MonthSummary } from './'
 import { parseBudgetData } from '../utils/helpers'
 import { format, startOfMonth, endOfMonth } from 'date-fns'
 import { FaCaretUp, FaCaretDown, FaFolder, FaFolderPlus, FaHome } from 'react-icons/fa'
@@ -124,6 +124,11 @@ const Budget = () => {
               { pageState === "edit-transaction" && (
                 <>
                   <EditTransactionEntry editingID={ editingTransaction } budgetState={ budgetState }/>
+                </>
+              )} 
+              { pageState === "edit-transfer" && (
+                <>
+                  <EditTransferEntry editingID={ editingTransaction } budgetState={ budgetState }/>
                 </>
               )} 
               { pageState === "edit-category" && (
