@@ -57,7 +57,7 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
     if( matchUserOut >= 0 ){
       uniqueUsers[matchUserOut].transfersOut  += entry.value
     }
-    const matchUserIn = uniqueUsers.findIndex( user => { return user.userID === entry.userID._id } )
+    const matchUserIn = uniqueUsers.findIndex( user => { return user.userID === entry.toUserID._id } )
     if( matchUserIn >= 0 ){
       uniqueUsers[matchUserIn].transfersIn  += entry.value
     }
@@ -67,7 +67,7 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
   uniqueUsers.map( user => {
     user.portionTotalExpenses = user.expensesTotal / sumPropArray( expenseByMonth, 'value' )
     user.portionSharedIncome = user.incomeTotal / sumPropArray( incomeByMonth, 'value' )
-    return user.balanceTotal = sumPropArray( incomeByMonth, 'value' ) - sumPropArray( expenseByMonth, 'value' )
+    return user.balanceTotal = user.incomeTotal - user.expensesTotal
   })
   
   console.log( uniqueUsers )
@@ -104,8 +104,8 @@ const MonthSummary = ( { highlightMonthState, categories, transactions } ) => {
                   <li>Shared Income: { toCurrency( user.incomeShared ) }</li>
                   <li>Transfers Out: { toCurrency( user.transfersOut ) }</li>
                   <li>Transfers In: { toCurrency( user.transfersIn ) }</li>
-                  <li>Total Expenses %: { user.portionTotalExpenses * 100 }%</li>
-                  <li>Total Income %: { user.portionSharedIncome * 100 }%</li>
+                  <li>Total Expenses %: { ( user.portionTotalExpenses * 100 ).toFixed(1) }%</li>
+                  <li>Total Income %: { ( user.portionSharedIncome * 100 ).toFixed(1) }%</li>
                   <li>Total Balance: { user.balanceTotal }</li>
               </ul>
              )
