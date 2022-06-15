@@ -83,6 +83,7 @@ const typeDefs = gql`
         title: String!
         budgetID: ID!
         categoryType: String!
+        countUse: Int
         budgetedValueRange: [ CategoryRange! ]
     }
 

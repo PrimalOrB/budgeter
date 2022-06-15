@@ -33,7 +33,6 @@ const resolvers = {
           // once _id verified, sign token
           if( _id ){
             const token = signToken( { email, _id } )
-            console.log( 'token' + token )
             return { token }
           }
 
@@ -116,7 +115,11 @@ const resolvers = {
             return {}
           }
 
-          const matchCategory = await Category.findOne( { _id: categoryID } )
+          const matchCategory = await Category.findOneAndUpdate( 
+            { _id: categoryID },
+            { $inc: { countUse: 1 } },
+            { new: true }
+          )
 
           if( !matchCategory ){
             return {}
@@ -288,7 +291,6 @@ const resolvers = {
           
           const matchCategory = await Category.findOne( { _id: input._id } )
           
-          console.log( matchCategory )
           if( !matchCategory ){
             return {}
           }

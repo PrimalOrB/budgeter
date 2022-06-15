@@ -61,8 +61,7 @@ const AddTransferEntry = ( { categoryType, budgetState, refetch, setPageState } 
       try {
         if( data ){
           refetch()
-          setPageState( 'dashboard' )
-          return setFormInput( { ...initialFormState } )
+          return setPageState( 'dashboard' )
         }
       } catch (e) {
         console.error( createdError );

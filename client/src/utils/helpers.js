@@ -43,11 +43,30 @@ export function dateAddTZ( date ){
 }
 
 export function titleCaseString( str ){
+    const isUpperCase = isStringUppercase( str )
+    if( isUpperCase ){
+        return str
+    }
     let sentence = str.toLowerCase().split(" ");
     for( let i = 0; i < sentence.length; i++ ){
         sentence[i] = sentence[i][0].toUpperCase() + sentence[i].slice(1);
     }
     return sentence.join(' ')
+}
+
+export function isStringUppercase( str ){
+    const split = str.split('')
+    let fails = 0
+    split.map( letter => {
+        if( letter !== letter.toUpperCase() ){
+            return fails++
+        }
+        return null
+    })
+    if( fails > 0 ){
+        return false
+    }
+    return true
 }
 
 export function sumNumericArray( arr ){

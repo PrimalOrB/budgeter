@@ -118,6 +118,7 @@ export const QUERY_CURRENT_BUDGET = gql`
         title
         budgetID
         categoryType
+        countUse
         budgetedValueRange {
           order
           effectiveStartDate
@@ -168,6 +169,7 @@ mutation queryCategory($input: CategoryIDInput! ) {
       title
       budgetID
       categoryType
+      countUse
       budgetedValueRange {
         order
         effectiveStartDate

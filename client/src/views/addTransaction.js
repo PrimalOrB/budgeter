@@ -64,8 +64,7 @@ const AddTransactionEntry = ( { categoryType, budgetState, refetch, setPageState
       try {
         if( data ){
           refetch()
-          setPageState( 'dashboard' )
-          return setFormInput( { ...initialFormState } )
+          return setPageState( 'dashboard' )
         }
       } catch (e) {
         console.error( createdError );
@@ -77,7 +76,7 @@ const AddTransactionEntry = ( { categoryType, budgetState, refetch, setPageState
     <section className="full-container">
       <Title text={ `Add ${ categoryType }` } />
       <form autoComplete="off">
-        <InlineSelectInput prop={ 'categoryID' } input={ formInput } setInput={ setFormInput } label={ 'Category' } optionList={ budgetState.categories.filter( category => category.categoryType === categoryType ) }/>
+        <InlineSelectInput prop={ 'categoryID' } input={ formInput } setInput={ setFormInput } label={ 'Category' } optionList={ budgetState.categories.filter( category => category.categoryType === categoryType ).sort( ( a, b ) => ( b.countUse || 0 ) - ( a.countUse || 0 ) ) }/>
         <InlineTextareaInput prop={ 'title' } input={ formInput } setInput={ setFormInput } label={ 'Description' }/>
         <InlineNumberInput prop={ `value` } input={ formInput } setInput={ setFormInput } label={ 'Value' }/>      
         <InlineDateInput prop={ `createdAt` } input={ formInput } setInput={ setFormInput } label={ 'Transaction Date' }/>

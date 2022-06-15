@@ -40,6 +40,10 @@ const categorySchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'Budget',
     },
+    countUse: {
+      type: Number,
+      default: 0 
+    },
     budgetedValueRange: [ categoryRangeSchema ]
   },
 )

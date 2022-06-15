@@ -62,7 +62,6 @@ const EditTransferEntry = ( { budgetState, setBudgetState, editingID, setPageSta
         if( data ){
           const newBudgetState = { ...budgetState }
           newBudgetState.entries = [ ...newBudgetState.entries.filter( entry => entry._id !== data.data.editTransfer._id ), data.data.editTransfer ]
-          console.log( newBudgetState )
           setBudgetState( { ...newBudgetState } )
           return setPageState( 'dashboard' )
         }
