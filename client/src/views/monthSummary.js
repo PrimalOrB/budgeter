@@ -141,9 +141,8 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
         </li>
         { expandedState.expense &&
            [ ...new Set( categories.map( category => category._id ) ) ].map( entry => {
-
-            const category = categories.filter( category => category._id === entry )
-            const entries = expenseByMonth.filter( entry => entry.categoryID === category[0]._id )
+             const category = categories.filter( category => category._id === entry )
+             const entries = expenseByMonth.filter( entry => entry.categoryID === category[0]._id )
             
             if( entries.length === 0 ){
               return null

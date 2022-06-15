@@ -122,10 +122,8 @@ const AddCategory = ( { id } ) => {
         })}
         { formInput.error && <InlineError text={ formInput.error }/> }
       </form>
-      <hr/>
-      <ActionButton action={ addNewRange } text={ 'Add Another Range' } additionalClass={ null } />
-      <hr/>
-      { createdLoading ? <InlineNotification text={ 'Submit processing' }/> :  <ActionButton action={ sumbitForm } text={ 'Submit' } additionalClass={ null } /> }
+      <ActionButton action={ addNewRange } text={ 'Add Another Range' } additionalClass={ 'large-button' } />
+      { createdLoading ? <InlineNotification text={ 'Submit processing' }/> :  <ActionButton action={ sumbitForm } text={ 'Submit' } additionalClass={ 'large-button' } /> }
     </section>
   )
 

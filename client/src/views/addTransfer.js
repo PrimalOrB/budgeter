@@ -79,7 +79,7 @@ const AddTransferEntry = ( { categoryType, budgetState, refetch, setPageState } 
         <InlineUserInput prop={ 'toUserID' } input={ formInput } setInput={ setFormInput } label={ 'To User' } optionList={ budgetState.ownerIDs }/>
         { formInput.error && <InlineError text={ formInput.error }/> }
       </form>
-      { createdLoading ? <InlineNotification text={ 'Submit processing' }/> :  <ActionButton action={ sumbitForm } text={ 'Submit' } additionalClass={ null } /> }
+      { createdLoading ? <InlineNotification text={ 'Submit processing' }/> :  <ActionButton action={ sumbitForm } text={ 'Submit' } additionalClass={ 'large-button' } /> }
     </section>
   )
 

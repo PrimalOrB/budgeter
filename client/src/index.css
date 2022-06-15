@@ -414,6 +414,22 @@ section {
   border-bottom: 3px inset var(--highlight-color);
 }
 
+.large-button {
+  margin-top: 1rem;
+  width: calc( 100% - 1rem );
+  font-size: 1.5rem;
+  font-weight: bold;
+  border-radius: 0.5rem;
+  padding: 1rem 0;
+  border: 1px solid var(--highlight-2-color);
+  border-bottom: 3px inset var(--highlight-color);
+}
+
+.large-button:hover {
+  margin-top: calc( 1rem + 2px);
+  border-bottom: 1px inset var(--highlight-2-color);
+}
+
 .chart-full-section #multi-month-menu {
   margin-top: calc( -1.5rem - 5px );
   margin-left: calc( -0.5rem );
@@ -789,6 +805,10 @@ form,
   margin: 0.5rem;
 }
 
+.form-inline-checkbox {
+  width: calc( 100% - 1rem )
+}
+
 .form-inline-text > *,
 .form-inline-number > *,
 .form-inline-date-monthly > *,
@@ -1148,6 +1168,16 @@ input::-ms-clear {
   .username-block {
     font-size: 1rem;
     padding: 0.2rem 0.75rem;
+  }
+
+  .large-button {
+    width: initial;
+    font-size: 1.75rem;
+    padding: 1rem 2.5rem;
+  }
+
+  .form-inline-checkbox {
+    width: 100%;
   }
 
   .form-inline-text > *,

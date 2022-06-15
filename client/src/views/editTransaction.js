@@ -86,7 +86,7 @@ const EditTransactionEntry = ( { budgetState, setBudgetState, editingID, setPage
         <InlineSwitchTwoWay prop={ `individualEntry` } input={ formInput } setInput={ setFormInput } label={ `${ formInput.individualEntry ? 'Individual Entry' : 'Shared Entry' }` } falseIcon={ MdPeople } trueIcon={ MdPerson }/>   
         { formInput.error && <InlineError text={ formInput.error }/> }
       </form>
-      { createdLoading ? <InlineNotification text={ 'Submit processing' }/> :  <ActionButton action={ sumbitForm } text={ 'Submit Edit' } additionalClass={ null } /> }
+      { createdLoading ? <InlineNotification text={ 'Submit processing' }/> :  <ActionButton action={ sumbitForm } text={ 'Submit Edit' } additionalClass={ 'large-button' } /> }
     </section>
   )
 

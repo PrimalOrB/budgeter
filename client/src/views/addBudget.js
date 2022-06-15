@@ -80,7 +80,7 @@ const AddBudget = () => {
   })
 
   return (
-    <section>
+    <section className="full-container">
       <Title text={ `Create New Budget` } />
       <form autoComplete="off">
         <InlineTextInput prop={ 'title' } input={ formInput } setInput={ setFormInput } label={ 'Budget Title' }/>
@@ -89,8 +89,7 @@ const AddBudget = () => {
         <InlineEmailInput prop={ 'email' } input={ formInput } setInput={ setFormInput } label={ 'Add More Owners' } placeholder={ "Type or paste email addresses and press `Enter`" }/> 
         { formInput.error && <InlineError text={ formInput.error }/> }
       </form>
-      <hr/>
-      { createdLoading ? <InlineNotification text={ 'Submit processing' }/> :  <ActionButton action={ sumbitForm } text={ 'Submit' } additionalClass={ null } /> }
+      { createdLoading ? <InlineNotification text={ 'Submit processing' }/> :  <ActionButton action={ sumbitForm } text={ 'Submit' } additionalClass={ 'large-button' } /> }
     </section>
   )
 
