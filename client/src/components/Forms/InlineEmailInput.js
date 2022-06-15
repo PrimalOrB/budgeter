@@ -53,7 +53,7 @@ const InlineEmailInput = ( { prop, input, setInput, label, placeholder } ) => {
 
     return (
         <div className={ 'form-inline-text' } >
-            <label htmlFor={ prop }>{ label }</label>
+            <label className={ 'noselect' } htmlFor={ prop }>{ label }</label>
             <input name={ prop } type="text" onChange={ updateInput } onKeyDown={ handleKeyDown } placeholder={ placeholder } value={ input[prop] } autoComplete="off"/>
         </div>
     )

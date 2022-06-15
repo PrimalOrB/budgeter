@@ -85,7 +85,7 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
   
   return (
     <section id="month-summary" >
-      <h4 className="sub-container-description section-list-title">{ format( date, "MMMM yyyy" ) }</h4>
+      <h4 className="sub-container-description section-list-title noselect">{ format( date, "MMMM yyyy" ) }</h4>
       <div className="dual-doughnut-container">
         <SingleMonthCategoryCost valueType="expense" activeDate={ date } highlightMonthState={ highlightMonthState } categories={ categories.filter( category => category.categoryType === 'expense' ) } transactions={ expenseByMonth } />
         <SingleMonthCategoryCost valueType="income" activeDate={ date } highlightMonthState={ highlightMonthState } categories={ categories.filter( category => category.categoryType === 'income' ) } transactions={ incomeByMonth } />
@@ -100,7 +100,7 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
           <span className="f1 bold noselect">
             Balance
           </span>
-          <span className="f1 bold right">
+          <span className="f1 bold right noselect">
             { toCurrency( sumPropArray( incomeByMonth, 'value' ) - sumPropArray( expenseByMonth, 'value' ) ) }
           </span>
         </li>
@@ -135,7 +135,7 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
           <span className="f1 bold noselect">
             Expenses
           </span>
-          <span className="f1 bold right">
+          <span className="f1 bold right noselect">
             { toCurrency( sumPropArray( expenseByMonth, 'value' ) ) }
           </span>
         </li>
@@ -164,7 +164,7 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
           <span className="f1 bold noselect">
             Income
           </span>
-          <span className="f1 bold right">
+          <span className="f1 bold right noselect">
             { toCurrency( sumPropArray( incomeByMonth, 'value' ) ) }
           </span>
         </li>
@@ -194,7 +194,7 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
           <span className="f1 bold noselect">
             Transfers
           </span>
-          <span className="f1 bold right">
+          <span className="f1 bold right noselect">
             { toCurrency( sumPropArray( transferByMonth, 'value' ) ) }
           </span>
         </li>

@@ -11,7 +11,7 @@ const InlineDateInput = ( { prop, input, setInput, label, placeholder } ) => {
 
     return (
         <div className={ 'form-inline-date' } >
-            <label htmlFor={ prop }>{ label }</label>
+            <label className={ 'noselect' } htmlFor={ prop }>{ label }</label>
             <input name={ prop } type="date" value={ String( format( new Date( input[prop] ), 'yyyy-MM-dd' ) ) } onChange={ updateInput } placeholder={ placeholder } autoComplete="off"/>
         </div>
     )

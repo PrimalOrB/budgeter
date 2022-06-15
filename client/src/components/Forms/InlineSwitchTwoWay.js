@@ -9,7 +9,7 @@ const InlineSwitchTwoWay = ( { prop, input, setInput, label, falseIcon, trueIcon
 
     return (
         <div className={ 'form-inline-checkbox' } >
-            <label htmlFor={ prop }>{ label }</label>
+            <label className={ 'noselect' } htmlFor={ prop }>{ label }</label>
             <div>
                 <div className={ `form-inline-checkbox-svg${ !input[prop] ? ' svg-checked' : '' }` } onClick={ () => setInput( { ...input, [prop]: false, error: null } ) }>
                     { falseIcon() }

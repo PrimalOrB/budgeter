@@ -17,7 +17,7 @@ const AllCategories = ( { categories, setPageState } ) => {
   return (
     <section className="full-container">
       <Title text={ `Manage Categories` } />
-      <h4 className="sub-container-description section-list-title">Expense Categories</h4>
+      <h4 className="sub-container-description section-list-title noselect">Expense Categories</h4>
       <ul className="section-list">
         { categories.filter( category => category.categoryType === 'expense' ).length === 0 
           ?
@@ -33,10 +33,10 @@ const AllCategories = ( { categories, setPageState } ) => {
 
             return (
               <li key={ `exp_${ category.title }` } className={ `flex border-bot-hightlight-1` }>
-                <span className='f1 font-medium bold indent-1 '>
+                <span className='f1 font-medium bold indent-1 noselect'>
                   { category.title }
                 </span>
-                <span className='f2 font-medium center'>
+                <span className='f2 font-medium center noselect'>
                   { currentRange.effectiveStartDate 
                     ?
                     toCurrency( currentRange.budgetedValue )
@@ -44,7 +44,7 @@ const AllCategories = ( { categories, setPageState } ) => {
                     'No Current Value'
                   }
                 </span>
-                <span className='f2 font-medium center'>
+                <span className='f2 font-medium center noselect'>
                   { currentRange.effectiveStartDate 
                     ?
                     `${ format( currentRange.effectiveStartDate, 'M/yy' ) } to ${ currentRange.effectiveEndDate ? format( currentRange.effectiveEndDate, 'M/yy' ) : 'Current' }`
@@ -53,7 +53,7 @@ const AllCategories = ( { categories, setPageState } ) => {
                   }
                   
                 </span>
-                <span className='f0 font-medium bold endent-1' onClick={ () => setEdit( { budget: category.budgetID, category: category._id } ) }>
+                <span className='f0 font-medium bold endent-1 noselect' onClick={ () => setEdit( { budget: category.budgetID, category: category._id } ) }>
                   { FaEdit() }
                 </span>
               </li>
@@ -61,7 +61,7 @@ const AllCategories = ( { categories, setPageState } ) => {
           } )
         }
       </ul>
-      <h4 className="sub-container-description section-list-title">Income Categories</h4>
+      <h4 className="sub-container-description section-list-title noselect">Income Categories</h4>
       <ul className="section-list">
         { categories.filter( category => category.categoryType === 'income' ).length === 0 &&
           <li className={ 'flex-transaction-line-sm border-bot-hightlight-1 f-valign flex-center' } onClick={ () => setPageState( 'add-category' ) }>Click To Add Expense Categories</li>
@@ -76,10 +76,10 @@ const AllCategories = ( { categories, setPageState } ) => {
 
           return (
             <li key={ `exp_${ category.title }` } className={ `flex border-bot-hightlight-1` }>
-              <span className='f1 font-medium bold indent-1 '>
+              <span className='f1 font-medium bold indent-1 noselect'>
                 { category.title }
               </span>
-              <span className='f2 font-medium center'>
+              <span className='f2 font-medium center noselect'>
                   { currentRange.effectiveStartDate 
                     ?
                     toCurrency( currentRange.budgetedValue )
@@ -87,7 +87,7 @@ const AllCategories = ( { categories, setPageState } ) => {
                     'No Current Value'
                   }
                 </span>
-                <span className='f2 font-medium center'>
+                <span className='f2 font-medium cente noselect'>
                   { currentRange.effectiveStartDate 
                     ?
                     `${ format( currentRange.effectiveStartDate, 'M/yy' ) } to ${ currentRange.effectiveEndDate ? format( currentRange.effectiveEndDate, 'M/yy' ) : 'Current' }`
@@ -96,7 +96,7 @@ const AllCategories = ( { categories, setPageState } ) => {
                   }
                   
                 </span>
-              <span className='f0 font-medium bold endent-1' onClick={ () => setEdit( { budget: category.budgetID, category: category._id } ) }>
+              <span className='f0 font-medium bold endent-1 noselect' onClick={ () => setEdit( { budget: category.budgetID, category: category._id } ) }>
                 { FaEdit() }
               </span>
             </li>

@@ -178,7 +178,7 @@ const MultiMonthBudgetOverview = ( { data, highlightMonthState, setHighlightMont
     return (
         <>
             <section id="multi-month-overview">
-                <h4 className="sub-container-description section-list-title">6 Month Overview</h4>
+                <h4 className="sub-container-description section-list-title noselect">6 Month Overview</h4>
                 <div className="chart-full-section">
                     { !loadingState &&
                         <Chart type="bar" className='blanketChart' data={ graphDataState } options={ options } height={ 2.5 } width={ 10 }/>
@@ -186,7 +186,7 @@ const MultiMonthBudgetOverview = ( { data, highlightMonthState, setHighlightMont
                     <div id="multi-month-menu" className={ 'container-flex nowrap' }>
                         { !loadingState &&
                             graphDataState.labels.map( ( month, i ) => {
-                                return <span key={ `select_month_${ i }`} className={ `nav-button ${ month === highlightMonthState && 'nav-button-active' }` } onClick={ () => setHighlightMonthState( month ) }>{ month }</span>
+                                return <span key={ `select_month_${ i }`} className={ `nav-button ${ month === highlightMonthState && 'nav-button-active' } noselect` } onClick={ () => setHighlightMonthState( month ) }>{ month }</span>
                             })
                         }
                     </div>

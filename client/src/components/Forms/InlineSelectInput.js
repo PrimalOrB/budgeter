@@ -10,7 +10,7 @@ const InlineSelectInput = ( { prop, input, setInput, label, optionList } ) => {
 
     return (
         <div className={ 'form-inline-select' } >
-            <label htmlFor={ prop }>{ label }</label>
+            <label className={ 'noselect' } htmlFor={ prop }>{ label }</label>
             <select name={ prop } type="number" value={ input[prop] } onChange={ updateInput }>
                 <option disabled></option>
                 { optionList.map( option => {

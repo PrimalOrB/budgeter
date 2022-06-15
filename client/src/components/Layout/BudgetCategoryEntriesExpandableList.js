@@ -30,32 +30,32 @@ const BudgetCategoryEntriesExpandableList = ( { entry, setPageState, setEditingT
 
     return (
         <li key={ `recent_${ entry._id }` } className={ 'margin-left-full flex fullWidth f-valign' }>
-            <span className='f0 individual-icon margin-right-full' title={ entry.individualEntry ? 'Individual' : 'Shared' }>
+            <span className='f0 individual-icon margin-right-full noselect' title={ entry.individualEntry ? 'Individual' : 'Shared' }>
                 { entry.individualEntry ? MdPerson() : MdPeople() }
             </span>
-            <span className="f0 margin-right-half">
+            <span className="f0 margin-right-half noselect">
                 { MdSubdirectoryArrowRight() }
             </span>
-            <span className="f1 italic">
+            <span className="f1 italic noselect">
                 { format( entry.createdAt, 'M/dd/yy' ) }
             </span>
-            <span className='f2 font-medium margin-left-half margin-right-half ellipsis'>
+            <span className='f2 font-medium margin-left-half margin-right-half ellipsis noselect'>
                 { entry.title }
             </span>
-            <span className={ `bold right f1${ type === 0 ? ' negative' : ''}${ type === 1 ? ' positive' : ''}${ type === 2 ? ' credit' : ''}${ type === 3 ? ' reverse' : ''}${ type === 4 ? ' transfer-text' : ''}` }>
+            <span className={ `bold right f1${ type === 0 ? ' negative' : ''}${ type === 1 ? ' positive' : ''}${ type === 2 ? ' credit' : ''}${ type === 3 ? ' reverse' : ''}${ type === 4 ? ' transfer-text' : ''} noselect` }>
                 { toCurrency( Math.abs( entry.value ) ) }
             </span>
-            <span className='f0 initials-icon' style={{ backgroundColor: entry.userID.userColor ? `#${ entry.userID.userColor }` : '#BBBBBB' }} title={ entry.userID.email }>
+            <span className='f0 initials-icon noselect' style={{ backgroundColor: entry.userID.userColor ? `#${ entry.userID.userColor }` : '#BBBBBB' }} title={ entry.userID.email }>
                 { entry.userID.userInitials ? entry.userID.userInitials.toUpperCase() : entry.userID.email[0].toUpperCase() }
             </span>
             
             { entry.valueType === 'transfer'
                 ?
-                <span className='f0 individual-icon' title="Edit Transaction" onClick={ () => setEdit( { entry, type: 'transfer' } ) }>
+                <span className='f0 individual-icon noselect' title="Edit Transaction" onClick={ () => setEdit( { entry, type: 'transfer' } ) }>
                     { FaEdit() }
                 </span>
                 :
-                <span className='f0 edit-icon' title="Edit Transfer" onClick={ () => setEdit( { entry, type: 'transaction' } ) }>
+                <span className='f0 edit-icon noselect' title="Edit Transfer" onClick={ () => setEdit( { entry, type: 'transaction' } ) }>
                     { FaEdit() }
                 </span>
             }

@@ -29,6 +29,8 @@ const Budget = () => {
 
   const [ highlightMonthState, setHighlightMonthState ] = useState( format( new Date(), 'M/yy' ) )
 
+  const [ paginateState, setPaginatState ] = useState( { limit: 6, offset: 0, page: 0, length: 0 })
+
   const [ queryBudget, { loading: queryLoading, error: queryError }] = useMutation(QUERY_CURRENT_BUDGET, {
     variables: { 
       input: {
@@ -39,6 +41,7 @@ const Budget = () => {
     update: ( cache, data ) => {
       try {
         if( data.data.queryBudget ){
+          setPaginatState( { ...paginateState, length: data.data.queryBudget.entries.length })
           setBudgetState( { ...data.data.queryBudget } )
           setParsedBudgetState( parseBudgetData( { budget: { ...data.data.queryBudget }, date: new Date(), duration: 6 } ) )
           setHighlightMonthState( format( new Date(), 'M/yy' ) )
@@ -81,15 +84,15 @@ const Budget = () => {
       
       { budgetState?.title && 
         <>
-            <Title id={ "budget-title" } text={ budgetState.title } additionalClass={ 'margin-bottom-none' }/>
+            <Title id={ "budget-title" } text={ budgetState.title } additionalClass={ 'margin-bottom-none noselect' }/>
             <NavStateContainer id={ "budget-menu" } buttons={ buttons } state={ pageState } setState={ setPageState } addClass={ "margin-top-none" }/>
               { pageState === "dashboard" && (
                 <>
-                  <h3 id="budget-description" className="container-description">{ budgetState.desc }</h3>
+                  <h3 id="budget-description" className="container-description noselect">{ budgetState.desc }</h3>
                   { parsedBudgetState &&
                     <MultiMonthBudgetOverview data={ parsedBudgetState } highlightMonthState={ highlightMonthState } setHighlightMonthState={ setHighlightMonthState }/>
                   }
-                  <RecentTransactions categories={ budgetState.categories } transactions={ budgetState.entries.sort( ( a, b ) => b.createdAt - a.createdAt ).slice( 0, 6 ) } />
+                  <RecentTransactions categories={ budgetState.categories } transactions={ budgetState.entries.sort( ( a, b ) => b.createdAt - a.createdAt ).slice( paginateState.offset, paginateState.limit + paginateState.offset ) } paginateState={ paginateState } setPaginatState={ setPaginatState } />
                   <MonthSummary highlightMonthState={ highlightMonthState } categories={ budgetState.categories } setPageState={ setPageState } setEditingTransaction={ setEditingTransaction } transactions={ budgetState.entries
                     .filter( entry => entry.createdAt >= startOfMonth( new Date( `20${Number( highlightMonthState.split('/')[1] )}`, Number( highlightMonthState.split('/')[0] ) ) - 1, 1 ) && entry.createdAt <= endOfMonth( new Date( `20${Number( highlightMonthState.split('/')[1] )}`, Number( highlightMonthState.split('/')[0] ) ) - 1, 1 ) )
                     .sort( ( a, b ) => b.createdAt - a.createdAt ) } />

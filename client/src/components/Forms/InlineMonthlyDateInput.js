@@ -18,7 +18,7 @@ const InlineMonthlyDateInput = ( { prop, input, setInput, label, minDate, maxDat
 
     return (
         <div className={ 'form-inline-date-monthly' } >
-            <label htmlFor={ prop }>{ label }</label>
+            <label className={ 'noselect' } htmlFor={ prop }>{ label }</label>
             { ( !minDate && !maxDate ) &&
                 <input name={ prop } type="month" onChange={ parseDate } value={ String( format( dateAddTZ( new Date( input[prop] ) ), 'yyyy-MM' ) ) } required="required"/>
             }

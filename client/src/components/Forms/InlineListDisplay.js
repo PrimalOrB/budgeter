@@ -4,7 +4,7 @@ import { ContactButton } from '../Buttons'
 const InlineListDisplay = ( { input, setInput, label } ) => {
     return (
         <div className={ 'form-inline-text' }> 
-            <label>{ label }</label>
+            <label className={ 'noselect' }>{ label }</label>
             <div className="container-flex margin-top-half">
             { input?.owner && <ContactButton input={ input } setInput={ setInput } text={ input.owner } deletable={ false }/>}
             { input?.emails.map( ( x, i ) => {

@@ -11,7 +11,7 @@ const AuthNav = () => {
         const { email } = currentUser;
         return (        
             <div className="nav-menu">
-                <span className="username-block">{ email }</span>
+                <span className="username-block noselect">{ email }</span>
                 <AuthenticationButton />
             </div>
         )
