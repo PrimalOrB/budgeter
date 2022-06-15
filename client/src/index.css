@@ -136,6 +136,18 @@ li {
                                   supported by Chrome, Edge, Opera and Firefox */
 }
 
+.ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -o-text-overflow: ellipsis;
+  -ms-text-overflow: ellipsis;
+}
+
+p.block {
+  width: 300px;
+}
+
 /* Paddings */
 .padding-top-none {
   padding-top: 0 !important;
@@ -1019,14 +1031,26 @@ input::-ms-clear {
   padding-top: 2px
 }
 
-.individual-icon {
-  margin-left: 1rem;
-}
-
 .individual-icon svg{
   fill: var(--highlight-color);
   width: 1.25rem;
   height: 1.25rem;
+}
+
+.edit-icon {
+  margin-left: 1rem;
+}
+
+.edit-icon svg{
+  fill: var(--highlight-color);
+  width: 1.25rem;
+  height: 1.25rem;
+  transition: 0.25s ease all;
+}
+
+.edit-icon:hover svg{
+  fill: var(--primary-color);
+
 }
 
 /* Media */

@@ -42,7 +42,7 @@ const RecentTransactions = ( { categories, transactions } ) => {
                     { categories.filter( category => category._id === entry.categoryID )[0].title }
                   </span>
                 }
-                <span className='f1 font-medium'>
+                <span className='f1 font-medium margin-left-half margin-right-half ellipsis'>
                   { entry.title }
                 </span>
                 <span className="indent-1 italic font-small f-full padding-bottom-sm">
@@ -52,10 +52,10 @@ const RecentTransactions = ( { categories, transactions } ) => {
               <span className={ `bold f0${ type === 0 ? ' negative' : ''}${ type === 1 ? ' positive' : ''}${ type === 2 ? ' credit' : ''}${ type === 3 ? ' reverse' : ''}${ type === 4 ? ' transfer-text' : ''}` }>
                 { toCurrency( Math.abs( entry.value ) ) }
               </span>
-              <span className='f0 initials-icon' style={{ backgroundColor: entry.userID.userColor ? `#${ entry.userID.userColor }` : '#BBBBBB' }}>
+              <span className='f0 initials-icon' style={{ backgroundColor: entry.userID.userColor ? `#${ entry.userID.userColor }` : '#BBBBBB' }}  title={ entry.userID.email }>
                   { entry.userID.userInitials ? entry.userID.userInitials.toUpperCase() : entry.userID.email[0].toUpperCase() }
               </span>
-              <span className='f0 individual-icon'>
+              <span className='f0 individual-icon margin-left-half' title={ entry.individualEntry ? 'Individual' : 'Shared' }>
                 { entry.individualEntry ? MdPerson() : MdPeople() }
             </span>
             </li> )

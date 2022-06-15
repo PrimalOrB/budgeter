@@ -29,32 +29,33 @@ const BudgetCategoryEntriesExpandableList = ( { entry, setPageState, setEditingT
     }
 
     return (
-        <li key={ `recent_${ entry._id }` } className={ 'margin-left-full-half flex fullWidth f-valign' }>
+        <li key={ `recent_${ entry._id }` } className={ 'margin-left-full flex fullWidth f-valign' }>
+            <span className='f0 individual-icon margin-right-full' title={ entry.individualEntry ? 'Individual' : 'Shared' }>
+                { entry.individualEntry ? MdPerson() : MdPeople() }
+            </span>
             <span className="f0 margin-right-half">
                 { MdSubdirectoryArrowRight() }
             </span>
             <span className="f1 italic">
                 { format( entry.createdAt, 'M/dd/yy' ) }
             </span>
-            <span className='f2 font-medium'>
+            <span className='f2 font-medium margin-left-half margin-right-half ellipsis'>
                 { entry.title }
             </span>
             <span className={ `bold right f1${ type === 0 ? ' negative' : ''}${ type === 1 ? ' positive' : ''}${ type === 2 ? ' credit' : ''}${ type === 3 ? ' reverse' : ''}${ type === 4 ? ' transfer-text' : ''}` }>
                 { toCurrency( Math.abs( entry.value ) ) }
             </span>
-            <span className='f0 initials-icon' style={{ backgroundColor: entry.userID.userColor ? `#${ entry.userID.userColor }` : '#BBBBBB' }}>
+            <span className='f0 initials-icon' style={{ backgroundColor: entry.userID.userColor ? `#${ entry.userID.userColor }` : '#BBBBBB' }} title={ entry.userID.email }>
                 { entry.userID.userInitials ? entry.userID.userInitials.toUpperCase() : entry.userID.email[0].toUpperCase() }
             </span>
-            <span className='f0 individual-icon'>
-                { entry.individualEntry ? MdPerson() : MdPeople() }
-            </span>
+            
             { entry.valueType === 'transfer'
                 ?
-                <span className='f0 individual-icon' onClick={ () => setEdit( { entry, type: 'transfer' } ) }>
-                    Test
+                <span className='f0 individual-icon' title="Edit Transaction" onClick={ () => setEdit( { entry, type: 'transfer' } ) }>
+                    { FaEdit() }
                 </span>
                 :
-                <span className='f0 individual-icon' onClick={ () => setEdit( { entry, type: 'transaction' } ) }>
+                <span className='f0 edit-icon' title="Edit Transfer" onClick={ () => setEdit( { entry, type: 'transaction' } ) }>
                     { FaEdit() }
                 </span>
             }
