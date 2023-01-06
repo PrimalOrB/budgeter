@@ -21,7 +21,7 @@ const InlineBarBalance = ( { inputData, title, valueProp } ) => {
         
         inputData.map( user => {
 
-            if( user.userBalance > 0 ){
+            if( user.userBalance > Math.floor( 0 ) ){
                 output.totalProp += user[`${ valueProp }`]
     
                 output.datasets.push( { 
@@ -136,7 +136,7 @@ const InlineBarBalance = ( { inputData, title, valueProp } ) => {
                         <span className='f0 initials-icon noselect' style={{ backgroundColor: hoverData.userColor ? `#${ hoverData.userColor }` : '#BBBBBB' }} >
                             { hoverData.userInitials }
                         </span>            
-                        <span className="margin-left-full">{ toCurrency( hoverData.hover ) } ( { ( ( hoverData.hover / dataState.totalProp ) * 100 ).toFixed(1) }% )</span>
+                        <span className="margin-left-full">{ toCurrency( hoverData.hover ) }</span>
                     </>
                     :
                     <>
