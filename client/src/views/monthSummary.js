@@ -105,7 +105,7 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
   })
   
   return (
-    <section id="month-summary" >
+    <section id="month-summary" key={ `${ date }_results` } >
       <h4 className="sub-container-description section-list-title noselect">{ format( date, "MMMM yyyy" ) }</h4>
       <div className="dual-doughnut-container">
         <SingleMonthCategoryCost valueType="expense" activeDate={ date } highlightMonthState={ highlightMonthState } categories={ categories.filter( category => category.categoryType === 'expense' ) } transactions={ expenseByMonth } />
@@ -126,14 +126,14 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
           </span>
         </li>
         { expandedState.balance &&
-          <>
-          <InlineBar inputData={ sharedData }   title={ 'Income to Expenses Ratio' }        perUser={ false } balance={ false }  ratioProp={ [ 'portionTotalIncome', 'portionTotalExpenses' ] }              valueProp={ [ 'totalIncome', 'totalExpenses' ] } />           
-          <InlineBar inputData={ sharedData }   title={ 'Shared Income to Expenses Ratio' } perUser={ false } balance={ false }  ratioProp={ [ 'portionSharedTotalIncome', 'portionSharedTotalExpenses' ] }  valueProp={ [ 'totalSharedIncome', 'totalSharedExpenses' ] } />
-           <InlineBar inputData={ uniqueUsers } title={ 'Shared Income By User' }           perUser={ true }  balance={ false }  ratioProp={ [ 'portionSharedIncome' ] }           valueProp={ [ 'incomeShared' ] } />
-           <InlineBar inputData={ uniqueUsers } title={ 'Shared Expenses By User' }         perUser={ true }  balance={ false }  ratioProp={ [ 'portionSharedExpenses' ] }         valueProp={ [ 'expensesShared' ] } />
-           <InlineBar inputData={ uniqueUsers } title={ 'Total Income By User' }            perUser={ true }  balance={ false }  ratioProp={ [ 'portionTotalIncome' ] }            valueProp={ [ 'incomeTotal' ] } />
-           <InlineBar inputData={ uniqueUsers } title={ 'Total Expenses By User' }          perUser={ true }  balance={ false }  ratioProp={ [ 'portionTotalExpenses' ] }          valueProp={ [ 'expensesTotal' ] } />
-           <InlineBar inputData={ uniqueUsers } title={ 'User Blance After Transfers' }     perUser={ true }  balance={ true }   ratioProp={ [ 'portionBalanceAfterTransfer' ] }   valueProp={ [ 'userBalance' ] } />
+          <React.Fragment>
+           <InlineBar inputData={ sharedData }   title={ 'Income to Expenses Ratio' }        perUser={ false } balance={ false }  ratioProp={ [ 'portionTotalIncome', 'portionTotalExpenses' ] }              valueProp={ [ 'totalIncome', 'totalExpenses' ] } />           
+           <InlineBar inputData={ sharedData }   title={ 'Shared Income to Expenses Ratio' } perUser={ false } balance={ false }  ratioProp={ [ 'portionSharedTotalIncome', 'portionSharedTotalExpenses' ] }  valueProp={ [ 'totalSharedIncome', 'totalSharedExpenses' ] } />
+           <InlineBar inputData={ uniqueUsers } title={ 'Shared Income By User' }            perUser={ true }  balance={ false }  ratioProp={ [ 'portionSharedIncome' ] }           valueProp={ [ 'incomeShared' ] } />
+           <InlineBar inputData={ uniqueUsers } title={ 'Shared Expenses By User' }          perUser={ true }  balance={ false }  ratioProp={ [ 'portionSharedExpenses' ] }         valueProp={ [ 'expensesShared' ] } />
+           <InlineBar inputData={ uniqueUsers } title={ 'Total Income By User' }             perUser={ true }  balance={ false }  ratioProp={ [ 'portionTotalIncome' ] }            valueProp={ [ 'incomeTotal' ] } />
+           <InlineBar inputData={ uniqueUsers } title={ 'Total Expenses By User' }           perUser={ true }  balance={ false }  ratioProp={ [ 'portionTotalExpenses' ] }          valueProp={ [ 'expensesTotal' ] } />
+           <InlineBar inputData={ uniqueUsers } title={ 'User Blance After Transfers' }      perUser={ true }  balance={ true }   ratioProp={ [ 'portionBalanceAfterTransfer' ] }   valueProp={ [ 'userBalance' ] } />
            {
             uniqueUsers.map( user => {
               return (
@@ -154,7 +154,7 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
               )
             })
             }
-          </>
+          </React.Fragment>
         }
       </ul> 
 
