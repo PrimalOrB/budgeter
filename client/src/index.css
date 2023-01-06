@@ -605,6 +605,10 @@ section {
   width: 100%
 }
 
+.f-j-l {
+  justify-content: flex-start;
+}
+
 .f-valign {
   align-items: center;
 }

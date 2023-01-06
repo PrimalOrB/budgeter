@@ -13,9 +13,11 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
 
   const uniqueUsers = [...new Set(transactions.map (entry => entry.userID._id ) ) ]
     .map( userID => { 
+      const matchUser = transactions.find( entry => entry.userID._id === userID ).userID
       return { 
       userID,
-      userColor: transactions.find( entry => entry.userID._id === userID ).userID.userColor,
+      userColor: matchUser.userColor,
+      userInitials: matchUser.userInitials,
       incomeTotal: 0, 
       expensesTotal: 0, 
       incomeShared: 0, 
@@ -103,6 +105,8 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
     user.portionBalanceAfterTransfer = ( ( sumPropArray( expenseByMonthShared, 'value' ) / 2 ) - ( user.balanceAfterTransfer - user.expensesShared ) ) / sumPropArray( expenseByMonthShared, 'value' )
     return user
   })
+
+  console.log( uniqueUsers )
   
   return (
     <section id="month-summary" key={ `${ date }_results` } >

@@ -15,7 +15,8 @@ const InlineBar = ( { inputData, title, perUser, balance, ratioProp, valueProp }
             labels: [title],
             datasets: [],
             totalProp: 0,
-            compositeTitle: ''
+            compositeTitle: '',
+            largerCompare: {}
         }
         
         if( perUser ){
@@ -27,6 +28,15 @@ const InlineBar = ( { inputData, title, perUser, balance, ratioProp, valueProp }
                 }else {
                     output.totalProp += user[`${ valueProp[0] }`]
                 }
+
+                if( user[`${ ratioProp[0] }`] > 0.5 ){
+                    output.largerCompare = {
+                        ratio: user[`${ ratioProp[0] }`],
+                        userInitials: user.userInitials,
+                        userColor: user.userColor
+                    }
+                }
+
                 return output.datasets.push( { 
                     label: user.userID,
                     data: [ user[`${ ratioProp[0] }`] ],
@@ -117,6 +127,8 @@ const InlineBar = ( { inputData, title, perUser, balance, ratioProp, valueProp }
         }
     };
 
+    console.log( dataState )
+
     useEffect(()=>{
         processData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -125,12 +137,24 @@ const InlineBar = ( { inputData, title, perUser, balance, ratioProp, valueProp }
     return (
         <>
         { !loadingState ?
-            <>
-            <span>{ dataState.compositeTitle }</span>
-            <section className="chart-inline-section">
-                <Bar data={ dataState } options={ options } />
-            </section>
-            </>
+            <div className="container-flex f-full f-j-l margin-top-full f-valign">
+                <span>{ dataState.compositeTitle }</span>
+                { dataState.largerCompare?.userInitials 
+                    ?
+                    <>
+                        <span className='f0 initials-icon noselect' style={{ backgroundColor: dataState.largerCompare.userColor ? `#${ dataState.largerCompare.userColor }` : '#BBBBBB' }} >
+                            { dataState.largerCompare.userInitials }
+                        </span>            
+                        <span className="margin-left-full">{ ( dataState.largerCompare.ratio * 100 ).toFixed(1) }%</span>
+                    </>
+                    :
+                    <>
+                    </>
+                }
+                <section className="chart-inline-section">
+                    <Bar data={ dataState } options={ options } />
+                </section>
+            </div>
         :
             <li>
                 loading
