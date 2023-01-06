@@ -103,8 +103,6 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
     return user
   })
 
-  // console.log( uniqueUsers )
-  
   return (
     <section id="month-summary" key={ `${ date }_results` } >
       <h4 className="sub-container-description section-list-title noselect">{ format( date, "MMMM yyyy" ) }</h4>
@@ -135,7 +133,7 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
            <InlineBarPerUser key={ `${ highlightMonthState }_tIn` } inputData={ uniqueUsers } title={ 'Total Income By User' } valueProp={ 'incomeTotal' } />
            <InlineBarPerUser key={ `${ highlightMonthState }_tOut` } inputData={ uniqueUsers } title={ 'Total Expenses By User' } valueProp={ 'expensesTotal' } />
            <InlineBarPerUser key={ `${ highlightMonthState }_uR` } inputData={ uniqueUsers } title={ 'User Resposibility' } valueProp={ 'responsibleExpenses' } />           
-           <InlineBarPerUser key={ `${ highlightMonthState }_uB` } inputData={ uniqueUsers } title={ 'User Balance After Transfers' } valueProp={ 'balanceAfterTransfer' } />  
+           {/* <InlineBarPerUser key={ `${ highlightMonthState }_uB` } inputData={ uniqueUsers } title={ 'User Balance After Transfers' } valueProp={ 'balanceAfterTransfer' } />   */}
            <InlineBarBalance key={ `${ highlightMonthState }_B` } inputData={ uniqueUsers } title={ 'Balance' } valueProp={ 'userBalance' } total={ 'expensesShared' } />
            {
             uniqueUsers.map( user => {
