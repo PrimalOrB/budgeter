@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { format } from 'date-fns'
 import { toCurrency, sumPropArray } from '../utils/helpers'
-import { SingleMonthCategoryCost, InlineBar } from '../components/Charts'
+import { SingleMonthCategoryCost, InlineBarTotal, InlineBarPerUser, InlineBarBalance } from '../components/Charts'
 import { BudgetCategoryExpandableList, BudgetCategoryEntriesExpandableList } from '../components/Layout'
 import { FaCaretDown, FaCaretUp } from 'react-icons/fa'
 
@@ -85,28 +85,23 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
   let sharedData = {
     totalIncome: sumPropArray( incomeByMonth, 'value' ),
     totalExpenses: sumPropArray( expenseByMonth, 'value' ),
-    portionTotalIncome: sumPropArray( incomeByMonth, 'value' ) / ( sumPropArray( incomeByMonth, 'value' ) + sumPropArray( expenseByMonth, 'value' ) ),
-    portionTotalExpenses: sumPropArray( expenseByMonth, 'value' ) / ( sumPropArray( incomeByMonth, 'value' ) + sumPropArray( expenseByMonth, 'value' ) ),
     totalSharedIncome: sumPropArray( incomeByMonthShared, 'value' ),
     totalSharedExpenses: sumPropArray( expenseByMonthShared, 'value' ),
-    portionSharedTotalIncome: sumPropArray( incomeByMonthShared, 'value' ) / ( sumPropArray( incomeByMonthShared, 'value' ) + sumPropArray( expenseByMonthShared, 'value' ) ),
-    portionSharedTotalExpenses: sumPropArray( expenseByMonthShared, 'value' ) / ( sumPropArray( incomeByMonthShared, 'value' ) + sumPropArray( expenseByMonthShared, 'value' ) ),
   }
 
   // run balances
   uniqueUsers.map( user => {
-    user.portionSharedExpenses = user.expensesShared / sumPropArray( expenseByMonthShared, 'value' )
+    user.portionSharedExpenses = user.expensesShared  / sumPropArray( expenseByMonthShared, 'value' )
     user.portionSharedIncome = user.incomeShared  / sumPropArray( incomeByMonthShared, 'value' )
-    user.portionTotalExpenses = user.expensesTotal / sumPropArray( expenseByMonth, 'value' )
+    user.portionTotalExpenses = user.expensesTotal  / sumPropArray( expenseByMonth, 'value' )
     user.portionTotalIncome = user.incomeTotal  / sumPropArray( incomeByMonth, 'value' )
-    user.responsibleExpenses = sumPropArray( expenseByMonthShared, 'value' ) * user.portionSharedIncome
+    user.responsibleExpenses = Number( ( sumPropArray( expenseByMonthShared, 'value' ) * user.portionSharedIncome).toFixed( 2 ) )
     user.balanceAfterTransfer = user.responsibleExpenses - user.transfersOut + user.transfersIn
     user.userBalance = user.balanceAfterTransfer - user.expensesShared
-    user.portionBalanceAfterTransfer = ( ( sumPropArray( expenseByMonthShared, 'value' ) / 2 ) - ( user.balanceAfterTransfer - user.expensesShared ) ) / sumPropArray( expenseByMonthShared, 'value' )
     return user
   })
 
-  console.log( uniqueUsers )
+  // console.log( uniqueUsers )
   
   return (
     <section id="month-summary" key={ `${ date }_results` } >
@@ -131,13 +126,15 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
         </li>
         { expandedState.balance &&
           <React.Fragment>
-           <InlineBar inputData={ sharedData }   title={ 'Income to Expenses Ratio' }        perUser={ false } balance={ false }  ratioProp={ [ 'portionTotalIncome', 'portionTotalExpenses' ] }              valueProp={ [ 'totalIncome', 'totalExpenses' ] } />           
-           <InlineBar inputData={ sharedData }   title={ 'Shared Income to Expenses Ratio' } perUser={ false } balance={ false }  ratioProp={ [ 'portionSharedTotalIncome', 'portionSharedTotalExpenses' ] }  valueProp={ [ 'totalSharedIncome', 'totalSharedExpenses' ] } />
-           <InlineBar inputData={ uniqueUsers } title={ 'Shared Income By User' }            perUser={ true }  balance={ false }  ratioProp={ [ 'portionSharedIncome' ] }           valueProp={ [ 'incomeShared' ] } />
-           <InlineBar inputData={ uniqueUsers } title={ 'Shared Expenses By User' }          perUser={ true }  balance={ false }  ratioProp={ [ 'portionSharedExpenses' ] }         valueProp={ [ 'expensesShared' ] } />
-           <InlineBar inputData={ uniqueUsers } title={ 'Total Income By User' }             perUser={ true }  balance={ false }  ratioProp={ [ 'portionTotalIncome' ] }            valueProp={ [ 'incomeTotal' ] } />
-           <InlineBar inputData={ uniqueUsers } title={ 'Total Expenses By User' }           perUser={ true }  balance={ false }  ratioProp={ [ 'portionTotalExpenses' ] }          valueProp={ [ 'expensesTotal' ] } />
-           <InlineBar inputData={ uniqueUsers } title={ 'User Blance After Transfers' }      perUser={ true }  balance={ true }   ratioProp={ [ 'portionBalanceAfterTransfer' ] }   valueProp={ [ 'userBalance' ] } />
+           <InlineBarTotal key={ `${ highlightMonthState }_iR` } inputData={ sharedData } title={ ['Income to Expenses Ratio', 'Income', 'Expenses' ] } valueProp={ [ 'totalIncome', 'totalExpenses' ] } />  
+           <InlineBarTotal key={ `${ highlightMonthState }_sR` } inputData={ sharedData } title={ ['Shared Income to Expenses Ratio', 'Income', 'Expenses' ] } valueProp={ [ 'totalSharedIncome', 'totalSharedExpenses' ] } />   
+           <InlineBarPerUser key={ `${ highlightMonthState }_sIn` } inputData={ uniqueUsers } title={ 'Shared Income By User' } valueProp={ 'incomeShared' } />
+           <InlineBarPerUser key={ `${ highlightMonthState }_sOut` } inputData={ uniqueUsers } title={ 'Shared Expenses By User' } valueProp={ 'expensesShared' } />
+           <InlineBarPerUser key={ `${ highlightMonthState }_tIn` } inputData={ uniqueUsers } title={ 'Total Income By User' } valueProp={ [ 'incomeTotal' ] } />
+           <InlineBarPerUser key={ `${ highlightMonthState }_tOut` } inputData={ uniqueUsers } title={ 'Total Expenses By User' } valueProp={ [ 'expensesTotal' ] } />
+           <InlineBarPerUser key={ `${ highlightMonthState }_uR` } inputData={ uniqueUsers } title={ 'User Resposibility' } valueProp={ 'responsibleExpenses' } />           
+           <InlineBarPerUser key={ `${ highlightMonthState }_uB` } inputData={ uniqueUsers } title={ 'User Balance After Transfers' } valueProp={ 'balanceAfterTransfer' } />  
+           <InlineBarBalance key={ `${ highlightMonthState }_B` } inputData={ uniqueUsers } title={ 'Balance' } valueProp={ [ 'userBalance' ] } total={ 'expensesShared' }/>
            {
             uniqueUsers.map( user => {
               return (
