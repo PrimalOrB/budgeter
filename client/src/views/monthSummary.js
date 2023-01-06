@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { format } from 'date-fns'
 import { toCurrency, sumPropArray } from '../utils/helpers'
-import { SingleMonthCategoryCost } from '../components/Charts'
+import { SingleMonthCategoryCost, InlineBar } from '../components/Charts'
 import { BudgetCategoryExpandableList, BudgetCategoryEntriesExpandableList } from '../components/Layout'
 import { FaCaretDown, FaCaretUp } from 'react-icons/fa'
 
@@ -12,8 +12,10 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
   const [ expandedState, setExpandedState ] = useState( { income: false, expense: false, balance: false, transfers: false } )
 
   const uniqueUsers = [...new Set(transactions.map (entry => entry.userID._id ) ) ]
-    .map( userID => { return { 
-      userID, 
+    .map( userID => { 
+      return { 
+      userID,
+      userColor: transactions.find( entry => entry.userID._id === userID ).userID.userColor,
       incomeTotal: 0, 
       expensesTotal: 0, 
       incomeShared: 0, 
@@ -28,6 +30,7 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
       balanceShared: 0,
       responsibleExpenses: 0
      } } )
+
   // add expenses to users
   const expenseByMonth = transactions.filter( entry => entry.valueType === 'expense' )
     .map( entry => {
@@ -45,6 +48,7 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
       }
       return entry
     })
+
   // add income to users
   const incomeByMonth = transactions.filter( entry => entry.valueType === 'income' )
     .map( entry => {
@@ -62,6 +66,7 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
       }
       return entry
     })
+
   // add transfers to users
   const transferByMonth = transactions.filter( entry => entry.valueType === 'transfer' ).map( entry => {
     const matchUserOut = uniqueUsers.findIndex( user => { return user.userID === entry.userID._id } )
@@ -74,13 +79,29 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
     }
     return entry
   })
+
+  let sharedData = {
+    totalIncome: sumPropArray( incomeByMonth, 'value' ),
+    totalExpenses: sumPropArray( expenseByMonth, 'value' ),
+    portionTotalIncome: sumPropArray( incomeByMonth, 'value' ) / ( sumPropArray( incomeByMonth, 'value' ) + sumPropArray( expenseByMonth, 'value' ) ),
+    portionTotalExpenses: sumPropArray( expenseByMonth, 'value' ) / ( sumPropArray( incomeByMonth, 'value' ) + sumPropArray( expenseByMonth, 'value' ) ),
+    totalSharedIncome: sumPropArray( incomeByMonthShared, 'value' ),
+    totalSharedExpenses: sumPropArray( expenseByMonthShared, 'value' ),
+    portionSharedTotalIncome: sumPropArray( incomeByMonthShared, 'value' ) / ( sumPropArray( incomeByMonthShared, 'value' ) + sumPropArray( expenseByMonthShared, 'value' ) ),
+    portionSharedTotalExpenses: sumPropArray( expenseByMonthShared, 'value' ) / ( sumPropArray( incomeByMonthShared, 'value' ) + sumPropArray( expenseByMonthShared, 'value' ) ),
+  }
+
   // run balances
   uniqueUsers.map( user => {
     user.portionSharedExpenses = user.expensesShared / sumPropArray( expenseByMonthShared, 'value' )
     user.portionSharedIncome = user.incomeShared  / sumPropArray( incomeByMonthShared, 'value' )
+    user.portionTotalExpenses = user.expensesTotal / sumPropArray( expenseByMonth, 'value' )
+    user.portionTotalIncome = user.incomeTotal  / sumPropArray( incomeByMonth, 'value' )
     user.responsibleExpenses = sumPropArray( expenseByMonthShared, 'value' ) * user.portionSharedIncome
     user.balanceAfterTransfer = user.responsibleExpenses - user.transfersOut + user.transfersIn
-    return user.userBalance = user.balanceAfterTransfer - user.expensesShared
+    user.userBalance = user.balanceAfterTransfer - user.expensesShared
+    user.portionBalanceAfterTransfer = ( ( sumPropArray( expenseByMonthShared, 'value' ) / 2 ) - ( user.balanceAfterTransfer - user.expensesShared ) ) / sumPropArray( expenseByMonthShared, 'value' )
+    return user
   })
   
   return (
@@ -105,24 +126,35 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
           </span>
         </li>
         { expandedState.balance &&
-           uniqueUsers.map( user => {
-             return (
-              <ul key={ user.userID }>
-                { user.userID }
-                  <li>Total Expenses: { toCurrency( user.expensesTotal ) }</li>
-                  <li>Total Income: { toCurrency( user.incomeTotal ) }</li>
-                  <li>Shared Expenses: { toCurrency( user.expensesShared ) }</li>
-                  <li>Shared Income: { toCurrency( user.incomeShared ) }</li>
-                  <li>Transfers Out: { toCurrency( user.transfersOut ) }</li>
-                  <li>Transfers In: { toCurrency( user.transfersIn ) }</li>
-                  <li>Total Expenses %: { ( user.portionTotalExpenses * 100 ).toFixed(1) }%</li>
-                  <li>Total Income %: { ( user.portionSharedIncome * 100 ).toFixed(1) }%</li>
-                  <li>User Expense Responsibility: { toCurrency( user.responsibleExpenses ) }</li>
-                  <li>User After Transfers: { toCurrency( user.balanceAfterTransfer ) }</li>
-                  <li>Final Balance: { toCurrency( user.userBalance ) }</li>
-              </ul>
-             )
-           })
+          <>
+          <InlineBar inputData={ sharedData }   title={ 'Income to Expenses Ratio' }        perUser={ false } balance={ false }  ratioProp={ [ 'portionTotalIncome', 'portionTotalExpenses' ] }              valueProp={ [ 'totalIncome', 'totalExpenses' ] } />           
+          <InlineBar inputData={ sharedData }   title={ 'Shared Income to Expenses Ratio' } perUser={ false } balance={ false }  ratioProp={ [ 'portionSharedTotalIncome', 'portionSharedTotalExpenses' ] }  valueProp={ [ 'totalSharedIncome', 'totalSharedExpenses' ] } />
+           <InlineBar inputData={ uniqueUsers } title={ 'Shared Income By User' }           perUser={ true }  balance={ false }  ratioProp={ [ 'portionSharedIncome' ] }           valueProp={ [ 'incomeShared' ] } />
+           <InlineBar inputData={ uniqueUsers } title={ 'Shared Expenses By User' }         perUser={ true }  balance={ false }  ratioProp={ [ 'portionSharedExpenses' ] }         valueProp={ [ 'expensesShared' ] } />
+           <InlineBar inputData={ uniqueUsers } title={ 'Total Income By User' }            perUser={ true }  balance={ false }  ratioProp={ [ 'portionTotalIncome' ] }            valueProp={ [ 'incomeTotal' ] } />
+           <InlineBar inputData={ uniqueUsers } title={ 'Total Expenses By User' }          perUser={ true }  balance={ false }  ratioProp={ [ 'portionTotalExpenses' ] }          valueProp={ [ 'expensesTotal' ] } />
+           <InlineBar inputData={ uniqueUsers } title={ 'User Blance After Transfers' }     perUser={ true }  balance={ true }   ratioProp={ [ 'portionBalanceAfterTransfer' ] }   valueProp={ [ 'userBalance' ] } />
+           {
+            uniqueUsers.map( user => {
+              return (
+                <ul key={ `${ user.userID }` }>
+                  { user.userID }
+                    <li>Total Expenses: { toCurrency( user.expensesTotal ) }</li>
+                    <li>Total Income: { toCurrency( user.incomeTotal ) }</li>
+                    <li>Shared Expenses: { toCurrency( user.expensesShared ) }</li>
+                    <li>Shared Income: { toCurrency( user.incomeShared ) }</li>
+                    <li>Transfers Out: { toCurrency( user.transfersOut ) }</li>
+                    <li>Transfers In: { toCurrency( user.transfersIn ) }</li>
+                    <li>Total Expenses %: { ( user.portionTotalExpenses * 100 ).toFixed(1) }%</li>
+                    <li>Total Income %: { ( user.portionSharedIncome * 100 ).toFixed(1) }%</li>
+                    <li>User Expense Responsibility: { toCurrency( user.responsibleExpenses ) }</li>
+                    <li>User After Transfers: { toCurrency( user.balanceAfterTransfer ) }</li>
+                    <li>Final Balance: { toCurrency( user.userBalance ) }</li>
+                </ul>
+              )
+            })
+            }
+          </>
         }
       </ul> 
 

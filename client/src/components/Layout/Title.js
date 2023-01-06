@@ -8,7 +8,6 @@ const Title = ( { text, additionalClass, id } ) => {
     <span id={ id } className={ `title grad-bg ${ additionalClass ? additionalClass : '' } noselect` }>
       { text }
     </span>
-
   )
 };
 

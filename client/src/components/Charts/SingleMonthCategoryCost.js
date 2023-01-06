@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
-import 'chart.js/auto';
-import { Chart } from 'react-chartjs-2';
+import React, { useState, useEffect } from "react"
+import 'chart.js/auto'
+import { Chart } from 'react-chartjs-2'
 import { randomHexColor, toCurrency } from '../../utils/helpers'
+
 
 const SingleMonthCategoryCost = ( { valueType, activeDate, highlightMonthState, categories, transactions } ) => {
 
