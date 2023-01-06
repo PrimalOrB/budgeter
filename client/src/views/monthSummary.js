@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { format } from 'date-fns'
 import { toCurrency, sumPropArray } from '../utils/helpers'
-import { SingleMonthCategoryCost, InlineBarTotal, InlineBarPerUser, InlineBarBalance } from '../components/Charts'
+import { SingleMonthCategoryCost, InlineBarTotal, InlineBarPerUser, InlineBarBalance, InlineBarPerUserBalance } from '../components/Charts'
 import { BudgetCategoryExpandableList, BudgetCategoryEntriesExpandableList } from '../components/Layout'
 import { FaCaretDown, FaCaretUp } from 'react-icons/fa'
 
@@ -97,6 +97,8 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
     user.portionTotalIncome = user.incomeTotal  / sumPropArray( incomeByMonth, 'value' )
     user.responsibleExpenses = Number( ( sumPropArray( expenseByMonthShared, 'value' ) * user.portionSharedIncome).toFixed( 2 ) )
     user.balanceAfterTransfer = user.responsibleExpenses - user.transfersOut + user.transfersIn
+    user.balancedIncome = user.incomeTotal + user.transfersIn
+    user.balancedExpenses = user.expensesTotal + user.transfersOut
     user.userBalance = user.balanceAfterTransfer - user.expensesShared
     return user
   })
@@ -130,28 +132,29 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
            <InlineBarTotal key={ `${ highlightMonthState }_sR` } inputData={ sharedData } title={ ['Shared Income to Expenses Ratio', 'Income', 'Expenses' ] } valueProp={ [ 'totalSharedIncome', 'totalSharedExpenses' ] } />   
            <InlineBarPerUser key={ `${ highlightMonthState }_sIn` } inputData={ uniqueUsers } title={ 'Shared Income By User' } valueProp={ 'incomeShared' } />
            <InlineBarPerUser key={ `${ highlightMonthState }_sOut` } inputData={ uniqueUsers } title={ 'Shared Expenses By User' } valueProp={ 'expensesShared' } />
-           <InlineBarPerUser key={ `${ highlightMonthState }_tIn` } inputData={ uniqueUsers } title={ 'Total Income By User' } valueProp={ [ 'incomeTotal' ] } />
-           <InlineBarPerUser key={ `${ highlightMonthState }_tOut` } inputData={ uniqueUsers } title={ 'Total Expenses By User' } valueProp={ [ 'expensesTotal' ] } />
+           <InlineBarPerUser key={ `${ highlightMonthState }_tIn` } inputData={ uniqueUsers } title={ 'Total Income By User' } valueProp={ 'incomeTotal' } />
+           <InlineBarPerUser key={ `${ highlightMonthState }_tOut` } inputData={ uniqueUsers } title={ 'Total Expenses By User' } valueProp={ 'expensesTotal' } />
            <InlineBarPerUser key={ `${ highlightMonthState }_uR` } inputData={ uniqueUsers } title={ 'User Resposibility' } valueProp={ 'responsibleExpenses' } />           
            <InlineBarPerUser key={ `${ highlightMonthState }_uB` } inputData={ uniqueUsers } title={ 'User Balance After Transfers' } valueProp={ 'balanceAfterTransfer' } />  
-           <InlineBarBalance key={ `${ highlightMonthState }_B` } inputData={ uniqueUsers } title={ 'Balance' } valueProp={ [ 'userBalance' ] } total={ 'expensesShared' }/>
+           <InlineBarBalance key={ `${ highlightMonthState }_B` } inputData={ uniqueUsers } title={ 'Balance' } valueProp={ 'userBalance' } total={ 'expensesShared' } />
            {
             uniqueUsers.map( user => {
-              return (
-                <ul key={ `${ user.userID }` }>
-                  { user.userID }
-                    <li>Total Expenses: { toCurrency( user.expensesTotal ) }</li>
-                    <li>Total Income: { toCurrency( user.incomeTotal ) }</li>
-                    <li>Shared Expenses: { toCurrency( user.expensesShared ) }</li>
-                    <li>Shared Income: { toCurrency( user.incomeShared ) }</li>
-                    <li>Transfers Out: { toCurrency( user.transfersOut ) }</li>
-                    <li>Transfers In: { toCurrency( user.transfersIn ) }</li>
-                    <li>Total Expenses %: { ( user.portionTotalExpenses * 100 ).toFixed(1) }%</li>
-                    <li>Total Income %: { ( user.portionSharedIncome * 100 ).toFixed(1) }%</li>
-                    <li>User Expense Responsibility: { toCurrency( user.responsibleExpenses ) }</li>
-                    <li>User After Transfers: { toCurrency( user.balanceAfterTransfer ) }</li>
-                    <li>Final Balance: { toCurrency( user.userBalance ) }</li>
-                </ul>
+              return (                 
+              <InlineBarPerUserBalance key={ `${ highlightMonthState }_${ user.userID }` } inputData={ user } title={ `${ user.userInitials } Balance` } valueProp={ 'balancedIncome' } total={ 'balancedExpenses' } />
+                // <ul key={ `${ user.userID }` }>
+                //   { user.userID }
+                //     <li>Total Expenses: { toCurrency( user.expensesTotal ) }</li>
+                //     <li>Total Income: { toCurrency( user.incomeTotal ) }</li>
+                //     <li>Shared Expenses: { toCurrency( user.expensesShared ) }</li>
+                //     <li>Shared Income: { toCurrency( user.incomeShared ) }</li>
+                //     <li>Transfers Out: { toCurrency( user.transfersOut ) }</li>
+                //     <li>Transfers In: { toCurrency( user.transfersIn ) }</li>
+                //     <li>Total Expenses %: { ( user.portionTotalExpenses * 100 ).toFixed(1) }%</li>
+                //     <li>Total Income %: { ( user.portionSharedIncome * 100 ).toFixed(1) }%</li>
+                //     <li>User Expense Responsibility: { toCurrency( user.responsibleExpenses ) }</li>
+                //     <li>User After Transfers: { toCurrency( user.balanceAfterTransfer ) }</li>
+                //     <li>Final Balance: { toCurrency( user.userBalance ) }</li>
+                // </ul>
               )
             })
             }

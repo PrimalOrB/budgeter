@@ -8,8 +8,6 @@ const InlineBarTotal = ( { inputData, title, valueProp } ) => {
     const [ loadingState, setLoadingState ] = useState( true )
     const [ hoverData, setHoverData ] = useState( '' )
 
-    console.log( inputData )
-
     function processData(){
 
         setLoadingState( true )

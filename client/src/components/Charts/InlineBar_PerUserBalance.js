@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { toCurrency } from '../../utils/helpers'
 import { Bar } from 'react-chartjs-2'
 
-const InlineBarBalance = ( { inputData, title, valueProp } ) => {
+const InlineBarPerUserBalance = ( { inputData, title, valueProp } ) => {
 
     const [ dataState, setDataState ] = useState( false )
     const [ loadingState, setLoadingState ] = useState( true )
@@ -14,36 +14,41 @@ const InlineBarBalance = ( { inputData, title, valueProp } ) => {
 
         let output = {
             labels: [title],
-            datasets: [],
-            totalProp: 0,
-            compositeTitle: ''
-        }
-        
-        inputData.map( user => {
-
-            if( user.userBalance > 0 ){
-                output.totalProp += user[`${ valueProp }`]
-    
-                output.datasets.push( { 
-                    label: user.userID,
-                    data: [ user[`${ valueProp }`] ],
-                    hoverData: user[`${ valueProp }` ],
-                    userData: user,
-                    backgroundColor: `#${ user.userColor }`,
+            datasets: [
+                { 
+                    label: 'Income',
+                    data: [],
+                    hoverData: 0,
+                    backgroundColor: `rgba(0, 128, 0, 1)`,
                     barPercentage: 1.0,
                     categoryPercentage: 1.0
-                })
-                output.compositeTitle = `${ title }`
+                },
+                { 
+                    label: 'Expenses',
+                    data: [],
+                    hoverData: 0,
+                    backgroundColor: `rgba(200, 0, 0, 1)`,
+                    barPercentage: 1.0,
+                    categoryPercentage: 1.0
+                }
+            ],
+            totalProp: 0,
+            compositeTitle: '',
+            userData: { userColor: inputData.userColor, userInitials: inputData.userInitials },
+            balance: 0,
+            remainder: 0
+        }
         
-                setDataState( output )
-                setLoadingState( false )
-                return updateHover( { ...output.datasets[0].userData, hover: output.datasets[0].hoverData } )
-            } 
-            
-            return user
-        })
+
+        output.datasets[0].data.push( inputData.balancedIncome )
+        output.datasets[1].data.push( inputData.balancedExpenses )
+        output.totalProp += inputData.balancedIncome
+        output.totalProp += inputData.balancedExpenses
+        output.balance = inputData.balancedIncome / ( inputData.balancedIncome + inputData.balancedExpenses )
+        output.remainder = inputData.balancedIncome - inputData.balancedExpenses
         
-        return setLoadingState( false )
+        setDataState( output )
+        setLoadingState( false )
     }  
     
     function updateHover( update ){
@@ -105,8 +110,8 @@ const InlineBarBalance = ( { inputData, title, valueProp } ) => {
                 backgroundColor: 'rgba(0,0,0,0)',
                 callbacks: {
                     footer: function( context ){
-                        const update = { ...context[0].dataset.userData, hover: context[0].dataset.hoverData }
-                        updateHover( update )
+                        // const update = { ...context[0].dataset.userData, hover: context[0].dataset.hoverData }
+                        // updateHover( update )
                         return false
                     },
                     title: function(){
@@ -125,18 +130,21 @@ const InlineBarBalance = ( { inputData, title, valueProp } ) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     },[])
 
+    console.log( hoverData )
+
     return (
         <>
         { ( !loadingState && dataState ) ?
             <div className="container-flex f-full f-j-l margin-top-full f-valign">
                 <span>{ dataState.compositeTitle }</span>
-                { hoverData
+                { dataState.userData
                     ?
                     <>
-                        <span className='f0 initials-icon noselect' style={{ backgroundColor: hoverData.userColor ? `#${ hoverData.userColor }` : '#BBBBBB' }} >
-                            { hoverData.userInitials }
-                        </span>            
-                        <span className="margin-left-full">{ toCurrency( hoverData.hover ) } ( { ( ( hoverData.hover / dataState.totalProp ) * 100 ).toFixed(1) }% )</span>
+                        <span className='f0 initials-icon noselect' style={{ backgroundColor: dataState.userData.userColor ? `#${ dataState.userData.userColor }` : '#BBBBBB' }} >
+                            { dataState.userData.userInitials }
+                        </span> 
+                        <span className="margin-left-full">{ ( dataState.balance * 100 ).toFixed(1) }% Income / Expenses</span> 
+                        <span className="margin-left-full">{ toCurrency( dataState.remainder ) } Remaining</span>  
                     </>
                     :
                     <>
@@ -155,4 +163,4 @@ const InlineBarBalance = ( { inputData, title, valueProp } ) => {
     )
 };
 
-export default InlineBarBalance;
+export default InlineBarPerUserBalance;
