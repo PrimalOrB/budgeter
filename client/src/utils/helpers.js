@@ -13,11 +13,9 @@ export function toCurrency( input ){
     return '$'+ commaSeparatedNumberDisplay( dollars )+'.'+cents
 }
 
-
 export function randomHexColor(){
     return `#${ Math.floor(Math.random()*16777215).toString(16) }`
 }
-
 
 export function isEmail(email) {
     return /[\w\d.-]+@[\w\d.-]+\.[\w\d.-]+/.test(email);

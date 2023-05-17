@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { format } from 'date-fns'
 import { toCurrency, sumPropArray } from '../utils/helpers'
 import { SingleMonthCategoryCost, InlineBarTotal, InlineBarPerUser, InlineBarBalance, InlineBarPerUserBalance } from '../components/Charts'
-import { BudgetCategoryExpandableList, BudgetCategoryEntriesExpandableList } from '../components/Layout'
+import { BudgetCategoryExpandableList, BudgetCategoryEntriesExpandableList, PDFMonthlyUse } from '../components/Layout'
 import { FaCaretDown, FaCaretUp } from 'react-icons/fa'
 
 const MonthSummary = ( { highlightMonthState, categories, transactions, setPageState, setEditingTransaction } ) => {
@@ -220,7 +220,7 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
       </ul>  
 
         {/* transfer section */}
-      <ul className="monthly-group-detail border-t-l-rad-none border-t-r-rad-none">        
+      <ul className="monthly-group-detail border-b-l-rad-none border-b-r-rad-none border_b_none border-t-l-rad-none border-t-r-rad-none">        
         <li className="flex nowrap flex-just-space-around f-full" onClick={ () => setExpandedState( { ...expandedState, transfers: !expandedState.transfers } ) }>
           <span className="f0 margin-right-half">
             { expandedState.transfers ? FaCaretUp() : FaCaretDown() }
@@ -238,6 +238,39 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
               <BudgetCategoryEntriesExpandableList key={ transfer._id } entry={ transfer } setPageState={ setPageState } setEditingTransaction={ setEditingTransaction }/>
             )
           })
+        }
+      </ul>  
+
+      {/* report section */}
+      <ul className="monthly-group-detail border-t-l-rad-none border-t-r-rad-none">        
+        <li className="flex nowrap flex-just-space-around f-full" onClick={ () => setExpandedState( { ...expandedState, reports: !expandedState.reports } ) }>
+          <span className="f0 margin-right-half">
+            { expandedState.reports ? FaCaretUp() : FaCaretDown() }
+          </span>
+          <span className="f1 bold noselect">
+            Reports
+          </span>
+        </li>
+        { expandedState.reports &&
+          uniqueUsers.length 
+          ?
+          <li className="flex nowrap flex-just-space-around f-full">
+            {
+            uniqueUsers.map( user => {
+              return <PDFMonthlyUse key={ `${ user.userID }_rpt`} 
+              user={ user } 
+              date={ date }
+              expensesIndividual={ expenseByMonth.filter( expense => expense.userID._id === user.userID && expense.individualEntry ) } 
+              expensesShared={ expenseByMonthShared }
+              incomeIndividual={ incomeByMonth.filter( income => income.userID._id === user.userID && income.individualEntry ) }
+              incomeShared={ incomeByMonthShared }
+              transfers={ transferByMonth }
+              />
+            })
+          }
+          </li>
+          :
+          <li className="flex nowrap flex-just-space-around f-full">Empty</li>
         }
       </ul>  
     </section>
