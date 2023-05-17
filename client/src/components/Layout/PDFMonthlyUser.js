@@ -1,8 +1,4 @@
-import React, { useState } from "react";
-import { FaCaretDown, FaCaretUp } from "react-icons/fa";
-import { MdSubdirectoryArrowRight } from "react-icons/md";
-import { BudgetCategoryEntriesExpandableList } from "./";
-import { sumPropArray, toCurrency } from "../../utils/helpers";
+import React from "react";
 import generatePDF from "../../utils/generatePDF";
 
 const PDFMonthlyUser = ({
