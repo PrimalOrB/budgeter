@@ -6,6 +6,7 @@ import { toCurrency } from "../utils/helpers";
 const generatePDF = ({
   user,
   date,
+  categories,
   expensesIndividual,
   expensesShared,
   incomeIndividual,
@@ -24,60 +25,63 @@ const generatePDF = ({
     incomeShared: 0,
     incomeSharedUser: 0,
     expensesIndividual: 0,
-    incomeIndividual: 0
-  }
+    incomeIndividual: 0,
+  };
 
-  const expenseSharedCol = ["Date", "Title", "Total Expense", "Responsibility"];
+  const expenseSharedCol = ["Date", "", "Title", "Total Expense", "Responsibility"];
   const expenseSharedRow = [];
   expensesShared.forEach((expense) => {
     const expenseData = [
       format(expense.createdAt, "M/dd/yy"),
+      `( ${categories.find( category => category._id === expense.categoryID ).title} )`,
       expense.title,
       toCurrency(expense.value),
       toCurrency(expense.value * user.portionSharedIncome),
     ];
-    subTotals.expensesShared += expense.value
-    subTotals.expensesSharedUser += (expense.value * user.portionSharedIncome)
+    subTotals.expensesShared += expense.value;
+    subTotals.expensesSharedUser += expense.value * user.portionSharedIncome;
     expenseSharedRow.push(expenseData);
   });
 
-  const incomeSharedCol = ["Date", "Title", "Total Income", "Responsibility"];
+  const incomeSharedCol = ["Date", "", "Title", "Total Income", "Responsibility"];
   const incomeSharedRow = [];
   incomeShared.forEach((income) => {
     const incomeData = [
-      format(income.createdAt, "M/dd/yy"),
+      format(income.createdAt, "M/dd/yy"),      
+      `( ${categories.find( category => category._id === income.categoryID ).title} )`,
       income.title,
       toCurrency(income.value),
       toCurrency(income.value * user.portionSharedIncome),
     ];
-    subTotals.incomeShared += income.value
-    console.log( 'before: ',subTotals.incomeSharedUser,)
-    subTotals.incomeSharedUser += (income.value * user.portionSharedIncome)
-    console.log( 'after: ',subTotals.incomeSharedUser)
+    subTotals.incomeShared += income.value;
+    subTotals.incomeSharedUser += income.value * user.portionSharedIncome;
     incomeSharedRow.push(incomeData);
   });
 
-  const expenseCol = ["Date", "Title", "Individual Expense"];
+  const expenseCol = ["Date", "", "Title", "Individual Expense"];
   const expenseRow = [];
   expensesIndividual.forEach((expense) => {
     const expenseData = [
       format(expense.createdAt, "M/dd/yy"),
+      
+      `( ${categories.find( category => category._id === expense.categoryID ).title} )`,
       expense.title,
       toCurrency(expense.value),
     ];
-    subTotals.expensesIndividual += expense.value
+    subTotals.expensesIndividual += expense.value;
     expenseRow.push(expenseData);
   });
 
-  const incomeCol = ["Date", "Title", "Individual Income"];
+  const incomeCol = ["Date", "", "Title", "Individual Income"];
   const incomeRow = [];
   incomeIndividual.forEach((income) => {
     const incomeData = [
       format(income.createdAt, "M/dd/yy"),
+      `( ${categories.find( category => category._id === income.categoryID ).title} )`,
       income.title,
-      toCurrency(income.value)
+      toCurrency(income.value),
     ];
-    subTotals.incomeIndividual += income.value
+    subTotals.incomeIndividual += income.value;
     incomeRow.push(incomeData);
   });
 
@@ -109,7 +113,7 @@ const generatePDF = ({
     font: "helvetica",
     halign: "center",
     cellPadding: 1,
-    fillColor: [77,80,107],
+    fillColor: [77, 80, 107],
     fontSize: 10,
   };
 
@@ -119,10 +123,20 @@ const generatePDF = ({
       halign: "center",
       overflow: "linebreak",
       cellPadding: 1,
-      cellWidth: 30,
+      cellWidth: 25,
       fontSize: 9,
     },
     1: {
+      font: "helvetica",
+      halign: "center",
+      overflow: "linebreak",
+      fontStyle: "italic",
+      cellPadding: 1,
+      cellWidth: 25,
+      fontSize: 8,
+      textColor: [155,155,155],
+    },
+    2: {
       font: "helvetica",
       halign: "left",
       overflow: "linebreak",
@@ -130,20 +144,20 @@ const generatePDF = ({
       cellWidth: 82,
       fontSize: 9,
     },
-    2: {
-      font: "helvetica",
-      halign: "center",
-      overflow: "linebreak",
-      cellPadding: 1,
-      cellWidth: 35,
-      fontSize: 9,
-    },
     3: {
       font: "helvetica",
       halign: "center",
       overflow: "linebreak",
       cellPadding: 1,
-      cellWidth: 35,
+      cellWidth: 25,
+      fontSize: 9,
+    },
+    4: {
+      font: "helvetica",
+      halign: "center",
+      overflow: "linebreak",
+      cellPadding: 1,
+      cellWidth: 25,
       fontSize: 9,
     },
   };
@@ -154,14 +168,26 @@ const generatePDF = ({
       halign: "center",
       overflow: "linebreak",
       cellPadding: 1,
-      cellWidth: 30,
+      cellWidth: 25,
       fontStyle: "bold",
       cellPadding: 1,
       textColor: [255, 255, 255],
-      fillColor: [77,80,107],
+      fillColor: [77, 80, 107],
       fontSize: 10,
     },
     1: {
+      font: "helvetica",
+      halign: "center",
+      overflow: "linebreak",
+      cellPadding: 1,
+      cellWidth: 25,
+      fontStyle: "bold",
+      cellPadding: 1,
+      textColor: [255, 255, 255],
+      fillColor: [77, 80, 107],
+      fontSize: 10,
+    },
+    2: {
       font: "helvetica",
       halign: "left",
       overflow: "linebreak",
@@ -170,19 +196,7 @@ const generatePDF = ({
       fontStyle: "bold",
       cellPadding: 1,
       textColor: [255, 255, 255],
-      fillColor: [77,80,107],
-      fontSize: 10,
-    },
-    2: {
-      font: "helvetica",
-      halign: "center",
-      overflow: "linebreak",
-      cellPadding: 1,
-      cellWidth: 35,
-      fontStyle: "bold",
-      cellPadding: 1,
-      textColor: [255, 255, 255],
-      fillColor: [77,80,107],
+      fillColor: [77, 80, 107],
       fontSize: 10,
     },
     3: {
@@ -190,11 +204,23 @@ const generatePDF = ({
       halign: "center",
       overflow: "linebreak",
       cellPadding: 1,
-      cellWidth: 35,
+      cellWidth: 25,
       fontStyle: "bold",
       cellPadding: 1,
       textColor: [255, 255, 255],
-      fillColor: [77,80,107],
+      fillColor: [77, 80, 107],
+      fontSize: 10,
+    },
+    4: {
+      font: "helvetica",
+      halign: "center",
+      overflow: "linebreak",
+      cellPadding: 1,
+      cellWidth: 25,
+      fontStyle: "bold",
+      cellPadding: 1,
+      textColor: [255, 255, 255],
+      fillColor: [77, 80, 107],
       fontSize: 10,
     },
   };
@@ -205,35 +231,48 @@ const generatePDF = ({
       halign: "center",
       overflow: "linebreak",
       cellPadding: 1,
-      cellWidth: 30,
+      cellWidth: 25,
       fontStyle: "bold",
       cellPadding: 1,
       textColor: [255, 255, 255],
-      fillColor: [77,80,107],
+      fillColor: [77, 80, 107],
       fontSize: 10,
     },
     1: {
       font: "helvetica",
+      halign: "center",
+      overflow: "linebreak",
+      fontStyle: "italic",
+      cellPadding: 1,
+      cellWidth: 25,
+      fontStyle: "bold",
+      cellPadding: 1,
+      textColor: [155,155,155],
+      fillColor: [77, 80, 107],
+      fontSize: 8,
+    },
+    2: {
+      font: "helvetica",
       halign: "left",
       overflow: "linebreak",
       cellPadding: 1,
-      cellWidth: 117,
+      cellWidth: 107,
       fontStyle: "bold",
       cellPadding: 1,
       textColor: [255, 255, 255],
-      fillColor: [77,80,107],
+      fillColor: [77, 80, 107],
       fontSize: 10,
     },
-    2: {
+    3: {
       font: "helvetica",
       halign: "center",
       overflow: "linebreak",
       cellPadding: 1,
-      cellWidth: 35,
+      cellWidth: 25,
       fontStyle: "bold",
       cellPadding: 1,
       textColor: [255, 255, 255],
-      fillColor: [77,80,107],
+      fillColor: [77, 80, 107],
       fontSize: 10,
     },
   };
@@ -279,23 +318,33 @@ const generatePDF = ({
       halign: "center",
       overflow: "linebreak",
       cellPadding: 1,
-      cellWidth: 30,
+      cellWidth: 25,
       fontSize: 9,
     },
     1: {
       font: "helvetica",
+      halign: "center",
+      overflow: "linebreak",
+      fontStyle: "italic",
+      cellPadding: 1,
+      cellWidth: 25,
+      fontSize: 8,
+      textColor: [155,155,155],
+    },
+    2: {
+      font: "helvetica",
       halign: "left",
       overflow: "linebreak",
       cellPadding: 1,
-      cellWidth: 117,
+      cellWidth: 107,
       fontSize: 9,
     },
-    2: {
+    3: {
       font: "helvetica",
       halign: "center",
       overflow: "linebreak",
       cellPadding: 1,
-      cellWidth: 35,
+      cellWidth: 25,
       fontSize: 9,
     },
   };
@@ -307,13 +356,21 @@ const generatePDF = ({
     pageBreak: "auto",
   });
 
-  if( user.userBalance !== 0 ){
+  if (user.userBalance !== 0) {
     doc.autoTable({
-        columnStyles: titleStyle,
-        body: [[`${ user.userBalance > 0 ? "You Owe " + toCurrency(user.userBalance) : "You Are Owed " + toCurrency(Math.abs(user.userBalance)) }`]],
-        startY: doc.lastAutoTable.finalY + 6,
-        pageBreak: "auto",
-      });
+      columnStyles: titleStyle,
+      body: [
+        [
+          `${
+            user.userBalance > 0
+              ? "You Owe " + toCurrency(user.userBalance)
+              : "You Are Owed " + toCurrency(Math.abs(user.userBalance))
+          }`,
+        ],
+      ],
+      startY: doc.lastAutoTable.finalY + 6,
+      pageBreak: "auto",
+    });
   }
 
   if (expenseSharedRow.length) {
@@ -335,6 +392,7 @@ const generatePDF = ({
       columnStyles: columnStyles4Total,
       body: [
         [
+          "",
           "",
           "Totals",
           toCurrency(subTotals.expensesShared),
@@ -366,6 +424,7 @@ const generatePDF = ({
       body: [
         [
           "",
+          "",
           "Totals",
           toCurrency(subTotals.incomeShared),
           toCurrency(subTotals.incomeSharedUser),
@@ -393,9 +452,7 @@ const generatePDF = ({
     });
     doc.autoTable({
       columnStyles: columnStyles3Total,
-      body: [
-        ["", "Totals", toCurrency(subTotals.expensesIndividual)],
-      ],
+      body: [["","", "Totals", toCurrency(subTotals.expensesIndividual)]],
       startY: doc.lastAutoTable.finalY,
       pageBreak: "auto",
     });
@@ -403,11 +460,11 @@ const generatePDF = ({
 
   if (incomeRow.length) {
     doc.autoTable({
-        columnStyles: titleStyle,
-        body: [["Individual Income"]],
-        startY: doc.lastAutoTable.finalY + 12,
-        pageBreak: "auto",
-      });
+      columnStyles: titleStyle,
+      body: [["Individual Income"]],
+      startY: doc.lastAutoTable.finalY + 12,
+      pageBreak: "auto",
+    });
     doc.autoTable({
       head: [incomeCol],
       headStyles: headerStyles,
@@ -418,7 +475,7 @@ const generatePDF = ({
     });
     doc.autoTable({
       columnStyles: columnStyles3Total,
-      body: [["", "Totals", toCurrency(subTotals.incomeIndividual)]],
+      body: [["","", "Totals", toCurrency(subTotals.incomeIndividual)]],
       startY: doc.lastAutoTable.finalY,
       pageBreak: "auto",
     });
@@ -426,11 +483,11 @@ const generatePDF = ({
 
   if (transferRow.length) {
     doc.autoTable({
-        columnStyles: titleStyle,
-        body: [["Transfers"]],
-        startY: doc.lastAutoTable.finalY + 12,
-        pageBreak: "auto",
-      });
+      columnStyles: titleStyle,
+      body: [["Transfers"]],
+      startY: doc.lastAutoTable.finalY + 12,
+      pageBreak: "auto",
+    });
     doc.autoTable({
       head: [transferCol],
       headStyles: headerStyles,
@@ -441,8 +498,7 @@ const generatePDF = ({
     });
   }
 
-
-  doc.save(`report_${ format(date, "M/dd/yy") }.pdf`);
+  doc.save(`report_${format(date, "M/dd/yy")}.pdf`);
 };
 
 export default generatePDF;

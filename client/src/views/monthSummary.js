@@ -261,6 +261,7 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
                 return <PDFMonthlyUse key={ `${ user.userID }_rpt`} 
                 user={ user } 
                 date={ date }
+                categories={ categories }
                 expensesIndividual={ expenseByMonth.filter( expense => expense.userID._id === user.userID && expense.individualEntry ) } 
                 expensesShared={ expenseByMonthShared }
                 incomeIndividual={ incomeByMonth.filter( income => income.userID._id === user.userID && income.individualEntry ) }

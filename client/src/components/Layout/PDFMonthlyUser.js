@@ -8,6 +8,7 @@ import generatePDF from "../../utils/generatePDF";
 const PDFMonthlyUser = ({
   user,
   date,
+  categories,
   expensesIndividual,
   expensesShared,
   incomeIndividual,
@@ -23,6 +24,7 @@ const PDFMonthlyUser = ({
           generatePDF({
             user,
             date,
+            categories,
             expensesIndividual,
             expensesShared,
             incomeIndividual,
