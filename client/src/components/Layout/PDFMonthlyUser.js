@@ -14,7 +14,6 @@ const PDFMonthlyUser = ({
   incomeShared,
   transfers,
 }) => {
-  console.log(transfers);
 
   return (
     <>

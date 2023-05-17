@@ -98,15 +98,15 @@ li {
 }
 
 .font-reg {
-  font-size: 0.8rem
+  font-size: 0.8rem;
 }
 
 .indent-1 {
-  padding-left: 1rem
+  padding-left: 1rem;
 }
 
 .endent-1 {
-  padding-right: 1rem
+  padding-right: 1rem;
 }
 
 .mobile-hide {
@@ -123,18 +123,18 @@ li {
   font-weight: bold;
 }
 
-.colon::after{
-  content: ": "
+.colon::after {
+  content: ": ";
 }
 
 label,
 .noselect {
   -webkit-touch-callout: none; /* iOS Safari */
-    -webkit-user-select: none; /* Safari */
-     -khtml-user-select: none; /* Konqueror HTML */
-       -moz-user-select: none; /* Old versions of Firefox */
-        -ms-user-select: none; /* Internet Explorer/Edge */
-            user-select: none; /* Non-prefixed version, currently
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome, Edge, Opera and Firefox */
 }
 
@@ -197,7 +197,7 @@ p.block {
 }
 
 .margin-1rem-2px-full-neg {
-  margin-top: calc( -1rem - 2px ) !important;
+  margin-top: calc(-1rem - 2px) !important;
 }
 
 .margin-top-full {
@@ -255,25 +255,25 @@ p.block {
 /* SVG sizes */
 .svg-sq-1-5 svg {
   width: 1.5rem;
-  height: 1.5rem
+  height: 1.5rem;
 }
 
 .svg-sq-2-0 svg {
   width: 2rem;
-  height: 2rem
+  height: 2rem;
 }
 
 /* SVG Color */
 .svg-fill-primary svg {
-  fill: var(--primary-color)
+  fill: var(--primary-color);
 }
 
 .svg-fill-secondary svg {
-  fill: var(--secondary-color)
+  fill: var(--secondary-color);
 }
 
 .svg-fill-highlight svg {
-  fill: var(--highlight-color)
+  fill: var(--highlight-color);
 }
 
 /* Widths */
@@ -340,8 +340,7 @@ section {
 .section-list,
 .chart-full-section,
 .dual-doughnut-container,
-.monthly-group-detail
- {
+.monthly-group-detail {
   width: 100%;
   max-width: 700px;
   border: 1px solid var(--highlight-color);
@@ -371,10 +370,10 @@ section {
   transition: 0.25s ease all;
   background: linear-gradient(
     90deg,
-    rgba( 255, 255, 255, 0 ) 0%,
-    rgba( 255, 255, 255, 0.75 ) 5%,
-    rgba( 255, 255, 255, 0.75 ) 95%,
-    rgba( 255, 255, 255, 0 ) 100%
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.75) 5%,
+    rgba(255, 255, 255, 0.75) 95%,
+    rgba(255, 255, 255, 0) 100%
   );
 }
 
@@ -382,15 +381,15 @@ section {
   background: white;
   background: linear-gradient(
     90deg,
-    rgba( 255, 255, 255, 0 ) 0%,
-    rgba( 255, 255, 255, 1 ) 5%,
-    rgba( 255, 255, 255, 1 ) 95%,
-    rgba( 255, 255, 255, 0 ) 100%
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 1) 5%,
+    rgba(255, 255, 255, 1) 95%,
+    rgba(255, 255, 255, 0) 100%
   );
 }
 
 .chart-full-section {
-  height: 15rem
+  height: 15rem;
 }
 
 .chart-half-section {
@@ -407,7 +406,7 @@ section {
   margin: 0.25rem 0;
 }
 
-.section-list-title{
+.section-list-title {
   width: 95%;
   max-width: 700px;
   border: 1px solid var(--highlight-color);
@@ -426,8 +425,8 @@ section {
 }
 
 .nav-button,
-.username-block {  
-  display: flex;  
+.username-block {
+  display: flex;
   text-align: center;
   padding: 0.4rem 0.6rem;
   font-size: 0.75rem;
@@ -461,7 +460,7 @@ section {
 
 .large-button {
   margin-top: 1rem;
-  width: calc( 100% - 1rem );
+  width: calc(100% - 1rem);
   font-size: 1.5rem;
   font-weight: bold;
   border-radius: 0.5rem;
@@ -471,14 +470,14 @@ section {
 }
 
 .large-button:hover {
-  margin-top: calc( 1rem + 2px);
+  margin-top: calc(1rem + 2px);
   border-bottom: 1px inset var(--highlight-2-color);
 }
 
 .chart-full-section #multi-month-menu {
-  margin-top: calc( -1.5rem - 5px );
-  margin-left: calc( -0.5rem );
-  width: calc( 100% + 1rem );
+  margin-top: calc(-1.5rem - 5px);
+  margin-left: calc(-0.5rem);
+  width: calc(100% + 1rem);
   justify-content: space-evenly;
 }
 
@@ -594,15 +593,15 @@ section {
 }
 
 .f1 {
-  flex: 1
+  flex: 1;
 }
 
 .f2 {
-  flex: 2
+  flex: 2;
 }
 
 .f-full {
-  width: 100%
+  width: 100%;
 }
 
 .f-j-l {
@@ -614,85 +613,83 @@ section {
 }
 
 .positive {
-  color: green
+  color: green;
 }
 
 .negative {
-  color: red
+  color: red;
 }
 
 .negative:before {
-  content: '-'
+  content: "-";
 }
 
 .reverse {
-  color: orange
+  color: orange;
 }
 
 .reverse:before {
-  content: '-'
+  content: "-";
 }
 .reverse:after {
-  content: 'rev'
+  content: "rev";
 }
 
 .transfer-text {
-  color: orange
+  color: orange;
 }
 
 .credit {
-  color: orange
+  color: orange;
 }
 
 .credit:after {
-  content: 'cr'
+  content: "cr";
 }
 
 .add {
-  margin-left: 0
+  margin-left: 0;
 }
 
 .add svg {
   height: 1.5rem;
   width: 1.5rem;
   fill: green;
-  margin: 0 0.5rem !important
+  margin: 0 0.5rem !important;
 }
 
 .sub {
-  margin-left: 0
+  margin-left: 0;
 }
 
 .sub svg {
   height: 1.5rem;
   width: 1.5rem;
   fill: red;
-  margin: 0 0.5rem !important
+  margin: 0 0.5rem !important;
 }
 
 .transfer {
-  margin-left: 0
+  margin-left: 0;
 }
 
 .transfer svg {
   height: 1.5rem;
   width: 1.5rem;
   fill: orange;
-  margin: 0 0.5rem !important
+  margin: 0 0.5rem !important;
 }
 
 .icon-margin {
-  margin-left: 0
+  margin-left: 0;
 }
 
 .icon-margin svg {
   height: 1.5rem;
   width: 1.5rem;
   fill: var(--primary-color);
-  margin: 0 0.5rem !important
+  margin: 0 0.5rem !important;
 }
-
-
 
 /* Titles */
 .title {
@@ -741,11 +738,11 @@ section {
 }
 
 /* Lists */
-.section-list .border-bot-hightlight-1:last-of-type{
+.section-list .border-bot-hightlight-1:last-of-type {
   border-bottom: none;
 }
 
-.section-list li:hover{
+.section-list li:hover {
   background-color: var(--tertiary-color);
 }
 
@@ -857,7 +854,7 @@ form,
 }
 
 .form-inline-checkbox {
-  width: calc( 100% - 1rem )
+  width: calc(100% - 1rem);
 }
 
 .form-inline-text > *,
@@ -866,7 +863,7 @@ form,
 .form-inline-date > *,
 .form-inline-select > *,
 .form-inline-checkbox > * {
-  width: calc( 100% - 1rem )
+  width: calc(100% - 1rem);
 }
 
 .form-inline-text > label,
@@ -926,8 +923,7 @@ form,
 .form-inline-date-monthly > input:focus,
 .form-inline-date > input:focus,
 .form-inline-number > input:focus,
-.form-inline-select > select:focus
-textarea:focus {
+.form-inline-select > select:focus textarea:focus {
   background-color: white;
   border: 1px solid var(--highlight-color);
 }
@@ -955,7 +951,7 @@ textarea:focus {
 }
 
 .form-inline-checkbox-svg {
-  margin: 0 2rem
+  margin: 0 2rem;
 }
 
 .form-inline-checkbox-svg svg {
@@ -1007,7 +1003,7 @@ textarea:focus {
 }
 
 .form-inline-checkbox .switch-handle {
-  content: '';
+  content: "";
   position: absolute;
   top: 1px;
   left: 2px;
@@ -1061,7 +1057,7 @@ input::-ms-clear {
 }
 
 .border_b_none {
-  border-bottom: none
+  border-bottom: none;
 }
 
 .border-t-l-rad-none {
@@ -1081,11 +1077,11 @@ input::-ms-clear {
 }
 
 .border-b-l-rad-none {
-  border-bottom-left-radius: 0
+  border-bottom-left-radius: 0;
 }
 
 .border-b-r-rad-none {
-  border-bottom-right-radius: 0
+  border-bottom-right-radius: 0;
 }
 
 /* Styled Elements */
@@ -1100,10 +1096,10 @@ input::-ms-clear {
   font-size: 0.6rem;
   font-weight: bold;
   margin-left: 1rem;
-  padding-top: 2px
+  padding-top: 2px;
 }
 
-.individual-icon svg{
+.individual-icon svg {
   fill: var(--highlight-color);
   width: 1.25rem;
   height: 1.25rem;
@@ -1113,21 +1109,19 @@ input::-ms-clear {
   margin-left: 1rem;
 }
 
-.edit-icon svg{
+.edit-icon svg {
   fill: var(--highlight-color);
   width: 1.25rem;
   height: 1.25rem;
   transition: 0.25s ease all;
 }
 
-.edit-icon:hover svg{
+.edit-icon:hover svg {
   fill: var(--primary-color);
-
 }
 
 /* Media */
 @media screen and (min-width: 1000px) {
-
   * {
     font-size: initial;
   }
@@ -1136,16 +1130,16 @@ input::-ms-clear {
     width: 100%;
     max-width: 1800px;
     display: grid;
-    grid-template-columns: 1fr 1fr; 
-    grid-template-rows: auto auto auto auto auto; 
-    gap: 0px 0px; 
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto auto auto;
+    gap: 0px 0px;
     align-items: start;
-    grid-template-areas: 
+    grid-template-areas:
       "title title"
       "menu menu"
       "description description"
       "multi-month-overview month-summary"
-      "recent-transactions month-summary"; 
+      "recent-transactions month-summary";
   }
 
   .nav-menu {
@@ -1159,17 +1153,17 @@ input::-ms-clear {
   .mobile-hide {
     display: initial !important;
   }
-  
+
   .add {
-    margin-left: 0.5rem
+    margin-left: 0.5rem;
   }
-  
+
   .sub {
-    margin-left: 0.5rem
+    margin-left: 0.5rem;
   }
 
   .transfer {
-    margin-left: 0.5rem
+    margin-left: 0.5rem;
   }
 
   #budget-title {
@@ -1199,15 +1193,15 @@ input::-ms-clear {
   section {
     min-width: 48%;
     width: auto;
-    margin: 0.5rem
+    margin: 0.5rem;
   }
 
   .full-width-section {
     grid-area: title;
   }
-  
+
   .chart-full-section #multi-month-menu {
-    margin-top: calc( -1.2rem - 6px );
+    margin-top: calc(-1.2rem - 6px);
   }
 
   .full-container {
@@ -1232,12 +1226,11 @@ input::-ms-clear {
   }
 
   .form-inline-text > *,
-  .form-inline-number > *
-  .form-inline-date-monthly > *,
+  .form-inline-number > * .form-inline-date-monthly > *,
   .form-inline-date > *,
   .form-inline-select > *,
-  .form-inline-checkbox  > * {
-    width: auto
+  .form-inline-checkbox > * {
+    width: auto;
   }
 
   .form-inline-text,
@@ -1263,15 +1256,15 @@ input::-ms-clear {
   .title {
     font-size: 1.75rem;
   }
-  
+
   .container-title {
     font-size: 1.75rem;
   }
-  
+
   .container-description {
     font-size: 1.5rem;
   }
-  
+
   .sub-container-description {
     font-size: 1.2rem;
   }
@@ -1279,12 +1272,12 @@ input::-ms-clear {
   .font-small {
     font-size: 0.75rem;
   }
-  
+
   .font-medium {
     font-size: 0.85rem;
   }
-  
+
   .font-reg {
-    font-size: 1rem
+    font-size: 1rem;
   }
 }

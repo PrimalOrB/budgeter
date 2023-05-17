@@ -251,26 +251,28 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
             Reports
           </span>
         </li>
-        { expandedState.reports &&
-          uniqueUsers.length 
-          ?
-          <li className="flex nowrap flex-just-space-around f-full">
-            {
-            uniqueUsers.map( user => {
-              return <PDFMonthlyUse key={ `${ user.userID }_rpt`} 
-              user={ user } 
-              date={ date }
-              expensesIndividual={ expenseByMonth.filter( expense => expense.userID._id === user.userID && expense.individualEntry ) } 
-              expensesShared={ expenseByMonthShared }
-              incomeIndividual={ incomeByMonth.filter( income => income.userID._id === user.userID && income.individualEntry ) }
-              incomeShared={ incomeByMonthShared }
-              transfers={ transferByMonth }
-              />
-            })
-          }
-          </li>
-          :
-          <li className="flex nowrap flex-just-space-around f-full">Empty</li>
+        { expandedState.reports && 
+          (
+            uniqueUsers.length 
+            ?
+            <li className="flex nowrap flex-just-space-around f-full">
+              {
+              uniqueUsers.map( user => {
+                return <PDFMonthlyUse key={ `${ user.userID }_rpt`} 
+                user={ user } 
+                date={ date }
+                expensesIndividual={ expenseByMonth.filter( expense => expense.userID._id === user.userID && expense.individualEntry ) } 
+                expensesShared={ expenseByMonthShared }
+                incomeIndividual={ incomeByMonth.filter( income => income.userID._id === user.userID && income.individualEntry ) }
+                incomeShared={ incomeByMonthShared }
+                transfers={ transferByMonth }
+                />
+              })
+            }
+            </li>
+            :
+            <li className="flex nowrap flex-just-space-around f-full">Empty</li>
+          )
         }
       </ul>  
     </section>
