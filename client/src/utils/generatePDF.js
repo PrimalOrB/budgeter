@@ -456,8 +456,6 @@ const generatePDF = ({
     })
   }
 
-  console.log( transferRows )
-
   if (transferRows.length) {
     doc.autoTable({
       columnStyles: tableTitleStyle,
