@@ -5,13 +5,11 @@ const PDFMonthlyUser = ({
   user,
   date,
   categories,
-  expensesIndividual,
-  expensesShared,
-  incomeIndividual,
-  incomeShared,
+  expenses,
+  incomes,
   transfers,
 }) => {
-
+    
   return (
     <>
       <button
@@ -21,10 +19,8 @@ const PDFMonthlyUser = ({
             user,
             date,
             categories,
-            expensesIndividual,
-            expensesShared,
-            incomeIndividual,
-            incomeShared,
+            expenses,
+            incomes,
             transfers,
           })
         }

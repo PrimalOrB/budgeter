@@ -262,10 +262,8 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
                 user={ user } 
                 date={ date }
                 categories={ categories }
-                expensesIndividual={ expenseByMonth.filter( expense => expense.userID._id === user.userID && expense.individualEntry ) } 
-                expensesShared={ expenseByMonthShared }
-                incomeIndividual={ incomeByMonth.filter( income => income.userID._id === user.userID && income.individualEntry ) }
-                incomeShared={ incomeByMonthShared }
+                expenses={ expenseByMonth }
+                incomes={ incomeByMonth }
                 transfers={ transferByMonth }
                 />
               })
