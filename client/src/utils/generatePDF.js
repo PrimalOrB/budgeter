@@ -408,7 +408,7 @@ const generatePDF = ({
   if( expensesIndividualPost.length ){
     doc.autoTable({
         columnStyles: tableTitleStyle,
-        body: [["Shared Expenses"]],
+        body: [["Individual Expenses"]],
         startY: doc.lastAutoTable.finalY + 6,
         pageBreak: "auto",
     });
@@ -434,7 +434,7 @@ const generatePDF = ({
   if( incomeIndividualPost.length ){
     doc.autoTable({
         columnStyles: tableTitleStyle,
-        body: [["Shared Expenses"]],
+        body: [["Individual Income"]],
         startY: doc.lastAutoTable.finalY + 6,
         pageBreak: "auto",
     });
