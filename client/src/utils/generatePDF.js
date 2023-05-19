@@ -100,18 +100,34 @@ const generatePDF = ({
       ]);
     }
     if (!income.individualEntry) {
+
       allData.totalSharedIncomeValue += income.value;
-      allData.totalSharedIncomeResponsibilityValue +=
-        income.value * user.portionSharedIncome;
-      category.sharedTotalValue += income.value;
-      category.sharedResponsibilityValue +=
-        income.value * user.portionSharedIncome;
-      category.sharedEntries.push([
-        format(income.createdAt, "M/dd/yy"),
-        income.title,
-        toCurrency(income.value),
-        toCurrency(income.value * user.portionSharedIncome),
-      ]);
+
+      if( income.userID._id === user.userID ){
+        allData.totalSharedIncomeResponsibilityValue +=
+            income.value;
+          category.sharedTotalValue += income.value;
+          category.sharedResponsibilityValue +=
+            income.value;
+
+        category.sharedEntries.push([
+            format(income.createdAt, "M/dd/yy"),
+            `( ${ income.userID.userInitials } )  ${ income.title }`,
+            toCurrency(income.value),
+            toCurrency(income.value),
+          ]);
+      } else {
+
+          category.sharedTotalValue += income.value;
+
+          category.sharedEntries.push([
+            format(income.createdAt, "M/dd/yy"),
+            `( ${ income.userID.userInitials } )  ${ income.title }`,
+            toCurrency(income.value),
+            '-',
+          ]);
+      }
+
     }
   });
 
@@ -537,6 +553,19 @@ const generatePDF = ({
       startY: doc.lastAutoTable.finalY + 6,
       pageBreak: "auto",
     });
+    doc.autoTable({
+        columnStyles: table4TotalsStyle,
+        body: [
+          [
+            "",
+            "",
+            "All",
+            `${ user.userInitials } Only`,
+          ],
+        ],
+        startY: doc.lastAutoTable.finalY,
+        pageBreak: "auto",
+      });
     incomeSharedPost.map((category) => {
       doc.autoTable({
         columnStyles: table3SubTitleStyle,
