@@ -48,8 +48,6 @@ const MultiMonthBudgetOverview = ( { data, highlightMonthState, setHighlightMont
     const [ loadingState, setLoadingState ] = useState( true )
     const maxYAxis = useRef( 0 )
 
-    console.log( data )
-
     const createGraphData = () => {
         const labels = []
         const datasets = [
