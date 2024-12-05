@@ -1,4 +1,5 @@
 import Home from './home'
+import CallbackPage from './callback'
 import AddBudget from './addBudget'
 import Budget from './budget'
 import AddCategory from './addCategory'
@@ -13,6 +14,7 @@ import MonthSummary from './monthSummary'
 
 export { 
     Home,
+    CallbackPage,
     AddBudget,
     Budget,
     AddCategory,

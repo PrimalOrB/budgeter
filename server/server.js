@@ -1,51 +1,53 @@
-const express = require( 'express' );
-const { ApolloServer } = require( 'apollo-server-express' );
-const db = require( './config/connection' );
-const { authMiddleware } = require('./utils/auth');
-const path = require('path');
+import express from "express";
+import { ApolloServer } from "@apollo/server";
+import { expressMiddleware } from "@apollo/server/express4";
+import { authMiddleware } from "./utils/auth.cjs";
+import http from "http";
+import cors from "cors";
 
-const { typeDefs, resolvers } = require( './schemas' );
+import db from "./config/connection.cjs";
 
-require('dotenv').config()
+import path from "path";
+import { fileURLToPath } from "url";
+
+import { typeDefs, resolvers } from "./schemas/index.cjs";
 
 const PORT = process.env.PORT || 3001;
 const app = express();
-const server = new ApolloServer( {
+
+const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
+// const __dirname = path.dirname(__filename); // get the name of the directory
+
+const httpServer = http.createServer(app);
+const server = new ApolloServer({
   typeDefs,
   resolvers,
   formatError: (err) => {
-    // Don't give the specific errors to the client.
-    if (err.message.startsWith('Database Error: ')) {
-      return new Error('Internal server error');
+    if (err.message.startsWith("Database Error: ")) {
+      return new Error("Internal server error");
     }
-
-    // Otherwise return the original error. The error can also
-    // be manipulated in other ways, as long as it's returned.
     return err;
   },
-  context: authMiddleware
-} );
-
-server.applyMiddleware( { app } );
-
-app.use(express.urlencoded({ extended: false }));
-app.use(express.static('public'))
-app.use(express.json());
-
-
-// Serve up static assets
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/build')));
-}
-
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/build/index.html'));
+  // context: authMiddleware,
 });
+await server.start();
+app.use(
+  "/graphql",
+  cors(),
+  express.urlencoded({ extended: false }),
+  express.static("public"),
+  express.json(),
+  expressMiddleware(server, {
+    // context: async ({ req }) => ({ token: req.headers.token }),
+    context: async ({ req }) => ({ token: authMiddleware({ req })}),
+  })
+);
 
-db.once('open', () => {
-  app.listen(PORT, () => {
-    console.log( `API server running on port ${ PORT }!` );
-    console.log( `Use GraphQL at http://localhost:${ PORT }${ server.graphqlPath }` );  
-  });
-});
+// app.use(express.static(path.join(__dirname, "../client/build/"))); // the same directory as below
 
+// app.get("*", (req, res) => {
+//   res.sendFile(path.resolve(__dirname, "../client/build/", "index.html"));
+// });
+
+await new Promise((resolve) => httpServer.listen({ port: PORT }, resolve));
+console.log(`🚀 Server ready at http://localhost:${PORT}/graphql`);

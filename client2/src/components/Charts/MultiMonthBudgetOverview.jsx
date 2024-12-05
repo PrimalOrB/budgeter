@@ -48,6 +48,8 @@ const MultiMonthBudgetOverview = ( { data, highlightMonthState, setHighlightMont
     const [ loadingState, setLoadingState ] = useState( true )
     const maxYAxis = useRef( 0 )
 
+    console.log( data )
+
     const createGraphData = () => {
         const labels = []
         const datasets = [
@@ -67,38 +69,12 @@ const MultiMonthBudgetOverview = ( { data, highlightMonthState, setHighlightMont
             },
             {
                 type: 'bar',
-                label: 'Budgeted Income',
-                data: new Array( data.length ).fill().map( ( x, i ) => {
-                    return 0
-                } ),
-                backgroundColor: 'rgba(0, 128, 0, 0.25)',
-                borderWidth: 1,
-                borderColor: 'rgba(0, 128, 0, 1)',
-                stack: 'Stack 0',
-                barThickness: 25,
-                borderRadius: determineBorderRadius,
-            },
-            {
-                type: 'bar',
-                label: 'Budgeted Expense',
-                data: new Array( data.length ).fill().map( ( x, i ) => {
-                    return 0
-                } ),
-                backgroundColor: 'rgba(200, 0, 0, 0.25)',
-                borderWidth: 1,
-                borderColor: 'rgba(200, 0, 0, 1)',
-                stack: 'Stack 0',
-                barThickness: 25,
-                borderRadius: determineBorderRadius,
-            },
-            {
-                type: 'bar',
                 label: 'Income',
                 data: new Array( data.length ).fill().map( ( x, i ) => {
                     return 0
                 } ),
                 backgroundColor: 'rgba(0, 128, 0, 1)',
-                stack: 'Stack 1',
+                stack: 'Stack 0',
                 barThickness: 25,
                 borderRadius: determineBorderRadius,
             },
@@ -118,10 +94,8 @@ const MultiMonthBudgetOverview = ( { data, highlightMonthState, setHighlightMont
         
         data.map( ( month, i ) => {
             labels.push( month.label )    
-            datasets[1].data[i] = month.budgetedIncomeTotal
-            datasets[2].data[i] = - month.budgetedExpenseTotal 
-            datasets[3].data[i] = month.incomeTotal
-            datasets[4].data[i] = - month.expenseTotal               
+            datasets[1].data[i] = month.incomeTotal
+            datasets[2].data[i] = month.expenseTotal               
             datasets[0].data[i] += month.incomeTotal  
             return datasets[0].data[i] -= month.expenseTotal  
         })
@@ -142,6 +116,7 @@ const MultiMonthBudgetOverview = ( { data, highlightMonthState, setHighlightMont
         
         setLoadingState( false )
     }
+    
 
     useEffect(()=>{
         createGraphData()

@@ -17,7 +17,8 @@
     "react-dom": "^16.14.0",
     "react-icons": "^4.2.0",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "4.0.0"
+    "react-scripts": "^3.0.1",
+    "save-dev": "^0.0.1-security"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -41,6 +42,7 @@
     ]
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "cross-env": "^7.0.2"
   }
 }

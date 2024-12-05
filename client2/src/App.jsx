@@ -14,8 +14,7 @@ import {
   Header,
   // Footer
 } from "./components";
-import { Home, AddBudget, Budget } from "./views";
-import ProtectedRoute from "./auth/protected-route";
+import { Home, CallbackPage, AddBudget, Budget } from "./views";
 
 const httpLink = createHttpLink({
   uri: "/graphql",
@@ -50,9 +49,10 @@ const App = () => {
           <Header />
           <main>
             <Routes>
-              <Route Component={Home} path="/" exact={true} />
-              <Route Component={AddBudget} path="/add-budget" exact={true} />
-              <Route Component={Budget} path="/budget/:id/:tab?/:cat?" exact={true} />
+              <Route element={<Home/>} path="/" />
+              <Route element={<CallbackPage/>} path="/callback" />
+              <Route element={<AddBudget/>} path="/add-budget" />
+              <Route element={<Budget/>} path="/budget/:id/:tab?/:cat?" />
             </Routes>
           </main>
         </div>

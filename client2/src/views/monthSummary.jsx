@@ -107,8 +107,8 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
     <section id="month-summary" key={ `${ date }_results` } >
       <h4 className="sub-container-description section-list-title noselect">{ format( date, "MMMM yyyy" ) }</h4>
       <div className="dual-doughnut-container">
-        <SingleMonthCategoryCost valueType="expense" activeDate={ date } highlightMonthState={ highlightMonthState } categories={ categories.filter( category => category.categoryType === 'expense' ) } transactions={ expenseByMonth } />
-        <SingleMonthCategoryCost valueType="income" activeDate={ date } highlightMonthState={ highlightMonthState } categories={ categories.filter( category => category.categoryType === 'income' ) } transactions={ incomeByMonth } />
+        {/* <SingleMonthCategoryCost valueType="expense" activeDate={ date } highlightMonthState={ highlightMonthState } categories={ categories.filter( category => category.categoryType === 'expense' ) } transactions={ expenseByMonth } />
+        <SingleMonthCategoryCost valueType="income" activeDate={ date } highlightMonthState={ highlightMonthState } categories={ categories.filter( category => category.categoryType === 'income' ) } transactions={ incomeByMonth } /> */}
       </div>
 
         {/* balances section */}

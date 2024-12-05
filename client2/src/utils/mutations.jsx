@@ -119,12 +119,6 @@ export const QUERY_CURRENT_BUDGET = gql`
         budgetID
         categoryType
         countUse
-        budgetedValueRange {
-          order
-          effectiveStartDate
-          effectiveEndDate
-          budgetedValue
-        }
       }
       entries {
         _id
@@ -170,12 +164,6 @@ mutation queryCategory($input: CategoryIDInput! ) {
       budgetID
       categoryType
       countUse
-      budgetedValueRange {
-        order
-        effectiveStartDate
-        effectiveEndDate
-        budgetedValue
-      }
   }
 }
 `;

@@ -15,7 +15,7 @@ const AddBudget = () => {
   
   const [ state ] = useStoreContext();
 
-  const history = useNavigate ();
+  const navigate = useNavigate ();
 
   useEffect(()=>{
     if( state?.currentUser ){
@@ -71,7 +71,7 @@ const AddBudget = () => {
     update: ( cache, data ) => {
       try {
         if( data ){
-          return history.push( `/budget/${ data.data.createBudget._id }` );
+          return navigate( `/budget/${ data.data.createBudget._id }` );
         }
       } catch (e) {
         console.error( createdError );

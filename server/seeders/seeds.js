@@ -1,7 +1,7 @@
 const faker = require('faker');
 
 const db = require('../config/connection');
-const { } = require('../models');
+const { } = require('../models.cjs');
 
 db.once('open', async () => {
   
