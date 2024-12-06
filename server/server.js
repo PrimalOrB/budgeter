@@ -39,7 +39,7 @@ app.use(
   express.json(),
   expressMiddleware(server, {
     // context: async ({ req }) => ({ token: req.headers.token }),
-    context: async ({ req }) => ({ token: authMiddleware({ req }) }),
+    context: async ({ req }) => ({ token: authMiddleware({ req })}),
   })
 );
 
@@ -51,3 +51,4 @@ app.use(
 
 await new Promise((resolve) => httpServer.listen({ port: PORT }, resolve));
 console.log(`🚀 Server ready at http://localhost:${PORT}/graphql`);
+  

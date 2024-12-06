@@ -14,7 +14,10 @@ function fixRounding(value, precision) {
   const roundingFactor = Math.pow(10, precision),
     isNegative = value < 0,
     rounded = Math.round(Math.abs(value) * roundingFactor) / roundingFactor;
-  return rounded * (isNegative ? -1 : 1);
+  return rounded > 0 ? rounded * (isNegative ? -1 : 1) : 0;
 }
 
-module.exports = { extractPropAsStrToArr, dateToMonthStr, fixRounding };
+
+function copyObject(obj) { return JSON.parse(JSON.stringify(obj)) }
+
+module.exports = { extractPropAsStrToArr, dateToMonthStr, fixRounding, copyObject };

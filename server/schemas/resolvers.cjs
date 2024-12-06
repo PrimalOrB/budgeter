@@ -7,6 +7,7 @@ const {
   extractPropAsStrToArr,
   dateToMonthStr,
   fixRounding,
+  copyObject,
 } = require("../utils/helpers.cjs");
 const { sub } = require("date-fns");
 
@@ -300,18 +301,26 @@ const resolvers = {
           defaultUser = {
             incomeTotal: 0,
             expenseTotal: 0,
+            balanceOfTransfer: 0,
             individualIncomeTotal: 0,
             individualExpenseTotal: 0,
             sharedIncomeTotal: 0,
             sharedExpenseTotal: 0,
+            percentOfTotalIncome: 0,
+            responsibilityTotal: 0,
+            responsibilityBalance: 0,
+            currentPersonalBalance: 0,
+            finalPersonalBalance: 0,
           };
 
-        let months = new Array(lengthOfInitialQuery).fill().map((x, i) => {
+        const createdMonths = [];
+        new Array(lengthOfInitialQuery).fill().map((x, i) => {
           const createDate = sub(new Date(), { months: i }),
             label = dateToMonthStr(createDate);
-          const month = { ...defaultMonth };
+          const month = copyObject(defaultMonth);
           month.label = label;
-          return { ...month };
+          month.order = i;
+          return createdMonths.push(month);
         });
 
         const findBudgetNew = await Budget.findOne({ _id: input.budget })
@@ -327,87 +336,149 @@ const resolvers = {
           throw new UserInputError("Incorrect credentials");
         }
 
-        const populateMonth = months.map(async (month) => {
+        // get data for each monmth
+        const newMonths = [];
+        const queryEachMonth = createdMonths.map(async (month) => {
           const monthlyEntries = await Entry.find({
             budgetID: findBudgetNew._id,
             monthString: month.label,
           })
             .populate("userID")
             .populate("toUserID");
-          return (month.entries = [...monthlyEntries]);
+          const findMonthInArr = createdMonths.find(
+            (findMonth) => findMonth.label === month.label
+          );
+          findMonthInArr.entries = [...monthlyEntries];
+          return newMonths.push(findMonthInArr);
         });
-        await Promise.all(populateMonth);
+        await Promise.all(queryEachMonth);
 
         const populatedMonths = [];
-        months.map((month, i) => {
-          const monthData = { ...defaultMonth };
-          monthData.label = month.label;
-          month.entries.map((entry) => {
-            if (!monthData.userData[entry.userID._id]) {
-              monthData.userData[entry.userID._id] = { ...defaultUser };
-            }
-            // income
-            if (entry.valueType === "income") {
-              monthData.incomeTotal = fixRounding(
-                monthData.incomeTotal + entry.value,
-                2
-              );
-              monthData.userData[entry.userID._id].incomeTotal = fixRounding(
-                monthData.userData[entry.userID._id].incomeTotal + entry.value,
-                2
-              );
-              if (!entry.individualEntry) {
-                monthData.sharedIncomeTotal = fixRounding(
-                  monthData.sharedIncomeTotal + entry.value,
+        newMonths
+          .sort((a, b) => a.order - b.order)
+          .map((month) => {
+            const monthData = { ...month };
+            month.entries.map((entry) => {
+              if (!monthData.userData[entry.userID._id]) {
+                monthData.userData[entry.userID._id] = copyObject(defaultUser);
+              }
+              if (entry?.toUserID) {
+                if (!monthData.userData[entry.toUserID._id]) {
+                  monthData.userData[entry.toUserID._id] =
+                    copyObject(defaultUser);
+                }
+              }
+              // income
+              if (entry.valueType === "income") {
+                monthData.incomeTotal = fixRounding(
+                  monthData.incomeTotal + entry.value,
                   2
                 );
-                monthData.userData[entry.userID._id].sharedIncomeTotal =
+                monthData.userData[entry.userID._id].incomeTotal = fixRounding(
+                  monthData.userData[entry.userID._id].incomeTotal +
+                    entry.value,
+                  2
+                );
+                if (!entry.individualEntry) {
+                  monthData.sharedIncomeTotal = fixRounding(
+                    monthData.sharedIncomeTotal + entry.value,
+                    2
+                  );
+                  monthData.userData[entry.userID._id].sharedIncomeTotal =
+                    fixRounding(
+                      monthData.userData[entry.userID._id].sharedIncomeTotal +
+                        entry.value,
+                      2
+                    );
+                } else {
+                  monthData.userData[entry.userID._id].individualIncomeTotal =
+                    fixRounding(
+                      monthData.userData[entry.userID._id]
+                        .individualIncomeTotal + entry.value,
+                      2
+                    );
+                }
+              }
+              // expenses
+              if (entry.valueType === "expense") {
+                monthData.expenseTotal = fixRounding(
+                  monthData.expenseTotal + entry.value,
+                  2
+                );
+                monthData.userData[entry.userID._id].expenseTotal = fixRounding(
+                  monthData.userData[entry.userID._id].expenseTotal +
+                    entry.value,
+                  2
+                );
+                if (!entry.individualEntry) {
+                  monthData.sharedExpenseTotal = fixRounding(
+                    monthData.sharedExpenseTotal + entry.value,
+                    2
+                  );
+                  monthData.userData[entry.userID._id].sharedExpenseTotal =
+                    fixRounding(
+                      monthData.userData[entry.userID._id].sharedExpenseTotal +
+                        entry.value,
+                      2
+                    );
+                } else {
+                  monthData.userData[entry.userID._id].individualExpenseTotal =
+                    fixRounding(
+                      monthData.userData[entry.userID._id]
+                        .individualExpenseTotal + entry.value,
+                      2
+                    );
+                }
+              }
+              // transfers
+              if (entry.valueType === "transfer") {
+                monthData.userData[entry.userID._id].balanceOfTransfer =
                   fixRounding(
-                    monthData.userData[entry.userID._id].sharedIncomeTotal +
+                    monthData.userData[entry.userID._id].balanceOfTransfer -
                       entry.value,
                     2
                   );
-              } else {
-                monthData.userData[entry.userID._id].individualIncomeTotal =
+                monthData.userData[entry.toUserID._id].balanceOfTransfer =
                   fixRounding(
-                    monthData.userData[entry.userID._id].individualIncomeTotal +
+                    monthData.userData[entry.toUserID._id].balanceOfTransfer +
                       entry.value,
                     2
                   );
               }
-            }
-            // expenses
-            // if (entry.valueType === "expense") {
-            //   months[i].expenseTotal = fixRounding(
-            //     months[i].expenseTotal + entry.value,
-            //     2
-            //   );
-            //   months[i].userData[entry.userID._id].expenseTotal = fixRounding(
-            //     months[i].userData[entry.userID._id].expenseTotal + entry.value,
-            //     2
-            //   );
-            //   if (!entry.individualEntry) {
-            //     months[i].sharedExpenseTotal = fixRounding(
-            //       months[i].sharedExpenseTotal + entry.value,
-            //       2
-            //     );
-            //     months[i].userData[entry.userID._id].sharedIncomeTotal =
-            //       fixRounding(
-            //         months[i].userData[entry.userID._id].sharedIncomeTotal +
-            //           entry.value,
-            //         2
-            //       );
-            //   } else {
-            //     months[i].userData[entry.userID._id].individualExpenseTotal =
-            //       fixRounding(
-            //         months[i].userData[entry.userID._id].individualExpenseTotal +
-            //           entry.value,
-            //         2
-            //       );
-            //   }
-            // }
+            });
+            populatedMonths.push({ ...monthData });
           });
-          populatedMonths.push({ ...monthData });
+
+        // Balancing Calculations
+        populatedMonths.map((month) => {
+          Object.values(month.userData).map((data) => {
+            // Responsibility
+            data.percentOfTotalIncome =
+              data.sharedIncomeTotal / month.sharedIncomeTotal;
+            data.responsibilityTotal = fixRounding(
+              month.sharedExpenseTotal * data.percentOfTotalIncome,
+              2
+            );
+            // Balance
+            data.responsibilityBalance = fixRounding(
+              data.responsibilityTotal -
+                data.sharedExpenseTotal +
+                data.balanceOfTransfer,
+              2
+            );
+            // Remainder
+            data.currentPersonalBalance = fixRounding(
+              data.incomeTotal - data.expenseTotal + data.balanceOfTransfer,
+              2
+            );
+            data.finalPersonalBalance = fixRounding(
+              data.incomeTotal -
+                data.expenseTotal +
+                data.balanceOfTransfer -
+                data.responsibilityBalance,
+              2
+            );
+          });
         });
 
         // find budget by ID
