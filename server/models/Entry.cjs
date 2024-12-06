@@ -1,10 +1,15 @@
 const { Schema, model } = require('mongoose');
+const { dateToMonthStr } = require("../utils/helpers.cjs");
 
 const entrySchema = new Schema(
   {
     createdAt: {
       type: Date,
       default: Date.now,
+    },
+    monthString: {
+      type: String,      
+      default: dateToMonthStr( new Date() )
     },
     title: {
       type: String,

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Title } from '../components/Layout'
 import { format } from 'date-fns'
-import { toCurrency } from '../utils/helpers'
+import { toCurrency, dateToMonthStr } from '../utils/helpers'
 import { FaEdit } from 'react-icons/fa'
 import { useHistory } from 'react-router-dom'
 
@@ -47,7 +47,7 @@ const AllCategories = ( { categories, setPageState } ) => {
                 <span className='f2 font-medium center noselect'>
                   { currentRange.effectiveStartDate 
                     ?
-                    `${ format( currentRange.effectiveStartDate, 'M/yy' ) } to ${ currentRange.effectiveEndDate ? format( currentRange.effectiveEndDate, 'M/yy' ) : 'Current' }`
+                    `${ dateToMonthStr( currentRange.effectiveStartDate ) } to ${ currentRange.effectiveEndDate ? dateToMonthStr( currentRange.effectiveEndDate ) : 'Current' }`
                     :
                     "No Current Range"
                   }
@@ -90,7 +90,7 @@ const AllCategories = ( { categories, setPageState } ) => {
                 <span className='f2 font-medium cente noselect'>
                   { currentRange.effectiveStartDate 
                     ?
-                    `${ format( currentRange.effectiveStartDate, 'M/yy' ) } to ${ currentRange.effectiveEndDate ? format( currentRange.effectiveEndDate, 'M/yy' ) : 'Current' }`
+                    `${ dateToMonthStr( currentRange.effectiveStartDate ) } to ${ currentRange.effectiveEndDate ? dateToMonthStr( currentRange.effectiveEndDate ) : 'Current' }`
                     :
                     "No Current Range"
                   }

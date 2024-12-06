@@ -71,6 +71,7 @@ const typeDefs = `
     type Entry {
         _id: ID!
         createdAt: Date!
+        monthString: String
         title: String!
         value: Float!
         valueType: String!

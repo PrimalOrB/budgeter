@@ -81,6 +81,11 @@ export function sumPropArray(arr, prop) {
   return arr.reduce((a, b) => a + (b[prop] || 0), 0);
 }
 
+export function dateToMonthStr(date){
+  console.log( date )
+  return format( date, 'M/yy' )
+}
+
 export function parseBudgetData({ budget, date, duration }) {
   let months = new Array(duration).fill().map((x, i) => {
     const createDate = sub(new Date(date), { months: i });

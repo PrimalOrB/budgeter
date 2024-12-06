@@ -1,3 +1,5 @@
+const { format } = require('date-fns')
+
 function extractPropAsStrToArr(input, field) {
     var output = [];
     for (var i=0; i < input.length ; ++i)
@@ -5,4 +7,9 @@ function extractPropAsStrToArr(input, field) {
     return output;
 }
 
-module.exports = { extractPropAsStrToArr }
+function dateToMonthStr(date) {
+    console.log( date )
+    return format(date, "M/yy");
+  }
+
+module.exports = { extractPropAsStrToArr, dateToMonthStr }
