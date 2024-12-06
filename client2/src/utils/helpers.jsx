@@ -82,7 +82,6 @@ export function sumPropArray(arr, prop) {
 }
 
 export function dateToMonthStr(date){
-  console.log( date )
   return format( date, 'M/yy' )
 }
 

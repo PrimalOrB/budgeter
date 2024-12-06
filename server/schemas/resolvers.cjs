@@ -1,11 +1,14 @@
 const { User, Budget, Category, Entry } = require("../models/index.cjs");
 const { AuthenticationError, UserInputError } = require("@apollo/server");
+const mongoose = require("mongoose");
 const { signToken } = require("../utils/auth.cjs");
 const dateScalar = require("./dateScalar.cjs");
 const {
   extractPropAsStrToArr,
   dateToMonthStr,
+  fixRounding,
 } = require("../utils/helpers.cjs");
+const { sub } = require("date-fns");
 
 const resolvers = {
   Date: dateScalar,
@@ -283,6 +286,130 @@ const resolvers = {
 
     queryBudget: async (parent, { input }, context) => {
       if (context.token.headers.authorization !== undefined) {
+        const lengthOfInitialQuery = 6;
+
+        const defaultMonth = {
+            label: "",
+            incomeTotal: 0,
+            expenseTotal: 0,
+            sharedIncomeTotal: 0,
+            sharedExpenseTotal: 0,
+            userData: {},
+            entries: [],
+          },
+          defaultUser = {
+            incomeTotal: 0,
+            expenseTotal: 0,
+            individualIncomeTotal: 0,
+            individualExpenseTotal: 0,
+            sharedIncomeTotal: 0,
+            sharedExpenseTotal: 0,
+          };
+
+        let months = new Array(lengthOfInitialQuery).fill().map((x, i) => {
+          const createDate = sub(new Date(), { months: i }),
+            label = dateToMonthStr(createDate);
+          const month = { ...defaultMonth };
+          month.label = label;
+          return { ...month };
+        });
+
+        const findBudgetNew = await Budget.findOne({ _id: input.budget })
+          .populate("categories")
+          .populate("ownerIDs");
+
+        // gather owner IDs
+        const owners = extractPropAsStrToArr(findBudgetNew.ownerIDs, "_id");
+
+        // ensure user is authorized
+        const userMatch = owners.includes(input.user);
+        if (!userMatch) {
+          throw new UserInputError("Incorrect credentials");
+        }
+
+        const populateMonth = months.map(async (month) => {
+          const monthlyEntries = await Entry.find({
+            budgetID: findBudgetNew._id,
+            monthString: month.label,
+          })
+            .populate("userID")
+            .populate("toUserID");
+          return (month.entries = [...monthlyEntries]);
+        });
+        await Promise.all(populateMonth);
+
+        const populatedMonths = [];
+        months.map((month, i) => {
+          const monthData = { ...defaultMonth };
+          monthData.label = month.label;
+          month.entries.map((entry) => {
+            if (!monthData.userData[entry.userID._id]) {
+              monthData.userData[entry.userID._id] = { ...defaultUser };
+            }
+            // income
+            if (entry.valueType === "income") {
+              monthData.incomeTotal = fixRounding(
+                monthData.incomeTotal + entry.value,
+                2
+              );
+              monthData.userData[entry.userID._id].incomeTotal = fixRounding(
+                monthData.userData[entry.userID._id].incomeTotal + entry.value,
+                2
+              );
+              if (!entry.individualEntry) {
+                monthData.sharedIncomeTotal = fixRounding(
+                  monthData.sharedIncomeTotal + entry.value,
+                  2
+                );
+                monthData.userData[entry.userID._id].sharedIncomeTotal =
+                  fixRounding(
+                    monthData.userData[entry.userID._id].sharedIncomeTotal +
+                      entry.value,
+                    2
+                  );
+              } else {
+                monthData.userData[entry.userID._id].individualIncomeTotal =
+                  fixRounding(
+                    monthData.userData[entry.userID._id].individualIncomeTotal +
+                      entry.value,
+                    2
+                  );
+              }
+            }
+            // expenses
+            // if (entry.valueType === "expense") {
+            //   months[i].expenseTotal = fixRounding(
+            //     months[i].expenseTotal + entry.value,
+            //     2
+            //   );
+            //   months[i].userData[entry.userID._id].expenseTotal = fixRounding(
+            //     months[i].userData[entry.userID._id].expenseTotal + entry.value,
+            //     2
+            //   );
+            //   if (!entry.individualEntry) {
+            //     months[i].sharedExpenseTotal = fixRounding(
+            //       months[i].sharedExpenseTotal + entry.value,
+            //       2
+            //     );
+            //     months[i].userData[entry.userID._id].sharedIncomeTotal =
+            //       fixRounding(
+            //         months[i].userData[entry.userID._id].sharedIncomeTotal +
+            //           entry.value,
+            //         2
+            //       );
+            //   } else {
+            //     months[i].userData[entry.userID._id].individualExpenseTotal =
+            //       fixRounding(
+            //         months[i].userData[entry.userID._id].individualExpenseTotal +
+            //           entry.value,
+            //         2
+            //       );
+            //   }
+            // }
+          });
+          populatedMonths.push({ ...monthData });
+        });
+
         // find budget by ID
         const findBudget = await Budget.findOne({ _id: input.budget })
           .populate("categories")
@@ -294,15 +421,6 @@ const resolvers = {
 
         if (!findBudget) {
           return {};
-        }
-
-        // gather owner IDs
-        const owners = extractPropAsStrToArr(findBudget.ownerIDs, "_id");
-
-        // ensure user is authorized
-        const userMatch = owners.includes(input.user);
-        if (!userMatch) {
-          throw new UserInputError("Incorrect credentials");
         }
 
         return findBudget;
