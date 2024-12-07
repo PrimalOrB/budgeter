@@ -8,6 +8,9 @@ const {
   dateToMonthStr,
   fixRounding,
   copyObject,
+  createMonthObj,
+  parseMonthlyEntries,
+  parseMonthlyBalances,
 } = require("../utils/helpers.cjs");
 const { sub } = require("date-fns");
 
@@ -289,40 +292,13 @@ const resolvers = {
       if (context.token.headers.authorization !== undefined) {
         const lengthOfInitialQuery = 6;
 
-        const defaultMonth = {
-            label: "",
-            incomeTotal: 0,
-            expenseTotal: 0,
-            sharedIncomeTotal: 0,
-            sharedExpenseTotal: 0,
-            userData: {},
-            entries: [],
-          },
-          defaultUser = {
-            incomeTotal: 0,
-            expenseTotal: 0,
-            balanceOfTransfer: 0,
-            individualIncomeTotal: 0,
-            individualExpenseTotal: 0,
-            sharedIncomeTotal: 0,
-            sharedExpenseTotal: 0,
-            percentOfTotalIncome: 0,
-            responsibilityTotal: 0,
-            responsibilityBalance: 0,
-            currentPersonalBalance: 0,
-            finalPersonalBalance: 0,
-          };
-
+        // Create Filler Months
         const createdMonths = [];
-        new Array(lengthOfInitialQuery).fill().map((x, i) => {
-          const createDate = sub(new Date(), { months: i }),
-            label = dateToMonthStr(createDate);
-          const month = copyObject(defaultMonth);
-          month.label = label;
-          month.order = i;
-          return createdMonths.push(month);
+        new Array(lengthOfInitialQuery).fill().map((_, offset) => {
+          return createdMonths.push(createMonthObj(offset));
         });
 
+        // Get budget data
         const findBudgetNew = await Budget.findOne({ _id: input.budget })
           .populate("categories")
           .populate("ownerIDs");
@@ -336,7 +312,7 @@ const resolvers = {
           throw new UserInputError("Incorrect credentials");
         }
 
-        // get data for each monmth
+        // Get data for each monmth
         const newMonths = [];
         const queryEachMonth = createdMonths.map(async (month) => {
           const monthlyEntries = await Entry.find({
@@ -357,128 +333,12 @@ const resolvers = {
         newMonths
           .sort((a, b) => a.order - b.order)
           .map((month) => {
-            const monthData = { ...month };
-            month.entries.map((entry) => {
-              if (!monthData.userData[entry.userID._id]) {
-                monthData.userData[entry.userID._id] = copyObject(defaultUser);
-              }
-              if (entry?.toUserID) {
-                if (!monthData.userData[entry.toUserID._id]) {
-                  monthData.userData[entry.toUserID._id] =
-                    copyObject(defaultUser);
-                }
-              }
-              // income
-              if (entry.valueType === "income") {
-                monthData.incomeTotal = fixRounding(
-                  monthData.incomeTotal + entry.value,
-                  2
-                );
-                monthData.userData[entry.userID._id].incomeTotal = fixRounding(
-                  monthData.userData[entry.userID._id].incomeTotal +
-                    entry.value,
-                  2
-                );
-                if (!entry.individualEntry) {
-                  monthData.sharedIncomeTotal = fixRounding(
-                    monthData.sharedIncomeTotal + entry.value,
-                    2
-                  );
-                  monthData.userData[entry.userID._id].sharedIncomeTotal =
-                    fixRounding(
-                      monthData.userData[entry.userID._id].sharedIncomeTotal +
-                        entry.value,
-                      2
-                    );
-                } else {
-                  monthData.userData[entry.userID._id].individualIncomeTotal =
-                    fixRounding(
-                      monthData.userData[entry.userID._id]
-                        .individualIncomeTotal + entry.value,
-                      2
-                    );
-                }
-              }
-              // expenses
-              if (entry.valueType === "expense") {
-                monthData.expenseTotal = fixRounding(
-                  monthData.expenseTotal + entry.value,
-                  2
-                );
-                monthData.userData[entry.userID._id].expenseTotal = fixRounding(
-                  monthData.userData[entry.userID._id].expenseTotal +
-                    entry.value,
-                  2
-                );
-                if (!entry.individualEntry) {
-                  monthData.sharedExpenseTotal = fixRounding(
-                    monthData.sharedExpenseTotal + entry.value,
-                    2
-                  );
-                  monthData.userData[entry.userID._id].sharedExpenseTotal =
-                    fixRounding(
-                      monthData.userData[entry.userID._id].sharedExpenseTotal +
-                        entry.value,
-                      2
-                    );
-                } else {
-                  monthData.userData[entry.userID._id].individualExpenseTotal =
-                    fixRounding(
-                      monthData.userData[entry.userID._id]
-                        .individualExpenseTotal + entry.value,
-                      2
-                    );
-                }
-              }
-              // transfers
-              if (entry.valueType === "transfer") {
-                monthData.userData[entry.userID._id].balanceOfTransfer =
-                  fixRounding(
-                    monthData.userData[entry.userID._id].balanceOfTransfer -
-                      entry.value,
-                    2
-                  );
-                monthData.userData[entry.toUserID._id].balanceOfTransfer =
-                  fixRounding(
-                    monthData.userData[entry.toUserID._id].balanceOfTransfer +
-                      entry.value,
-                    2
-                  );
-              }
-            });
-            populatedMonths.push({ ...monthData });
+            return populatedMonths.push(parseMonthlyEntries(month))
           });
 
         // Balancing Calculations
         populatedMonths.map((month) => {
-          Object.values(month.userData).map((data) => {
-            // Responsibility
-            data.percentOfTotalIncome =
-              data.sharedIncomeTotal / month.sharedIncomeTotal;
-            data.responsibilityTotal = fixRounding(
-              month.sharedExpenseTotal * data.percentOfTotalIncome,
-              2
-            );
-            // Balance
-            data.responsibilityBalance = fixRounding(
-              data.responsibilityTotal -
-                data.sharedExpenseTotal +
-                data.balanceOfTransfer,
-              2
-            );
-            // Remainder
-            data.currentPersonalBalance = fixRounding(
-              data.incomeTotal - data.expenseTotal + data.balanceOfTransfer,
-              2
-            );
-            data.finalPersonalBalance = fixRounding(
-              data.incomeTotal -
-                data.expenseTotal +
-                data.balanceOfTransfer -
-                data.responsibilityBalance,
-              2
-            );
-          });
+          return parseMonthlyBalances(month)
         });
 
         // find budget by ID
@@ -489,6 +349,8 @@ const resolvers = {
             path: "entries",
             populate: ["userID", "toUserID"],
           });
+
+          findBudget.months = populatedMonths
 
         if (!findBudget) {
           return {};

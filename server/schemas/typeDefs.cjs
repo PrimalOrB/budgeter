@@ -82,6 +82,33 @@ const typeDefs = `
         individualEntry: Boolean
     }
 
+    type MonthUser {
+        userID: User
+        incomeTotal: Float
+        expenseTotal: Float
+        balanceOfTransfer: Float
+        individualIncomeTotal: Float
+        individualExpenseTotal: Float
+        sharedIncomeTotal: Float
+        sharedExpenseTotal: Float
+        percentOfTotalIncome: Float
+        responsibilityTotal: Float
+        responsibilityBalance: Float
+        currentPersonalBalance: Float
+        finalPersonalBalance: Float
+    }
+
+    type Month {
+        label: String
+        order: Int
+        incomeTotal: Float
+        expenseTotal: Float
+        sharedIncomeTotal: Float
+        sharedExpenseTotal: Float
+        userData: [ MonthUser ]
+        entries: [ Entry ]
+    }
+
     type Budget {
         _id: ID!
         ownerIDs: [ User ]
@@ -89,6 +116,7 @@ const typeDefs = `
         desc: String!
         categories: [ Category ]
         entries: [ Entry ]
+        months: [ Month ]
     }
 
     type Auth {

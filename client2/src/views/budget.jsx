@@ -19,7 +19,7 @@ import {
   EditCategory,
   MonthSummary,
 } from ".";
-import { parseBudgetData } from "../utils/helpers";
+import { parseBudgetData, dateToMonthStr } from "../utils/helpers";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import {
   FaCaretUp,
@@ -78,7 +78,7 @@ const Budget = () => {
                 duration: 6,
               })
             );
-            setHighlightMonthState(format(new Date(), "M/yy"));
+            setHighlightMonthState(dateToMonthStr(new Date()));
           }
         } catch (e) {
           console.log(e);
@@ -174,6 +174,7 @@ const Budget = () => {
               {parsedBudgetState && (
                 <MultiMonthBudgetOverview
                   data={parsedBudgetState}
+                  budget={budgetState}
                   highlightMonthState={highlightMonthState}
                   setHighlightMonthState={setHighlightMonthState}
                 />

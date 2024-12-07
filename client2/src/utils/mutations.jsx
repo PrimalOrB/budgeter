@@ -142,6 +142,56 @@ export const QUERY_CURRENT_BUDGET = gql`
         }
         individualEntry
       }
+      months {
+        label
+        order
+        incomeTotal
+        expenseTotal
+        sharedIncomeTotal
+        sharedExpenseTotal        
+        userData {
+          userID {
+            _id
+            email
+            userInitials
+            userColor
+          }
+          incomeTotal
+          expenseTotal
+          balanceOfTransfer
+          individualIncomeTotal
+          individualExpenseTotal
+          sharedIncomeTotal
+          sharedExpenseTotal
+          percentOfTotalIncome
+          responsibilityTotal
+          responsibilityBalance
+          currentPersonalBalance
+          finalPersonalBalance
+        }
+        entries {
+          _id
+          createdAt
+          title
+          value
+          valueType
+          budgetID
+          categoryID
+          userID {
+            _id
+            email
+            userInitials
+            userColor
+          }
+          toUserID {
+            _id
+            email
+            userInitials
+            userColor
+          }
+          individualEntry
+        }
+      }
     }
   }
 `;
