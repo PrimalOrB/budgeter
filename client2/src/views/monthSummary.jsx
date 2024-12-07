@@ -129,7 +129,7 @@ const MonthSummary = ( { budget, highlightMonthState, categories, transactions, 
         { expandedState.balance &&
           <React.Fragment>
            <InlineBarTotal key={ `${ highlightMonthState }_iR` } inputData={ monthData } title={ ['Income to Expenses Ratio', 'Income', 'Expenses' ] } valueProp={ [ 'incomeTotal', 'expenseTotal' ] } />  
-           {/* <InlineBarTotal key={ `${ highlightMonthState }_sR` } inputData={ sharedData } title={ ['Shared Income to Expenses Ratio', 'Income', 'Expenses' ] } valueProp={ [ 'totalSharedIncome', 'totalSharedExpenses' ] } />    */}
+           <InlineBarTotal key={ `${ highlightMonthState }_sR` } inputData={ monthData } title={ ['Shared Income to Expenses Ratio', 'Income', 'Expenses' ] } valueProp={ [ 'sharedIncomeTotal', 'sharedExpenseTotal' ] } />   
            <InlineBarPerUser key={ `${ highlightMonthState }_sIn` } inputData={ uniqueUsers } title={ 'Shared Income By User' } valueProp={ 'incomeShared' } />
            <InlineBarPerUser key={ `${ highlightMonthState }_sOut` } inputData={ uniqueUsers } title={ 'Shared Expenses By User' } valueProp={ 'expensesShared' } />
            <InlineBarPerUser key={ `${ highlightMonthState }_tIn` } inputData={ uniqueUsers } title={ 'Total Income By User' } valueProp={ 'incomeTotal' } />

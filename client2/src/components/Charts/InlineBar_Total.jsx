@@ -7,13 +7,6 @@ const InlineBarTotal = ({ inputData, title, valueProp }) => {
   const [loadingState, setLoadingState] = useState(true);
   const [hoverData, setHoverData] = useState("");
 
-  console.log(
-    inputData,
-    valueProp,
-    inputData[`${valueProp[0]}`],
-    inputData[`${valueProp[1]}`]
-  );
-
   function processData() {
     setLoadingState(true);
 
