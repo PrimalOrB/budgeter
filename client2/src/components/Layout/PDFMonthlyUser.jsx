@@ -4,10 +4,10 @@ import generatePDF from "../../utils/generatePDF";
 const PDFMonthlyUser = ({
   user,
   date,
-  categories,
-  expenses,
-  incomes,
-  transfers,
+  // categories,
+  // expenses,
+  // incomes,
+  // transfers,
 }) => {
     
   return (
@@ -18,14 +18,14 @@ const PDFMonthlyUser = ({
           generatePDF({
             user,
             date,
-            categories,
-            expenses,
-            incomes,
-            transfers,
+            // categories,
+            // expenses,
+            // incomes,
+            // transfers,
           })
         }
       >
-        {user.userInitials}
+        {user.userID.userInitials}
       </button>
     </>
   );

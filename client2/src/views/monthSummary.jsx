@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { format } from "date-fns";
-import { toCurrency, sumPropArray } from "../utils/helpers";
+import { toCurrency } from "../utils/helpers";
 import {
   InlineBarTotal,
   InlineBarPerUser,
@@ -18,7 +18,6 @@ const MonthSummary = ({
   budget,
   highlightMonthState,
   categories,
-  transactions,
   setPageState,
   setEditingTransaction,
 }) => {
@@ -38,122 +37,6 @@ const MonthSummary = ({
   const monthData = budget.months.find(
     (month) => month.label === highlightMonthState
   );
-
-  const uniqueUsers = [
-    ...new Set(transactions.map((entry) => entry.userID._id)),
-  ].map((userID) => {
-    const matchUser = transactions.find(
-      (entry) => entry.userID._id === userID
-    ).userID;
-    return {
-      userID,
-      userColor: matchUser.userColor,
-      userInitials: matchUser.userInitials,
-      incomeTotal: 0,
-      expensesTotal: 0,
-      incomeShared: 0,
-      expensesShared: 0,
-      transfersOut: 0,
-      transfersIn: 0,
-      portionTotalExpenses: 0,
-      portionTotalIncome: 0,
-      balanceTotal: 0,
-      portionSharedExpenses: 0,
-      portionSharedIncome: 0,
-      balanceShared: 0,
-      responsibleExpenses: 0,
-    };
-  });
-
-  // add expenses to users
-  const expenseByMonth = transactions
-    .filter((entry) => entry.valueType === "expense")
-    .map((entry) => {
-      const matchUser = uniqueUsers.findIndex((user) => {
-        return user.userID === entry.userID._id;
-      });
-      if (matchUser >= 0) {
-        uniqueUsers[matchUser].expensesTotal += entry.value;
-      }
-      return entry;
-    });
-  const expenseByMonthShared = transactions
-    .filter((entry) => entry.valueType === "expense" && !entry.individualEntry)
-    .map((entry) => {
-      const matchUser = uniqueUsers.findIndex((user) => {
-        return user.userID === entry.userID._id;
-      });
-      if (matchUser >= 0) {
-        uniqueUsers[matchUser].expensesShared += entry.value;
-      }
-      return entry;
-    });
-
-  // add income to users
-  const incomeByMonth = transactions
-    .filter((entry) => entry.valueType === "income")
-    .map((entry) => {
-      const matchUser = uniqueUsers.findIndex((user) => {
-        return user.userID === entry.userID._id;
-      });
-      if (matchUser >= 0) {
-        uniqueUsers[matchUser].incomeTotal += entry.value;
-      }
-      return entry;
-    });
-  const incomeByMonthShared = transactions
-    .filter((entry) => entry.valueType === "income" && !entry.individualEntry)
-    .map((entry) => {
-      const matchUser = uniqueUsers.findIndex((user) => {
-        return user.userID === entry.userID._id;
-      });
-      if (matchUser >= 0) {
-        uniqueUsers[matchUser].incomeShared += entry.value;
-      }
-      return entry;
-    });
-
-  // add transfers to users
-  const transferByMonth = transactions
-    .filter((entry) => entry.valueType === "transfer")
-    .map((entry) => {
-      const matchUserOut = uniqueUsers.findIndex((user) => {
-        return user.userID === entry.userID._id;
-      });
-      if (matchUserOut >= 0) {
-        uniqueUsers[matchUserOut].transfersOut += entry.value;
-      }
-      const matchUserIn = uniqueUsers.findIndex((user) => {
-        return user.userID === entry.toUserID._id;
-      });
-      if (matchUserIn >= 0) {
-        uniqueUsers[matchUserIn].transfersIn += entry.value;
-      }
-      return entry;
-    });
-
-  // run balances
-  uniqueUsers.map((user) => {
-    user.portionSharedExpenses =
-      user.expensesShared / sumPropArray(expenseByMonthShared, "value");
-    user.portionSharedIncome =
-      user.incomeShared / sumPropArray(incomeByMonthShared, "value");
-    user.portionTotalExpenses =
-      user.expensesTotal / sumPropArray(expenseByMonth, "value");
-    user.portionTotalIncome =
-      user.incomeTotal / sumPropArray(incomeByMonth, "value");
-    user.responsibleExpenses = Number(
-      (
-        sumPropArray(expenseByMonthShared, "value") * user.portionSharedIncome
-      ).toFixed(2)
-    );
-    user.balanceAfterTransfer =
-      user.responsibleExpenses - user.transfersOut + user.transfersIn;
-    user.balancedIncome = user.incomeTotal + user.transfersIn;
-    user.balancedExpenses = user.expensesTotal + user.transfersOut;
-    user.userBalance = user.balanceAfterTransfer - user.expensesShared;
-    return user;
-  });
 
   return (
     <section id="month-summary" key={`${date}_results`}>
@@ -177,10 +60,7 @@ const MonthSummary = ({
           </span>
           <span className="f1 bold noselect">Balance</span>
           <span className="f1 bold right noselect">
-            {toCurrency(
-              sumPropArray(incomeByMonth, "value") -
-                sumPropArray(expenseByMonth, "value")
-            )}
+            {toCurrency(monthData.incomeTotal - monthData.expenseTotal)}
           </span>
         </li>
         {expandedState.balance && (
@@ -265,18 +145,23 @@ const MonthSummary = ({
           </span>
           <span className="f1 bold noselect">Expenses</span>
           <span className="f1 bold right noselect">
-            {toCurrency(sumPropArray(expenseByMonth, "value"))}
+            {toCurrency(monthData.expenseTotal)}
           </span>
         </li>
-        {expandedState.expense &&
-          [...new Set(categories.map((category) => category._id))].map(
-            (entry) => {
-              const category = categories.filter(
-                (category) => category._id === entry
+        {expandedState.expense ? (
+          [...monthData.expenseCategories]
+            .sort((a, b) => b.total - a.total)
+            .map((entry) => {
+              const findCategory = categories.find(
+                (category) => category._id === entry.categoryID
               );
-              const entries = expenseByMonth.filter(
-                (entry) => entry.categoryID === category[0]._id
-              );
+
+              const category = { ...entry, title: findCategory.title };
+
+              const entries = monthData.entries
+                .filter((entry) => entry.valueType === "expense")
+                .filter((entry) => entry.categoryID === findCategory._id)
+                .sort((a, b) => a.createdAt - b.createdAt);
 
               if (entries.length === 0) {
                 return null;
@@ -284,15 +169,17 @@ const MonthSummary = ({
 
               return (
                 <BudgetCategoryExpandableList
-                  key={`exp_${category[0]._id}`}
-                  category={category[0].title}
+                  key={`exp_${category.categoryID}`}
+                  category={category}
                   data={entries}
                   setPageState={setPageState}
                   setEditingTransaction={setEditingTransaction}
                 />
               );
-            }
-          )}
+            })
+        ) : (
+          <></>
+        )}
       </ul>
 
       {/* income section */}
@@ -311,18 +198,23 @@ const MonthSummary = ({
           </span>
           <span className="f1 bold noselect">Income</span>
           <span className="f1 bold right noselect">
-            {toCurrency(sumPropArray(incomeByMonth, "value"))}
+            {toCurrency(monthData.incomeTotal)}
           </span>
         </li>
-        {expandedState.income &&
-          [...new Set(categories.map((category) => category._id))].map(
-            (entry) => {
-              const category = categories.filter(
-                (category) => category._id === entry
+        {expandedState.income ? (
+          [...monthData.incomeCategories]
+            .sort((a, b) => b.total - a.total)
+            .map((entry) => {
+              const findCategory = categories.find(
+                (category) => category._id === entry.categoryID
               );
-              const entries = incomeByMonth.filter(
-                (entry) => entry.categoryID === category[0]._id
-              );
+
+              const category = { ...entry, title: findCategory.title };
+
+              const entries = monthData.entries
+                .filter((entry) => entry.valueType === "income")
+                .filter((entry) => entry.categoryID === findCategory._id)
+                .sort((a, b) => a.createdAt - b.createdAt);
 
               if (entries.length === 0) {
                 return null;
@@ -330,15 +222,17 @@ const MonthSummary = ({
 
               return (
                 <BudgetCategoryExpandableList
-                  key={`inc_${category[0]._id}`}
-                  category={category[0].title}
+                  key={`exp_${category.categoryID}`}
+                  category={category}
                   data={entries}
                   setPageState={setPageState}
                   setEditingTransaction={setEditingTransaction}
                 />
               );
-            }
-          )}
+            })
+        ) : (
+          <></>
+        )}
       </ul>
 
       {/* transfer section */}
@@ -357,20 +251,23 @@ const MonthSummary = ({
           </span>
           <span className="f1 bold noselect">Transfers</span>
           <span className="f1 bold right noselect">
-            {toCurrency(sumPropArray(transferByMonth, "value"))}
+            {toCurrency(monthData.transferTotals)}
           </span>
         </li>
         {expandedState.transfers &&
-          transferByMonth.map((transfer) => {
-            return (
-              <BudgetCategoryEntriesExpandableList
-                key={transfer._id}
-                entry={transfer}
-                setPageState={setPageState}
-                setEditingTransaction={setEditingTransaction}
-              />
-            );
-          })}
+          [...monthData.entries]
+            .filter((entry) => entry.valueType === "transfer")
+            .sort((a, b) => a.createdAt - b.createdAt)
+            .map((transfer) => {
+              return (
+                <BudgetCategoryEntriesExpandableList
+                  key={transfer._id}
+                  entry={transfer}
+                  setPageState={setPageState}
+                  setEditingTransaction={setEditingTransaction}
+                />
+              );
+            })}
       </ul>
 
       {/* report section */}
@@ -390,18 +287,18 @@ const MonthSummary = ({
           <span className="f1 bold noselect">Reports</span>
         </li>
         {expandedState.reports &&
-          (uniqueUsers.length ? (
+          (monthData.userData ? (
             <li className="flex nowrap flex-just-space-around f-full">
-              {uniqueUsers.map((user) => {
+              {monthData.userData.map((user) => {
                 return (
                   <PDFMonthlyUse
-                    key={`${user.userID}_rpt`}
+                    key={`${user.userID._id}_rpt`}
                     user={user}
                     date={date}
-                    categories={categories}
-                    expenses={expenseByMonth}
-                    incomes={incomeByMonth}
-                    transfers={transferByMonth}
+                    // categories={categories}
+                    // expenses={expenseByMonth}
+                    // incomes={incomeByMonth}
+                    // transfers={transferByMonth}
                   />
                 );
               })}

@@ -19,7 +19,7 @@ import {
   EditCategory,
   MonthSummary,
 } from ".";
-import { parseBudgetData, dateToMonthStr } from "../utils/helpers";
+import { dateToMonthStr } from "../utils/helpers";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import {
   FaCaretUp,
@@ -40,7 +40,6 @@ const Budget = () => {
   const { currentUser } = state;
 
   const [budgetState, setBudgetState] = useState({});
-  const [parsedBudgetState, setParsedBudgetState] = useState(null);
   const [errorState, setErrorState] = useState();
   const [editingTransaction, setEditingTransaction] = useState(null);
 
@@ -71,13 +70,6 @@ const Budget = () => {
               length: data.data.queryBudget.entries.length,
             });
             setBudgetState({ ...data.data.queryBudget });
-            setParsedBudgetState(
-              parseBudgetData({
-                budget: { ...data.data.queryBudget },
-                date: new Date(),
-                duration: 6,
-              })
-            );
             setHighlightMonthState(dateToMonthStr(new Date()));
           }
         } catch (e) {
@@ -171,7 +163,7 @@ const Budget = () => {
               >
                 {budgetState.desc}
               </h3>
-              {parsedBudgetState && (
+              {budgetState && (
                 <MultiMonthBudgetOverview
                   budget={budgetState}
                   highlightMonthState={highlightMonthState}
@@ -190,27 +182,6 @@ const Budget = () => {
                 categories={budgetState.categories}
                 setPageState={setPageState}
                 setEditingTransaction={setEditingTransaction}
-                transactions={budgetState.entries
-                  .filter(
-                    (entry) =>
-                      entry.createdAt >=
-                        startOfMonth(
-                          new Date(
-                            `20${Number(highlightMonthState.split("/")[1])}`,
-                            Number(highlightMonthState.split("/")[0])
-                          ) - 1,
-                          1
-                        ) &&
-                      entry.createdAt <=
-                        endOfMonth(
-                          new Date(
-                            `20${Number(highlightMonthState.split("/")[1])}`,
-                            Number(highlightMonthState.split("/")[0])
-                          ) - 1,
-                          1
-                        )
-                  )
-                  .sort((a, b) => b.createdAt - a.createdAt)}
               />
             </>
           )}

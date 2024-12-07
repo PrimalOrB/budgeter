@@ -103,10 +103,18 @@ const typeDefs = `
         order: Int
         incomeTotal: Float
         expenseTotal: Float
+        transferTotals: Float
         sharedIncomeTotal: Float
         sharedExpenseTotal: Float
         userData: [ MonthUser ]
         entries: [ Entry ]
+        incomeCategories: [ cateogryGroup ]
+        expenseCategories: [ cateogryGroup ]
+    }
+
+    type cateogryGroup {        
+        categoryID: ID
+        total: Float
     }
 
     type Budget {

@@ -102,6 +102,7 @@ export function parseBudgetData({ budget, date, duration }) {
   months = months.reverse();
 
   budget.entries.map((entry) => {
+    console.log( entry.createdAt)
     let matchedMonth = months.filter(
       (month) => month.label === format(entry.createdAt, "M/yy")
     );

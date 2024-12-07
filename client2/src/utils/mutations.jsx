@@ -122,25 +122,6 @@ export const QUERY_CURRENT_BUDGET = gql`
       }
       entries {
         _id
-        createdAt
-        title
-        value
-        valueType
-        budgetID
-        categoryID
-        userID {
-          _id
-          email
-          userInitials
-          userColor
-        }
-        toUserID {
-          _id
-          email
-          userInitials
-          userColor
-        }
-        individualEntry
       }
       months {
         label
@@ -148,7 +129,8 @@ export const QUERY_CURRENT_BUDGET = gql`
         incomeTotal
         expenseTotal
         sharedIncomeTotal
-        sharedExpenseTotal        
+        sharedExpenseTotal      
+        transferTotals  
         userData {
           userID {
             _id
@@ -190,6 +172,14 @@ export const QUERY_CURRENT_BUDGET = gql`
             userColor
           }
           individualEntry
+        }
+        incomeCategories {
+          categoryID
+          total
+        }
+        expenseCategories {
+          categoryID
+          total
         }
       }
     }

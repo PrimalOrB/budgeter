@@ -24,10 +24,13 @@ function createMonthObj(offset) {
     label: "",
     incomeTotal: 0,
     expenseTotal: 0,
+    transferTotals: 0,
     sharedIncomeTotal: 0,
     sharedExpenseTotal: 0,
     userData: [],
     entries: [],
+    incomeCategories: [],
+    expenseCategories: [],
   };
   month.label = label;
   month.order = offset;
@@ -49,6 +52,13 @@ function createMonthlyUserObj() {
     responsibilityBalance: 0,
     currentPersonalBalance: 0,
     finalPersonalBalance: 0,
+  });
+}
+
+function createMonthlyCategoryObj() {
+  return (defaultUser = {
+    categoryID: {},
+    total: 0,
   });
 }
 
@@ -91,6 +101,22 @@ function parseMonthlyEntries(month) {
         userData[indexOfUser].incomeTotal + entry.value,
         2
       );
+
+      // get monthly category value
+      let indexOfCategory = monthData.incomeCategories.findIndex((category) =>
+        category.categoryID?._id.equals(entry.categoryID._id)
+      );
+      if (indexOfCategory < 0) {
+        const createdCategory = copyObject(createMonthlyCategoryObj());
+        createdCategory.categoryID = entry.categoryID;
+        indexOfCategory = monthData.incomeCategories.length;
+        monthData.incomeCategories[indexOfCategory] = createdCategory;
+      }
+      monthData.incomeCategories[indexOfCategory].total += fixRounding(
+        entry.value,
+        2
+      );
+
       if (!entry.individualEntry) {
         monthData.sharedIncomeTotal = fixRounding(
           monthData.sharedIncomeTotal + entry.value,
@@ -117,6 +143,22 @@ function parseMonthlyEntries(month) {
         userData[indexOfUser].expenseTotal + entry.value,
         2
       );
+
+      // get monthly category value
+      let indexOfCategory = monthData.expenseCategories.findIndex((category) =>
+        category.categoryID?._id.equals(entry.categoryID._id)
+      );
+      if (indexOfCategory < 0) {
+        const createdCategory = copyObject(createMonthlyCategoryObj());
+        createdCategory.categoryID = entry.categoryID;
+        indexOfCategory = monthData.expenseCategories.length;
+        monthData.expenseCategories[indexOfCategory] = createdCategory;
+      }
+      monthData.expenseCategories[indexOfCategory].total += fixRounding(
+        entry.value,
+        2
+      );
+
       if (!entry.individualEntry) {
         monthData.sharedExpenseTotal = fixRounding(
           monthData.sharedExpenseTotal + entry.value,
@@ -135,6 +177,10 @@ function parseMonthlyEntries(month) {
     }
     // transfers
     if (entry.valueType === "transfer") {
+      monthData.transferTotals = fixRounding(
+        monthData.transferTotals + entry.value,
+        2
+      );
       userData[indexOfUser].balanceOfTransfer = fixRounding(
         userData[indexOfUser].balanceOfTransfer - entry.value,
         2

@@ -6,13 +6,10 @@ const dateScalar = require("./dateScalar.cjs");
 const {
   extractPropAsStrToArr,
   dateToMonthStr,
-  fixRounding,
-  copyObject,
   createMonthObj,
   parseMonthlyEntries,
   parseMonthlyBalances,
 } = require("../utils/helpers.cjs");
-const { sub } = require("date-fns");
 
 const resolvers = {
   Date: dateScalar,
