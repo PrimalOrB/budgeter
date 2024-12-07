@@ -20,7 +20,7 @@ import {
   MonthSummary,
 } from ".";
 import { dateToMonthStr } from "../utils/helpers";
-import { format, startOfMonth, endOfMonth } from "date-fns";
+import { format } from "date-fns";
 import {
   FaCaretUp,
   FaCaretDown,
@@ -39,6 +39,7 @@ const Budget = () => {
   const [state] = useStoreContext();
   const { currentUser } = state;
 
+  const [v, setV] = useState(0);
   const [budgetState, setBudgetState] = useState({});
   const [errorState, setErrorState] = useState();
   const [editingTransaction, setEditingTransaction] = useState(null);
@@ -65,6 +66,7 @@ const Budget = () => {
       update: (cache, data) => {
         try {
           if (data.data.queryBudget) {
+            setV(v + 1);
             setPaginatState({
               ...paginateState,
               length: data.data.queryBudget.entries.length,
@@ -165,18 +167,21 @@ const Budget = () => {
               </h3>
               {budgetState && (
                 <MultiMonthBudgetOverview
+                  key={`monthly_${v}`}
                   budget={budgetState}
                   highlightMonthState={highlightMonthState}
                   setHighlightMonthState={setHighlightMonthState}
                 />
               )}
               <RecentTransactions
+                key={`recent_${v}`}
                 budget={budgetState}
                 categories={budgetState.categories}
                 paginateState={paginateState}
                 setPaginatState={setPaginatState}
               />
               <MonthSummary
+                key={`summary_${v}`}
                 highlightMonthState={highlightMonthState}
                 budget={budgetState}
                 categories={budgetState.categories}
