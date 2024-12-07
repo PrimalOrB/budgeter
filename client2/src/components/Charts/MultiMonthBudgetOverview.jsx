@@ -49,10 +49,10 @@ const MultiMonthBudgetOverview = ({
 }) => {
   const [graphDataState, setGraphDataState] = useState(null);
   const [loadingState, setLoadingState] = useState(true);
-  const maxYAxis = useRef(0);  
+  const maxYAxis = useRef(0);
 
   let startIndex = 0,
-  displayLength = 6;
+    displayLength = 6;
 
   const createGraphData = () => {
     const labels = [];
@@ -102,8 +102,9 @@ const MultiMonthBudgetOverview = ({
       labels.push(targetMonth.label);
       datasets[1].data[i] = targetMonth.incomeTotal;
       datasets[2].data[i] = targetMonth.expenseTotal;
-      datasets[0].data[i] += targetMonth.incomeTotal;
-      return (datasets[0].data[i] -= targetMonth.expenseTotal);
+      //   datasets[0].data[i] += targetMonth.incomeTotal;
+      //   return (datasets[0].data[i] -= targetMonth.expenseTotal);
+      return;
     });
 
     const newState = {

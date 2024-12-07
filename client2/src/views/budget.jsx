@@ -173,20 +173,14 @@ const Budget = () => {
               </h3>
               {parsedBudgetState && (
                 <MultiMonthBudgetOverview
-                  data={parsedBudgetState}
                   budget={budgetState}
                   highlightMonthState={highlightMonthState}
                   setHighlightMonthState={setHighlightMonthState}
                 />
               )}
               <RecentTransactions
+                budget={budgetState}
                 categories={budgetState.categories}
-                transactions={[...budgetState.entries]
-                  .sort((a, b) => b?.createdAt - a?.createdAt)
-                  .slice(
-                    paginateState.offset,
-                    paginateState.limit + paginateState.offset
-                  )}
                 paginateState={paginateState}
                 setPaginatState={setPaginatState}
               />

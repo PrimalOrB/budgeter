@@ -5,8 +5,8 @@ import { MdPerson, MdPeople } from "react-icons/md";
 import { FaCaretLeft, FaCaretRight } from "react-icons/fa";
 
 const RecentTransactions = ({
+  budget,
   categories,
-  transactions,
   paginateState,
   setPaginatState,
 }) => {
@@ -25,6 +25,12 @@ const RecentTransactions = ({
       page: paginateState.page - 1,
     });
   }
+
+  let transactions = [];
+  budget.months.map((month) => {
+    transactions = [...transactions, ...month.entries];
+  });
+  transactions.sort((a, b) => b.createdAt - a.createdAt);
 
   return (
     <section id="recent-transactions">
@@ -65,83 +71,88 @@ const RecentTransactions = ({
             No Recent Transactions
           </li>
         )}
-        {transactions.map((entry) => {
-          let type;
-          if (entry.valueType === "income" && entry.value > 0) {
-            type = 1;
-          }
-          if (entry.valueType === "income" && entry.value < 0) {
-            type = 3;
-          }
-          if (entry.valueType === "expense" && entry.value > 0) {
-            type = 0;
-          }
-          if (entry.valueType === "expense" && entry.value < 0) {
-            type = 2;
-          }
-          if (entry.valueType === "transfer") {
-            type = 4;
-          }
+        {transactions
+          .slice(
+            paginateState.offset,
+            paginateState.limit + paginateState.offset
+          )
+          .map((entry) => {
+            let type;
+            if (entry.valueType === "income" && entry.value > 0) {
+              type = 1;
+            }
+            if (entry.valueType === "income" && entry.value < 0) {
+              type = 3;
+            }
+            if (entry.valueType === "expense" && entry.value > 0) {
+              type = 0;
+            }
+            if (entry.valueType === "expense" && entry.value < 0) {
+              type = 2;
+            }
+            if (entry.valueType === "transfer") {
+              type = 4;
+            }
 
-          return (
-            <li
-              key={`recent_${entry._id}`}
-              className={
-                "flex-transaction-line-sm border-bot-hightlight-1 f-valign"
-              }
-            >
-              <div className="flex f1 wrap padding-top-sm">
-                {entry.valueType === "transfer" ? (
-                  <span className="margin-right-half colon bold f0 font-medium noselect">
-                    Transfer
+            return (
+              <li
+                key={`recent_${entry._id}`}
+                className={
+                  "flex-transaction-line-sm border-bot-hightlight-1 f-valign"
+                }
+              >
+                <div className="flex f1 wrap padding-top-sm">
+                  {entry.valueType === "transfer" ? (
+                    <span className="margin-right-half colon bold f0 font-medium noselect">
+                      Transfer
+                    </span>
+                  ) : (
+                    <span className="margin-right-half colon bold f0 font-medium noselect">
+                      {
+                        categories.filter(
+                          (category) => category._id === entry.categoryID
+                        )[0].title
+                      }
+                    </span>
+                  )}
+                  <span className="f1 font-medium margin-left-half margin-right-half ellipsis noselect">
+                    {entry.title}
                   </span>
-                ) : (
-                  <span className="margin-right-half colon bold f0 font-medium noselect">
-                    {
-                      categories.filter(
-                        (category) => category._id === entry.categoryID
-                      )[0].title
-                    }
+                  <span className="indent-1 italic font-small f-full padding-bottom-sm noselect">
+                    {format(entry.createdAt, "M/dd/yy")}
                   </span>
-                )}
-                <span className="f1 font-medium margin-left-half margin-right-half ellipsis noselect">
-                  {entry.title}
+                </div>
+                <span
+                  className={`bold noselect f0${type === 0 ? " negative" : ""}${
+                    type === 1 ? " positive" : ""
+                  }${type === 2 ? " credit" : ""}${
+                    type === 3 ? " reverse" : ""
+                  }${type === 4 ? " transfer-text" : ""}`}
+                >
+                  {toCurrency(Math.abs(entry.value))}
                 </span>
-                <span className="indent-1 italic font-small f-full padding-bottom-sm noselect">
-                  {format(entry.createdAt, "M/dd/yy")}
+                <span
+                  className="f0 initials-icon noselect"
+                  style={{
+                    backgroundColor: entry.userID.userColor
+                      ? `#${entry.userID.userColor}`
+                      : "#BBBBBB",
+                  }}
+                  title={entry.userID.email}
+                >
+                  {entry.userID.userInitials
+                    ? entry.userID.userInitials.toUpperCase()
+                    : entry.userID.email[0].toUpperCase()}
                 </span>
-              </div>
-              <span
-                className={`bold noselect f0${type === 0 ? " negative" : ""}${
-                  type === 1 ? " positive" : ""
-                }${type === 2 ? " credit" : ""}${type === 3 ? " reverse" : ""}${
-                  type === 4 ? " transfer-text" : ""
-                }`}
-              >
-                {toCurrency(Math.abs(entry.value))}
-              </span>
-              <span
-                className="f0 initials-icon noselect"
-                style={{
-                  backgroundColor: entry.userID.userColor
-                    ? `#${entry.userID.userColor}`
-                    : "#BBBBBB",
-                }}
-                title={entry.userID.email}
-              >
-                {entry.userID.userInitials
-                  ? entry.userID.userInitials.toUpperCase()
-                  : entry.userID.email[0].toUpperCase()}
-              </span>
-              <span
-                className="f0 individual-icon margin-left-half noselect"
-                title={entry.individualEntry ? "Individual" : "Shared"}
-              >
-                {entry.individualEntry ? MdPerson() : MdPeople()}
-              </span>
-            </li>
-          );
-        })}
+                <span
+                  className="f0 individual-icon margin-left-half noselect"
+                  title={entry.individualEntry ? "Individual" : "Shared"}
+                >
+                  {entry.individualEntry ? MdPerson() : MdPeople()}
+                </span>
+              </li>
+            );
+          })}
       </ul>
     </section>
   );
