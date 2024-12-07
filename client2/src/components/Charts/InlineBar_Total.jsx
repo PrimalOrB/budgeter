@@ -5,7 +5,6 @@ import { Bar } from "react-chartjs-2";
 const InlineBarTotal = ({ inputData, title, valueProp }) => {
   const [dataState, setDataState] = useState(false);
   const [loadingState, setLoadingState] = useState(true);
-  const [hoverData, setHoverData] = useState("");
 
   function processData() {
     setLoadingState(true);
@@ -34,8 +33,6 @@ const InlineBarTotal = ({ inputData, title, valueProp }) => {
           categoryPercentage: 1.0,
         },
       ],
-      totalProp: 0,
-      totalRatio: 0,
     };
 
     output.datasets[0].data.push((entry1 / dataRange) * 100);
@@ -48,17 +45,8 @@ const InlineBarTotal = ({ inputData, title, valueProp }) => {
     )}%`;
 
     setDataState(output);
-    setLoadingState(false);
-    // if( output.datasets.length ){
-    //     updateHover( { ...output.datasets[0].userData, hover: output.datasets[0].hoverData } )
-    // }
+    return setLoadingState(false);
   }
-
-  // function updateHover( update ){
-  //     if( hoverData.userID !== update.userID ){
-  //         return setHoverData( { ...update } )
-  //     }
-  // }
 
   const options = {
     indexAxis: "y",
@@ -111,9 +99,7 @@ const InlineBarTotal = ({ inputData, title, valueProp }) => {
         intersect: false,
         backgroundColor: "rgba(0,0,0,0)",
         callbacks: {
-          footer: function (context) {
-            // const update = { ...context[0].dataset.userData, hover: context[0].dataset.hoverData }
-            // updateHover( update )
+          footer: function () {
             return false;
           },
           title: function () {
@@ -137,26 +123,6 @@ const InlineBarTotal = ({ inputData, title, valueProp }) => {
       {!loadingState ? (
         <div className="container-flex f-full f-j-l margin-top-full f-valign">
           <span>{dataState.compositeTitle}</span>
-          {hoverData ? (
-            <>
-              <span
-                className="f0 initials-icon noselect"
-                style={{
-                  backgroundColor: hoverData.userColor
-                    ? `#${hoverData.userColor}`
-                    : "#BBBBBB",
-                }}
-              >
-                {hoverData.userInitials}
-              </span>
-              <span className="margin-left-full">
-                {toCurrency(hoverData.hover)} ({" "}
-                {((hoverData.hover / dataState.totalProp) * 100).toFixed(1)}% )
-              </span>
-            </>
-          ) : (
-            <></>
-          )}
           <section className="chart-inline-section">
             <Bar data={dataState} options={options} />
           </section>

@@ -406,6 +406,18 @@ section {
   margin: 0.25rem 0;
 }
 
+.chart-inline-section-top {
+  border-bottom: 0;
+  margin-bottom: 0;
+  border-radius: 1rem 1rem 0 0;
+}
+
+.chart-inline-section-bottom {
+  border-top: 0;
+  margin-top: 0;
+  border-radius: 0 0 1rem 1rem;
+}
+
 .section-list-title {
   width: 95%;
   max-width: 700px;
