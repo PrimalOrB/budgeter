@@ -186,6 +186,7 @@ const Budget = () => {
               />
               <MonthSummary
                 highlightMonthState={highlightMonthState}
+                budget={budgetState}
                 categories={budgetState.categories}
                 setPageState={setPageState}
                 setEditingTransaction={setEditingTransaction}

@@ -5,11 +5,13 @@ import { SingleMonthCategoryCost, InlineBarTotal, InlineBarPerUser, InlineBarBal
 import { BudgetCategoryExpandableList, BudgetCategoryEntriesExpandableList, PDFMonthlyUse } from '../components/Layout'
 import { FaCaretDown, FaCaretUp } from 'react-icons/fa'
 
-const MonthSummary = ( { highlightMonthState, categories, transactions, setPageState, setEditingTransaction } ) => {
+const MonthSummary = ( { budget, highlightMonthState, categories, transactions, setPageState, setEditingTransaction } ) => {
   
   const date = new Date( `20${Number( highlightMonthState.split('/')[1] )}`, Number( highlightMonthState.split('/')[0] ) - 1, 1 )
 
   const [ expandedState, setExpandedState ] = useState( { income: false, expense: false, balance: false, transfers: false } )
+
+  const monthData = budget.months.find(month => month.label === highlightMonthState)
 
   const uniqueUsers = [...new Set(transactions.map (entry => entry.userID._id ) ) ]
     .map( userID => { 
@@ -126,8 +128,8 @@ const MonthSummary = ( { highlightMonthState, categories, transactions, setPageS
         </li>
         { expandedState.balance &&
           <React.Fragment>
-           <InlineBarTotal key={ `${ highlightMonthState }_iR` } inputData={ sharedData } title={ ['Income to Expenses Ratio', 'Income', 'Expenses' ] } valueProp={ [ 'totalIncome', 'totalExpenses' ] } />  
-           <InlineBarTotal key={ `${ highlightMonthState }_sR` } inputData={ sharedData } title={ ['Shared Income to Expenses Ratio', 'Income', 'Expenses' ] } valueProp={ [ 'totalSharedIncome', 'totalSharedExpenses' ] } />   
+           <InlineBarTotal key={ `${ highlightMonthState }_iR` } inputData={ monthData } title={ ['Income to Expenses Ratio', 'Income', 'Expenses' ] } valueProp={ [ 'incomeTotal', 'expenseTotal' ] } />  
+           {/* <InlineBarTotal key={ `${ highlightMonthState }_sR` } inputData={ sharedData } title={ ['Shared Income to Expenses Ratio', 'Income', 'Expenses' ] } valueProp={ [ 'totalSharedIncome', 'totalSharedExpenses' ] } />    */}
            <InlineBarPerUser key={ `${ highlightMonthState }_sIn` } inputData={ uniqueUsers } title={ 'Shared Income By User' } valueProp={ 'incomeShared' } />
            <InlineBarPerUser key={ `${ highlightMonthState }_sOut` } inputData={ uniqueUsers } title={ 'Shared Expenses By User' } valueProp={ 'expensesShared' } />
            <InlineBarPerUser key={ `${ highlightMonthState }_tIn` } inputData={ uniqueUsers } title={ 'Total Income By User' } valueProp={ 'incomeTotal' } />
