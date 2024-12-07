@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { format } from "date-fns";
 import { toCurrency, sumPropArray } from "../utils/helpers";
 import {
-  SingleMonthCategoryCost,
   InlineBarTotal,
   InlineBarPerUser,
   InlineBarBalance,
@@ -133,13 +132,6 @@ const MonthSummary = ({
       return entry;
     });
 
-  let sharedData = {
-    totalIncome: sumPropArray(incomeByMonth, "value"),
-    totalExpenses: sumPropArray(expenseByMonth, "value"),
-    totalSharedIncome: sumPropArray(incomeByMonthShared, "value"),
-    totalSharedExpenses: sumPropArray(expenseByMonthShared, "value"),
-  };
-
   // run balances
   uniqueUsers.map((user) => {
     user.portionSharedExpenses =
@@ -168,10 +160,6 @@ const MonthSummary = ({
       <h4 className="sub-container-description section-list-title noselect">
         {format(date, "MMMM yyyy")}
       </h4>
-      <div className="dual-doughnut-container">
-        {/* <SingleMonthCategoryCost valueType="expense" activeDate={ date } highlightMonthState={ highlightMonthState } categories={ categories.filter( category => category.categoryType === 'expense' ) } transactions={ expenseByMonth } />
-        <SingleMonthCategoryCost valueType="income" activeDate={ date } highlightMonthState={ highlightMonthState } categories={ categories.filter( category => category.categoryType === 'income' ) } transactions={ incomeByMonth } /> */}
-      </div>
 
       {/* balances section */}
       <ul className="monthly-group-detail border-b-l-rad-none border-b-r-rad-none border_b_none">
