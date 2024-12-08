@@ -122,6 +122,25 @@ export const QUERY_CURRENT_BUDGET = gql`
       }
       entries {
         _id
+        createdAt
+        title
+        value
+        valueType
+        budgetID
+        categoryID
+        userID {
+          _id
+          email
+          userInitials
+          userColor
+        }
+        toUserID {
+          _id
+          email
+          userInitials
+          userColor
+        }
+        individualEntry
       }
       months {
         label

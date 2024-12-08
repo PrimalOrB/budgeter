@@ -7,6 +7,7 @@ import { MdSubdirectoryArrowRight, MdPerson, MdPeople } from 'react-icons/md'
 const BudgetCategoryEntriesExpandableList = ( { entry, setPageState, setEditingTransaction } ) => {
 
     function setEdit( { entry, type } ){
+        console.log( entry )
         setEditingTransaction( entry._id )
         setPageState( `edit-${ type }` )
     }

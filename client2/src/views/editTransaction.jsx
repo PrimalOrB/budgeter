@@ -11,6 +11,8 @@ const EditTransactionEntry = ( { budgetState, setBudgetState, editingID, setPage
 
   const incomingEditData = budgetState.entries.find( x => x._id === editingID )
 
+  console.log( incomingEditData )
+
   const initialFormState = { categoryID: incomingEditData.categoryID, title: incomingEditData.title, value: incomingEditData.value, createdAt: incomingEditData.createdAt, userID: incomingEditData.userID._id, individualEntry: incomingEditData.individualEntry || false  }
   
   const [ formInput, setFormInput ] = useState( { ...initialFormState } ) 
