@@ -1,8 +1,8 @@
 const monthlyUserReportTemplate = require("../templates/template_monthlyUserReport.cjs");
 const puppeteer = require("puppeteer");
 
-async function build_PDF_MonthlyReport(data) {
-  const rendered = monthlyUserReportTemplate(data);
+async function build_PDF_MonthlyReport(data, user) {
+  const rendered = monthlyUserReportTemplate(data, user);
 
   const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
 
@@ -11,7 +11,7 @@ async function build_PDF_MonthlyReport(data) {
   await page.setContent(rendered, { waitUntil: ["domcontentloaded"] });
   const pdf = await page.pdf({
     width: "8.5in",
-    height: "5.5in",
+    height: "11in",
     printBackground: true,
     margin: {
       bottom: "0.25in",

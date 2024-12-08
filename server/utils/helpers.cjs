@@ -5,6 +5,27 @@ function extractPropAsStrToArr(input, field) {
   for (var i = 0; i < input.length; ++i) output.push(String(input[i][field]));
   return output;
 }
+function commaSeparatedNumberDisplay(value) {
+  return Math.floor(value)
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function toCurrency(input) {
+  if (isNaN(input)) {
+    return "$" + 0;
+  }
+  const isNegative = input < 0,
+    dollars = Math.floor(Math.abs(input)),
+    cents = (input - dollars).toFixed(2).split(".")[1];
+  return (
+    "$" +
+    (isNegative ? "-" : "") +
+    commaSeparatedNumberDisplay(dollars) +
+    "." +
+    cents
+  );
+}
 
 function dateToMonthStr(date) {
   return format(date, "M/yy");
@@ -237,6 +258,7 @@ function copyObject(obj) {
 }
 
 module.exports = {
+  toCurrency,
   extractPropAsStrToArr,
   dateToMonthStr,
   fixRounding,

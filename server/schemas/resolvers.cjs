@@ -53,7 +53,7 @@ const resolvers = {
           .populate("userID")
           .populate("toUserID");
 
-        createdMonth.entires = [...monthlyEntries];
+        createdMonth.entries = [...monthlyEntries];
 
         // Populate entries
         const populatedMonth = parseMonthlyEntries(createdMonth);
@@ -63,7 +63,7 @@ const resolvers = {
 
         findBudget.months = [balancedMonth];
 
-        const report = await build_PDF_MonthlyReport(findBudget) 
+        const report = await build_PDF_MonthlyReport(findBudget, user) 
 
         let bufferStr = Buffer.from(report, "utf8");
         

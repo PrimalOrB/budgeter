@@ -13,7 +13,7 @@ const PDFMonthlyUser = ({
   // incomes,
   // transfers,
 }) => {
-  console.log( user, month, budget)
+  // console.log( user, month, budget)
   const [printReq, setPrintReq] = useState(false);
 
   let [getMonthlyReport] = useLazyQuery(REQUEST_MONTHLY_USER_REPORT_PDF, {

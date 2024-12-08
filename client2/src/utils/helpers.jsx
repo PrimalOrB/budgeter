@@ -10,9 +10,16 @@ export function toCurrency(input) {
   if (isNaN(input)) {
     return "$" + 0;
   }
-  let dollars = Math.floor(input);
-  let cents = (input - dollars).toFixed(2).split(".")[1];
-  return "$" + commaSeparatedNumberDisplay(dollars) + "." + cents;
+  const isNegative = input < 0,
+    dollars = Math.floor(Math.abs(input)),
+    cents = (input - dollars).toFixed(2).split(".")[1];
+  return (
+    "$" +
+    (isNegative ? "-" : "") +
+    commaSeparatedNumberDisplay(dollars) +
+    "." +
+    cents
+  );
 }
 
 export function randomHexColor() {
@@ -81,8 +88,8 @@ export function sumPropArray(arr, prop) {
   return arr.reduce((a, b) => a + (b[prop] || 0), 0);
 }
 
-export function dateToMonthStr(date){
-  return format( date, 'M/yy' )
+export function dateToMonthStr(date) {
+  return format(date, "M/yy");
 }
 
 export function parseBudgetData({ budget, date, duration }) {
@@ -102,7 +109,7 @@ export function parseBudgetData({ budget, date, duration }) {
   months = months.reverse();
 
   budget.entries.map((entry) => {
-    console.log( entry.createdAt)
+    console.log(entry.createdAt);
     let matchedMonth = months.filter(
       (month) => month.label === format(entry.createdAt, "M/yy")
     );
