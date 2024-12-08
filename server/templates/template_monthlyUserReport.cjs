@@ -17,7 +17,7 @@ function monthlyUserReportTemplate(data, user) {
   // SHARED EXPENSES
   const sharedExpenseRows = [],
     sharedExpenseStrings = [];
-  let sharedExpenseTotal = [0,0];
+  let sharedExpenseTotal = [0, 0];
   copyObject(data.months[0].entries)
     .filter(
       (entry) =>
@@ -78,18 +78,18 @@ function monthlyUserReportTemplate(data, user) {
       .sort((a, b) => a.createdAt - b.createdAt)
       .map((entry, i) => {
         categoryStr.push(
-          `<tr class="entry ${i % 2 ? "alternate-o" : "alternate-e"}">
-          <td class="w-4 flex w-10">
-            <span class="w-6-r c date">${new Date(
-              entry.createdAt
-            ).toLocaleDateString()}</span>
-            <span class="w-8">${entry.title}</span>
-          </td>
-          <td class="w-1 c">${toCurrency(entry.valueIndividual)}</td>
-          <td class="w-1 c ${entry.value < 0 ? "negative" : ""}">${toCurrency(
+          `<tr class="entry ${i % 2 === 0 ? "alternate-e" : "alternate-o"}">
+            <td class="w-4 flex w-10">
+              <span class="w-6-r c date">${new Date(
+                entry.createdAt
+              ).toLocaleDateString()}</span>
+              <span class="w-8">${entry.title}</span>
+            </td>
+            <td class="w-1 c">${toCurrency(entry.valueIndividual)}</td>
+            <td class="w-1 c ${entry.value < 0 ? "negative" : ""}">${toCurrency(
             entry.value
           )}</td>
-        </tr>`
+          </tr>`
         );
       });
     sharedExpenseStrings.push(categoryStr);
@@ -168,7 +168,7 @@ function monthlyUserReportTemplate(data, user) {
       .sort((a, b) => a.createdAt - b.createdAt)
       .map((entry, i) => {
         categoryStr.push(
-          `<tr class="entry ${i % 2 ? "alternate-o" : "alternate-e"}">
+          `<tr class="entry ${i % 2 === 0 ? "alternate-e" : "alternate-o"}">
           <td class="w-4 flex w-10">
             <span class="w-6-r c date">${new Date(
               entry.createdAt
@@ -205,8 +205,8 @@ function monthlyUserReportTemplate(data, user) {
 
   // SHARED INCOME
   const sharedIncomeRows = [],
-    sharedIncomeStrings = [];    
-  let sharedIncomeTotal = [0,0];
+    sharedIncomeStrings = [];
+  let sharedIncomeTotal = [0, 0];
   copyObject(data.months[0].entries)
     .filter(
       (entry) =>
@@ -217,17 +217,14 @@ function monthlyUserReportTemplate(data, user) {
     .map((entry) => {
       let indexOfCategory = sharedIncomeRows.findIndex(
         (category) => category.categoryID === entry.categoryID
-      );  
+      );
 
       sharedIncomeTotal[0] = fixRounding(
         sharedIncomeTotal[0] +
           entry.value * matchedUserData.percentOfTotalIncome,
         2
       );
-      sharedIncomeTotal[1] = fixRounding(
-        sharedIncomeTotal[1] + entry.value,
-        2
-      );
+      sharedIncomeTotal[1] = fixRounding(sharedIncomeTotal[1] + entry.value, 2);
 
       // create category grouping if categoryID does not exist
       if (indexOfCategory < 0) {
@@ -267,7 +264,7 @@ function monthlyUserReportTemplate(data, user) {
       .sort((a, b) => a.createdAt - b.createdAt)
       .map((entry, i) => {
         categoryStr.push(
-          `<tr class="entry ${i % 2 ? "alternate-o" : "alternate-e"}">
+          `<tr class="entry ${i % 2 === 0 ? "alternate-e" : "alternate-o"}">
           <td class="w-4 flex w-10">
             <span class="w-6-r c date">${new Date(
               entry.createdAt
@@ -282,7 +279,7 @@ function monthlyUserReportTemplate(data, user) {
         );
       });
     sharedIncomeStrings.push(categoryStr);
-  });  
+  });
   let sharedIncome = `<table>
   <thead>
     <tr>
@@ -296,7 +293,7 @@ function monthlyUserReportTemplate(data, user) {
       <th class="c fs-1">All</th>
     </tr>
   </thead>
-  <tbody>`
+  <tbody>`;
   sharedIncomeStrings.map((group) => {
     group.map((str) => {
       return (sharedIncome += str);
@@ -306,7 +303,7 @@ function monthlyUserReportTemplate(data, user) {
 
   // INDIVIDUAL INCOME
   const individualIncomeRows = [],
-    individualIncomeStrings = [];    
+    individualIncomeStrings = [];
   let individualIncomeTotal = [0];
   copyObject(data.months[0].entries)
     .filter(
@@ -357,17 +354,17 @@ function monthlyUserReportTemplate(data, user) {
       .sort((a, b) => a.createdAt - b.createdAt)
       .map((entry, i) => {
         categoryStr.push(
-          `<tr class="entry ${i % 2 ? "alternate-o" : "alternate-e"}">
-          <td class="w-4 flex w-10">
-            <span class="w-6-r c date">${new Date(
-              entry.createdAt
-            ).toLocaleDateString()}</span>
-            <span class="w-8">${entry.title}</span>
-          </td>
-          <td class="w-1 c ${entry.value < 0 ? "negative" : ""}">${toCurrency(
+          `<tr class="entry ${i % 2 === 0 ? "alternate-e" : "alternate-o"}">
+            <td class="w-4 flex w-10">
+              <span class="w-6-r c date">${new Date(
+                entry.createdAt
+              ).toLocaleDateString()}</span>
+              <span class="w-8">${entry.title}</span>
+            </td>
+            <td class="w-1 c ${entry.value < 0 ? "negative" : ""}">${toCurrency(
             entry.value
           )}</td>
-        </tr>`
+          </tr>`
         );
       });
     individualIncomeStrings.push(categoryStr);
@@ -384,13 +381,73 @@ function monthlyUserReportTemplate(data, user) {
       <th class="c fs-1">${matchedUserData.userID.userInitials} Only</th>
     </tr>
   </thead>
-  <tbody>`
+  <tbody>`;
   individualIncomeStrings.map((group) => {
     group.map((str) => {
       return (individualIncome += str);
     });
   });
   individualIncome += `</tbody></table>`;
+
+  // TRANSFERS
+  const transfersStrings = [];
+  const transferVals = [0, 0];
+  copyObject(data.months[0].entries)
+    .filter(
+      (entry) =>
+        entry.valueType === "transfer" &&
+        (entry.userID._id === user || entry.toUserID._id === user)
+    )
+    .map((entry, i) => {
+      console.log(i, i % 2);
+      if (entry.userID._id === user) {
+        transferVals[0] = fixRounding(transferVals[0] + entry.value, 2);
+        transfersStrings.push(
+          `<tr class="entry ${i % 2 === 0 ? "alternate-e" : "alternate-o"}">
+            <td class="w-4 flex w-10">
+              <span class="w-6-r c date">${new Date(
+                entry.createdAt
+              ).toLocaleDateString()}</span>
+              <span class="w-8">${entry.title}</span>
+            </td>
+            <td class="w-1 c negative">${toCurrency(entry.value * -1)}</td>
+          </tr>`
+        );
+      }
+      if (entry.toUserID._id === user) {
+        transferVals[1] = fixRounding(transferVals[1] + entry.value, 2);
+        transfersStrings.push(
+          `<tr class="entry ${i % 2 === 0 ? "alternate-e" : "alternate-o"}">
+            <td class="w-4 flex w-10">
+              <span class="w-6-r c date">${new Date(
+                entry.createdAt
+              ).toLocaleDateString()}</span>
+              <span class="w-8">${entry.title}</span>
+            </td>
+            <td class="w-1 c">${toCurrency(entry.value)}</td>
+          </tr>`
+        );
+      }
+      return;
+    });
+
+  let transfers = `<table>
+      <thead>
+        <tr>
+          <th class="ml-05-r flex">
+            <span class="col-w">Transfers</span>
+            <span class="totals fs-1 col-w ml-2-r">${toCurrency(
+              transferVals[0]
+            )} Out / ${toCurrency(transferVals[1])} In</span> 
+          </th>          
+          <th class="c fs-1"></th>
+        </tr>
+      </thead>
+    <tbody>`;
+  transfersStrings.map((str) => {
+    return (transfers += str);
+  });
+  transfers += `</tbody></table>`;
 
   // html tempalte to have data added
   return `
@@ -405,6 +462,7 @@ function monthlyUserReportTemplate(data, user) {
         ${individualExpenses}
         ${sharedIncome}
         ${individualIncome}
+        ${transfers}
       </body>
   </html>
 `;

@@ -4,8 +4,6 @@ const puppeteer = require("puppeteer");
 async function build_PDF_MonthlyReport(data, user) {
   const rendered = monthlyUserReportTemplate(data, user);
 
-  console.log( rendered )
-
   const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
 
   const page = await browser.newPage();
