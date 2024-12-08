@@ -6,15 +6,74 @@ const dateScalar = require("./dateScalar.cjs");
 const {
   extractPropAsStrToArr,
   dateToMonthStr,
+  createMonthLabelFromOffset,
   createMonthObj,
   parseMonthlyEntries,
   parseMonthlyBalances,
 } = require("../utils/helpers.cjs");
+const build_PDF_MonthlyReport = require("../utils/build_PDF_monthlyReport.cjs")
 
 const resolvers = {
   Date: dateScalar,
 
-  Query: {},
+  Query: {
+    requestMonthlyUserReport: async (
+      parent,
+      { month, user, budgetID },
+      context
+    ) => {
+      if (context.token.headers.authorization !== undefined) {
+        // Create Month
+        const createdMonth = createMonthObj(month);
+
+        // Get budget data
+        const findBudget = await Budget.findOne({ _id: budgetID })
+          .populate("categories")
+          .populate("ownerIDs")
+          .populate("entries");
+
+          if (!findBudget) {
+            return {};
+          }
+
+        // gather owner IDs
+        const owners = extractPropAsStrToArr(findBudget.ownerIDs, "_id");
+
+        // ensure user is authorized
+        const userMatch = owners.includes(user);
+        if (!userMatch) {
+          throw new UserInputError("Incorrect credentials");
+        }
+
+        // Get data for each monmth
+        const monthlyEntries = await Entry.find({
+          budgetID: findBudget._id,
+          monthString: createdMonth.label,
+        })
+          .populate("userID")
+          .populate("toUserID");
+
+        createdMonth.entires = [...monthlyEntries];
+
+        // Populate entries
+        const populatedMonth = parseMonthlyEntries(createdMonth);
+
+        // Balancing Calculations
+        const balancedMonth = parseMonthlyBalances(populatedMonth);
+
+        findBudget.months = [balancedMonth];
+
+        const report = await build_PDF_MonthlyReport(findBudget) 
+
+        let bufferStr = Buffer.from(report, "utf8");
+        
+        const base64 = bufferStr.toString("base64");
+
+        return { blob: base64 };
+      }
+      throw new AuthenticationError("Incorrect credentials");
+    },
+  },
 
   Mutation: {
     login: async (parent, { email }, context) => {
@@ -292,16 +351,18 @@ const resolvers = {
         // Create Filler Months
         const createdMonths = [];
         new Array(lengthOfInitialQuery).fill().map((_, offset) => {
-          return createdMonths.push(createMonthObj(offset));
+          const label = createMonthLabelFromOffset(offset);
+          return createdMonths.push(createMonthObj(label, offset));
         });
 
         // Get budget data
-        const findBudgetNew = await Budget.findOne({ _id: input.budget })
+        const findBudget = await Budget.findOne({ _id: input.budget })
           .populate("categories")
-          .populate("ownerIDs");
+          .populate("ownerIDs")
+          .populate("entries");
 
         // gather owner IDs
-        const owners = extractPropAsStrToArr(findBudgetNew.ownerIDs, "_id");
+        const owners = extractPropAsStrToArr(findBudget.ownerIDs, "_id");
 
         // ensure user is authorized
         const userMatch = owners.includes(input.user);
@@ -313,7 +374,7 @@ const resolvers = {
         const newMonths = [];
         const queryEachMonth = createdMonths.map(async (month) => {
           const monthlyEntries = await Entry.find({
-            budgetID: findBudgetNew._id,
+            budgetID: findBudget._id,
             monthString: month.label,
           })
             .populate("userID")
@@ -330,24 +391,15 @@ const resolvers = {
         newMonths
           .sort((a, b) => a.order - b.order)
           .map((month) => {
-            return populatedMonths.push(parseMonthlyEntries(month))
+            return populatedMonths.push(parseMonthlyEntries(month));
           });
 
         // Balancing Calculations
         populatedMonths.map((month) => {
-          return parseMonthlyBalances(month)
+          return parseMonthlyBalances(month);
         });
 
-        // find budget by ID
-        const findBudget = await Budget.findOne({ _id: input.budget })
-          .populate("categories")
-          .populate("ownerIDs")
-          .populate({
-            path: "entries",
-            populate: ["userID", "toUserID"],
-          });
-
-          findBudget.months = populatedMonths
+        findBudget.months = populatedMonths;
 
         if (!findBudget) {
           return {};

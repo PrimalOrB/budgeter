@@ -127,12 +127,16 @@ const typeDefs = `
         months: [ Month ]
     }
 
+    type PDF {
+        blob: String
+    }
+
     type Auth {
         token: ID!
     }
 
     type Query {
-        _dummy: String
+        requestMonthlyUserReport(month: String!, user: ID!, budgetID: ID!): PDF
     }
 
     type Mutation {

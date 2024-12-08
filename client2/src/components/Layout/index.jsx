@@ -3,7 +3,7 @@ import Footer from "./Footer";
 import Title from "./Title";
 import BudgetCategoryExpandableList from "./BudgetCategoryExpandableList";
 import BudgetCategoryEntriesExpandableList from "./BudgetCategoryEntriesExpandableList";
-import PDFMonthlyUse from "./PDFMonthlyUser";
+import PDFMonthlyUser from "./PDFMonthlyUser";
 
 export {
   Header,
@@ -11,5 +11,5 @@ export {
   Title,
   BudgetCategoryExpandableList,
   BudgetCategoryEntriesExpandableList,
-  PDFMonthlyUse,
+  PDFMonthlyUser,
 };

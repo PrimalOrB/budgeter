@@ -10,7 +10,7 @@ import {
 import {
   BudgetCategoryExpandableList,
   BudgetCategoryEntriesExpandableList,
-  PDFMonthlyUse,
+  PDFMonthlyUser,
 } from "../components/Layout";
 import { FaCaretDown, FaCaretUp } from "react-icons/fa";
 
@@ -291,10 +291,12 @@ const MonthSummary = ({
             <li className="flex nowrap flex-just-space-around f-full">
               {monthData.userData.map((user) => {
                 return (
-                  <PDFMonthlyUse
+                  <PDFMonthlyUser
                     key={`${user.userID._id}_rpt`}
                     user={user}
                     date={date}
+                    month={monthData}
+                    budget={budget}
                     // categories={categories}
                     // expenses={expenseByMonth}
                     // incomes={incomeByMonth}

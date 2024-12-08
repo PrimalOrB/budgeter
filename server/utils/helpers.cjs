@@ -17,11 +17,15 @@ function fixRounding(value, precision) {
   return rounded > 0 ? rounded * (isNegative ? -1 : 1) : 0;
 }
 
-function createMonthObj(offset) {
+function createMonthLabelFromOffset(offset) {
   const createDate = sub(new Date(), { months: offset }),
     label = dateToMonthStr(createDate);
+  return label;
+}
+
+function createMonthObj(label, offset) {
   const month = {
-    label: "",
+    label,
     incomeTotal: 0,
     expenseTotal: 0,
     transferTotals: 0,
@@ -32,8 +36,9 @@ function createMonthObj(offset) {
     incomeCategories: [],
     expenseCategories: [],
   };
-  month.label = label;
-  month.order = offset;
+  if (offset !== undefined) {
+    month.order = offset;
+  }
   return month;
 }
 
@@ -236,6 +241,7 @@ module.exports = {
   dateToMonthStr,
   fixRounding,
   copyObject,
+  createMonthLabelFromOffset,
   createMonthObj,
   parseMonthlyEntries,
   parseMonthlyBalances,

@@ -204,6 +204,6 @@ mutation queryCategory($input: CategoryIDInput! ) {
       budgetID
       categoryType
       countUse
+    }
   }
-}
 `;
