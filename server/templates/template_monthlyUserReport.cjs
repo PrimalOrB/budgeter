@@ -14,20 +14,6 @@ function monthlyUserReportTemplate(data, user) {
     entries: [],
   };
 
-  // SUMMARY
-  let summary = `<table>
-  <thead>
-    <tr>
-      <th class="ml-05-r flex">
-        <span class="col-w">Summary: ${matchedUserData.userID.userInitials} - ${ data.months[0].label }</span>
-        <span class="totals fs-1 col-w ml-2-r">
-      </th>
-      <th class="c fs-1"></th>
-      <th class="c fs-1"></th>
-    </tr>
-  </thead>
-  <tbody>`;
-
   // SHARED EXPENSES
   const sharedExpenseRows = [],
     sharedExpenseStrings = [];
@@ -225,8 +211,7 @@ function monthlyUserReportTemplate(data, user) {
     .filter(
       (entry) =>
         entry.valueType === "income" &&
-        entry.individualEntry === false &&
-        entry.userID._id === user
+        entry.individualEntry === false 
     )
     .map((entry) => {
       let indexOfCategory = sharedIncomeRows.findIndex(
@@ -250,15 +235,14 @@ function monthlyUserReportTemplate(data, user) {
         indexOfCategory = sharedIncomeRows.length;
         sharedIncomeRows[indexOfCategory] = createdCategoryGroup;
       }
-      entry.valueIndividual = fixRounding(
-        entry.value * matchedUserData.percentOfTotalIncome,
-        2
-      );
-      sharedIncomeRows[indexOfCategory].valueIndividual = fixRounding(
-        sharedIncomeRows[indexOfCategory].valueIndividual +
-          entry.valueIndividual,
-        2
-      );
+      if( entry.userID._id === user ){
+        entry.valueIndividual = entry.value
+        sharedIncomeRows[indexOfCategory].valueIndividual = fixRounding(
+          sharedIncomeRows[indexOfCategory].valueIndividual +
+            entry.value,
+          2
+        );
+      }
       sharedIncomeRows[indexOfCategory].valueTotal = fixRounding(
         sharedIncomeRows[indexOfCategory].valueTotal + entry.value,
         2
@@ -285,7 +269,7 @@ function monthlyUserReportTemplate(data, user) {
             ).toLocaleDateString()}</span>
             <span class="w-8">${entry.title}</span>
           </td>
-          <td class="w-1 c ${entry.valueIndividual < 0 ? "negative" : ""}">${toCurrency(entry.valueIndividual)}</td>
+          <td class="w-1 c ${entry.valueIndividual < 0 ? "negative" : ""}">${entry.valueIndividual > 0 ? toCurrency(entry.valueIndividual) : ''}</td>
           <td class="w-1 c ${entry.value < 0 ? "negative" : ""}">${toCurrency(
             entry.value
           )}</td>
@@ -465,6 +449,55 @@ function monthlyUserReportTemplate(data, user) {
     return (transfers += str);
   });
   transfers += `</tbody></table>`;
+
+  
+
+  // SUMMARY
+  let summary = `
+    <table>
+      <thead>
+        <tr>
+          <th class="ml-05-r flex">
+            <span class="col-w">Summary: ${matchedUserData.userID.userInitials} - ${ data.months[0].label }</span>
+          </th>
+        </tr>
+      </thead>
+    </table>
+    <table class="mt-0">
+      <tbody>
+        <tr class="category">
+          <td class="w-8-r ml-1-r">Shared Expenses</td>
+          <td class="w-8">${toCurrency(
+            sharedExpenseTotal[0]
+          )} of ${toCurrency(sharedExpenseTotal[1])}</td>
+        </tr>
+        <tr class="category">
+          <td class="w-8-r ml-1-r">Individual Expenses</td>
+          <td class="w-8">${toCurrency(
+            individualExpenseTotal[0]
+          )}</td>
+        </tr>
+        <tr class="category">
+          <td class="w-8-r ml-1-r">Shared Income</td>
+          <td class="w-8">${toCurrency(
+            sharedIncomeTotal[0]
+          )} of ${toCurrency(sharedIncomeTotal[1])}</td>
+        </tr>
+        <tr class="category">
+          <td class="w-8-r ml-1-r">Individual Income</td>
+          <td class="w-8">${toCurrency(
+            individualIncomeTotal[0]
+          )}</td>
+        </tr>      
+        <tr class="category">
+          <td class="w-8-r ml-1-r">Transfers</td>
+          <td class="w-8">${toCurrency(
+            transferVals[0]
+          )} Out / ${toCurrency(transferVals[1])} In</td>
+        </tr>
+      </tbody>
+    </table>
+  `;
 
   // html tempalte to have data added
   return `

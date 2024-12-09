@@ -1,4 +1,4 @@
-  const css = `
+const css = `
   * {
     box-sizing: border-box;
     margin: 0;
@@ -217,6 +217,10 @@
   .ml-10-r {
     padding-left: 10rem;
   }
+
+  .mt-0 {
+    margin-top: 0 !important;
+  }
 `;
 
-module.exports = css
+module.exports = css;
