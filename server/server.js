@@ -45,9 +45,9 @@ app.use(
 
 // app.use(express.static(path.join(__dirname, "../client/build/"))); // the same directory as below
 
-// app.get("*", (req, res) => {
-//   res.sendFile(path.resolve(__dirname, "../client/build/", "index.html"));
-// });
+app.get("*", (req, res) => {
+  res.sendFile(path.resolve(__dirname, "../client/build/", "index.html"));
+});
 
 await new Promise((resolve) => httpServer.listen({ port: PORT }, resolve));
 console.log(`🚀 Server ready at http://localhost:${PORT}/graphql`);
