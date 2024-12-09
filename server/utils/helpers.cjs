@@ -91,14 +91,11 @@ function createMonthlyCategoryObj() {
 function parseMonthlyEntries(month) {
   const monthData = { ...month };
   const userData = [];
-  console.log( month )
   month.entries.map((entry) => {
-    console.log( entry )
     let indexOfUser = userData.findIndex((user) =>
         user.userID?._id.equals(entry.userID._id)
       ),
       indexOfToUser = -1;
-    console.log('------', indexOfUser, entry)
 
     // create user if userID does not exist
     if (indexOfUser < 0) {
@@ -220,7 +217,6 @@ function parseMonthlyEntries(month) {
       );
     }
   });
-  console.log( userData )
   monthData.userData = userData;
   return monthData;
 }
