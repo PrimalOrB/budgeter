@@ -434,18 +434,18 @@ const resolvers = {
         await Promise.all(queryEachMonth);
 
         const populatedMonths = [];
-        newMonths
+        const populateMonths = newMonths
           .sort((a, b) => a.order - b.order)
           .map((month) => {
             return populatedMonths.push(parseMonthlyEntries(month));
           });
+        await Promise.all(populateMonths);
 
         // Balancing Calculations
-        populatedMonths.map((month) => {
+        const balaneMonths = populatedMonths.map((month) => {
           return parseMonthlyBalances(month);
         });
-
-        console.log( populatedMonths )
+        await Promise.all(balaneMonths);
 
         findBudget.months = populatedMonths;
 
