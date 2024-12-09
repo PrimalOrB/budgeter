@@ -7,7 +7,7 @@ const Auth0ProviderWithHistory = ({ children }) => {
   const clientId = process.env.VITE_AUTH0_CLIENT_ID;
   const audience = process.env.VITE_AUTH0_AUDIENCE;
   const redirectUri = process.env.REACT_APP_AUTH0_CALLBACK_URL;
-  
+
   const navigate  = useNavigate ();
 
   const onRedirectCallback = (appState) => {
@@ -18,9 +18,9 @@ const Auth0ProviderWithHistory = ({ children }) => {
     domain,
     clientId,
     authorizationParams: {
-      audience,
-      redirect_uri: window.location.origin,
-      organization: process.env.ORGID
+      // audience,
+      redirect_uri: redirectUri,
+      // organization: process.env.ORGID
       // scope: REACT_APP_AUTH0_SCOPES,
     }
   }
@@ -28,11 +28,11 @@ const Auth0ProviderWithHistory = ({ children }) => {
   return (
     <Auth0Provider
     {...auth0config}
-      domain={domain}
-      clientId={clientId}
-      authorizationParams={{
-        redirect_uri: redirectUri,
-      }}
+      // domain={domain}
+      // clientId={clientId}
+      // authorizationParams={{
+      //   redirect_uri: redirectUri,
+      // }}
       // audience={audience}
       // redirect_uri={window.location.origin}
       onRedirectCallback={onRedirectCallback}
