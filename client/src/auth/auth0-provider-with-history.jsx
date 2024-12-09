@@ -6,7 +6,8 @@ const Auth0ProviderWithHistory = ({ children }) => {
   const domain = process.env.VITE_AUTH0_DOMAIN;
   const clientId = process.env.VITE_AUTH0_CLIENT_ID;
   const audience = process.env.VITE_AUTH0_AUDIENCE;
-
+  const redirectUri = process.env.REACT_APP_AUTH0_CALLBACK_URL;
+  
   const navigate  = useNavigate ();
 
   const onRedirectCallback = (appState) => {
@@ -27,8 +28,11 @@ const Auth0ProviderWithHistory = ({ children }) => {
   return (
     <Auth0Provider
     {...auth0config}
-      // domain={domain}
-      // clientId={clientId}
+      domain={domain}
+      clientId={clientId}
+      authorizationParams={{
+        redirect_uri: redirectUri,
+      }}
       // audience={audience}
       // redirect_uri={window.location.origin}
       onRedirectCallback={onRedirectCallback}
