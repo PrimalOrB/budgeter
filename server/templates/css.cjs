@@ -38,10 +38,6 @@
     text-align: left;
   }
 
-  tbody tr:nth-child(odd) {
-    background-color: #edf2f4;
-  }
-
   .alternate-e {
     background-color: #ffffff;
   }

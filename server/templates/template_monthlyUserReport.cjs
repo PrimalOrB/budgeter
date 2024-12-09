@@ -14,6 +14,20 @@ function monthlyUserReportTemplate(data, user) {
     entries: [],
   };
 
+  // SUMMARY
+  let summary = `<table>
+  <thead>
+    <tr>
+      <th class="ml-05-r flex">
+        <span class="col-w">Summary: ${matchedUserData.userID.userInitials} - ${ data.months[0].label }</span>
+        <span class="totals fs-1 col-w ml-2-r">
+      </th>
+      <th class="c fs-1"></th>
+      <th class="c fs-1"></th>
+    </tr>
+  </thead>
+  <tbody>`;
+
   // SHARED EXPENSES
   const sharedExpenseRows = [],
     sharedExpenseStrings = [];
@@ -85,7 +99,7 @@ function monthlyUserReportTemplate(data, user) {
               ).toLocaleDateString()}</span>
               <span class="w-8">${entry.title}</span>
             </td>
-            <td class="w-1 c">${toCurrency(entry.valueIndividual)}</td>
+            <td class="w-1 c ${entry.valueIndividual < 0 ? "negative" : ""}">${toCurrency(entry.valueIndividual)}</td>
             <td class="w-1 c ${entry.value < 0 ? "negative" : ""}">${toCurrency(
             entry.value
           )}</td>
@@ -98,7 +112,7 @@ function monthlyUserReportTemplate(data, user) {
   <thead>
     <tr>
       <th class="ml-05-r flex">
-        <span class="col-w">Shared Expenses</span>
+        <span class="col-w">Shared Expenses: </span>
         <span class="totals fs-1 col-w ml-2-r">${toCurrency(
           sharedExpenseTotal[0]
         )} of ${toCurrency(sharedExpenseTotal[1])}</span> 
@@ -187,7 +201,7 @@ function monthlyUserReportTemplate(data, user) {
   <thead>
     <tr>
       <th class="ml-05-r flex">
-        <span class="col-w">Individual Expenses</span>
+        <span class="col-w">Individual Expenses:</span>
         <span class="totals fs-1 col-w ml-2-r">${toCurrency(
           individualExpenseTotal[0]
         )}</span> 
@@ -271,7 +285,7 @@ function monthlyUserReportTemplate(data, user) {
             ).toLocaleDateString()}</span>
             <span class="w-8">${entry.title}</span>
           </td>
-          <td class="w-1 c">${toCurrency(entry.valueIndividual)}</td>
+          <td class="w-1 c ${entry.valueIndividual < 0 ? "negative" : ""}">${toCurrency(entry.valueIndividual)}</td>
           <td class="w-1 c ${entry.value < 0 ? "negative" : ""}">${toCurrency(
             entry.value
           )}</td>
@@ -284,7 +298,7 @@ function monthlyUserReportTemplate(data, user) {
   <thead>
     <tr>
       <th class="ml-05-r flex">
-        <span class="col-w">Shared Income</span>
+        <span class="col-w">Shared Income:</span>
         <span class="totals fs-1 col-w ml-2-r">${toCurrency(
           sharedIncomeTotal[0]
         )} of ${toCurrency(sharedIncomeTotal[1])}</span> 
@@ -373,7 +387,7 @@ function monthlyUserReportTemplate(data, user) {
   <thead>
     <tr>
       <th class="ml-05-r flex">
-        <span class="col-w">Individual Income</span>
+        <span class="col-w">Individual Income:</span>
         <span class="totals fs-1 col-w ml-2-r">${toCurrency(
           individualIncomeTotal[0]
         )}</span> 
@@ -399,7 +413,6 @@ function monthlyUserReportTemplate(data, user) {
         (entry.userID._id === user || entry.toUserID._id === user)
     )
     .map((entry, i) => {
-      console.log(i, i % 2);
       if (entry.userID._id === user) {
         transferVals[0] = fixRounding(transferVals[0] + entry.value, 2);
         transfersStrings.push(
@@ -443,7 +456,11 @@ function monthlyUserReportTemplate(data, user) {
           <th class="c fs-1"></th>
         </tr>
       </thead>
-    <tbody>`;
+    <tbody>
+    <tr class="category">
+      <td class="w-5 ml-1-r"></td>
+      <td class="w-1 c"></td>
+    </tr>`;
   transfersStrings.map((str) => {
     return (transfers += str);
   });
@@ -458,6 +475,7 @@ function monthlyUserReportTemplate(data, user) {
         <style>${css}</style>
       </head>
       <body id="print-body">
+        ${summary}
         ${sharedExpenses}
         ${individualExpenses}
         ${sharedIncome}
