@@ -17,7 +17,7 @@ const Auth0ProviderWithHistory = ({ children }) => {
     domain,
     clientId,
     authorizationParams: {
-      // audience,
+      audience,
       redirect_uri: window.location.origin,
       // organization: process.env.ORGID
       // scope: REACT_APP_AUTH0_SCOPES,

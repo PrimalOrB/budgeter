@@ -4,13 +4,22 @@ import { ActionButton } from ".";
 
 const LoginButton = () => {
 
-  console.log(useAuth0( ))
+  const { loginWithRedirect } = useAuth0();
   
-  // const { loginWithRedirect } = useAuth0( { organization_name: process.env.ORGID } );
-  const { loginWithRedirect } = useAuth0( );
+  const handleLogin = async () => {
+    await loginWithRedirect({
+      appState: {
+        returnTo: "/",
+      },
+    });
+  };
 
   return (
-    <ActionButton additionalClass={ "login" } action={ loginWithRedirect } text={ 'Log In' }/>
+    <ActionButton
+      additionalClass={"login"}
+      action={handleLogin}
+      text={"Log In"}
+    />
   );
 };
 

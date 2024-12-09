@@ -9,9 +9,10 @@ const LogoutButton = () => {
 
   function logoutActions() {
     Auth.logout()
-    // auth0 logout
     logout({returnTo: window.location.origin,})
   }
+
+  
 
   return (
     <ActionButton additionalClass={ "logout" } action={ logoutActions } text={ 'Log Out' }/>
