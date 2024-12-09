@@ -137,6 +137,7 @@ const typeDefs = `
 
     type Query {
         requestMonthlyUserReport(month: String!, user: ID!, budgetID: ID!): PDF
+        requestSingleTransaction(entryID: ID!, userID: ID!, budgetID: ID!): Entry
     }
 
     type Mutation {

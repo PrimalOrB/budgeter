@@ -11,7 +11,7 @@ const {
   parseMonthlyEntries,
   parseMonthlyBalances,
 } = require("../utils/helpers.cjs");
-const build_PDF_MonthlyReport = require("../utils/build_PDF_monthlyReport.cjs")
+const build_PDF_MonthlyReport = require("../utils/build_PDF_monthlyReport.cjs");
 
 const resolvers = {
   Date: dateScalar,
@@ -32,9 +32,9 @@ const resolvers = {
           .populate("ownerIDs")
           .populate("entries");
 
-          if (!findBudget) {
-            return {};
-          }
+        if (!findBudget) {
+          return {};
+        }
 
         // gather owner IDs
         const owners = extractPropAsStrToArr(findBudget.ownerIDs, "_id");
@@ -63,13 +63,60 @@ const resolvers = {
 
         findBudget.months = [balancedMonth];
 
-        const report = await build_PDF_MonthlyReport(findBudget, user) 
+        const report = await build_PDF_MonthlyReport(findBudget, user);
 
         let bufferStr = Buffer.from(report, "utf8");
-        
+
         const base64 = bufferStr.toString("base64");
 
         return { blob: base64 };
+      }
+      throw new AuthenticationError("Incorrect credentials");
+    },
+    requestSingleTransaction: async (
+      parent,
+      { entryID, userID, budgetID },
+      context
+    ) => {
+      if (context.token.headers.authorization !== undefined) {
+
+        const user = await User.findOne({ _id: userID });
+
+        if (!user) {
+          throw new AuthenticationError("Incorrect credentials");
+        }
+
+        const findEntry = await Entry.findOne({ _id: entryID })
+          .populate("userID")
+          .populate("toUserID");
+
+        if (!findEntry) {
+          throw new AuthenticationError("No Entry Found");
+        }
+
+        const findBudget = await Budget.findOne({ _id: budgetID });
+
+        if (!findBudget) {
+          throw new AuthenticationError("No Budget Found");
+        }
+
+        const entryMatchesBudget = findEntry.budgetID.equals(budgetID);
+
+        if (!entryMatchesBudget) {
+          throw new AuthenticationError("Budget Does Not Contain Entry");
+        }
+
+        // gather owner IDs
+        const owners = extractPropAsStrToArr(findBudget.ownerIDs, "_id");
+
+        // ensure user is authorized
+        const userMatch = owners.includes(userID);
+
+        if (!userMatch) {
+          throw new AuthenticationError("User Not Authorized");
+        }
+
+        return findEntry
       }
       throw new AuthenticationError("Incorrect credentials");
     },

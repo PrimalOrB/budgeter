@@ -1,21 +1,8 @@
-# Easy User Authentication for React Apps
+# React + Vite
 
-This repository hosts a React project that defines a Single-Page Application (SPA). You'll secure access to some of its routes using Auth0 User Authentication.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Get Started
+Currently, two official plugins are available:
 
-Install the client project dependencies:
-
-```bash
-npm install
-```
-
-Run the client project:
-
-```bash
-npm start
-```
-
-The application runs by on port `4040` to mitigate conflicting with other client applications you may be running.
-
-Visit [`http://localhost:4040/`](http://localhost:4040/) to access the starter application.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh

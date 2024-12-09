@@ -22,8 +22,7 @@ function monthlyUserReportTemplate(data, user) {
     .filter(
       (entry) =>
         entry.valueType === "expense" &&
-        entry.individualEntry === false &&
-        entry.userID._id === user
+        entry.individualEntry === false
     )
     .map((entry) => {
       let indexOfCategory = sharedExpenseRows.findIndex(
@@ -103,7 +102,7 @@ function monthlyUserReportTemplate(data, user) {
           sharedExpenseTotal[0]
         )} of ${toCurrency(sharedExpenseTotal[1])}</span> 
       </th>
-      <th class="c fs-1">${matchedUserData.userID.userInitials} Only</th>
+      <th class="c fs-1">${matchedUserData.userID.userInitials} Portion</th>
       <th class="c fs-1">All</th>
     </tr>
   </thead>
@@ -487,7 +486,7 @@ function monthlyUserReportTemplate(data, user) {
         }
         <tr class="category">
           <td class="w-15-r ml-1-r">Shared Responsibility</td>
-          <td class="w-7">${toCurrency(matchedUserData.responsibilityTotal)} ( ${fixRounding(matchedUserData.percentOfTotalIncome * 100,1)}% )</td>
+          <td class="w-7">${toCurrency(matchedUserData.responsibilityTotal)} ( ${fixRounding(matchedUserData.percentOfTotalIncome * 100,1)}% Of Shared Expenses )</td>
         </tr>
         <tr class="category">
           <td class="w-15-r ml-1-r">Remaining Balance</td>
