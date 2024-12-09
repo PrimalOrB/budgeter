@@ -24,8 +24,6 @@ const Auth0ProviderWithHistory = ({ children }) => {
     }
   }
 
-  console.log( auth0config )
-
   return (
     <Auth0Provider
     {...auth0config}
