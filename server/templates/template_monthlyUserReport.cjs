@@ -465,33 +465,61 @@ function monthlyUserReportTemplate(data, user) {
     </table>
     <table class="mt-0">
       <tbody>
+        ${
+          matchedUserData.responsibilityBalance === 0
+          ?
+          `<tr class="category">
+            <td class="w-15-r ml-1-r">Values Balanced</td>
+            <td class="w-7"></td>
+          </tr>`
+          :
+          matchedUserData.responsibilityBalance > 0
+          ?
+          `<tr class="category">
+            <td class="w-15-r ml-1-r">Balance To Pay</td>
+            <td class="w-7">${toCurrency(matchedUserData.responsibilityBalance)}</td>
+          </tr>`
+          :
+          `<tr class="category">
+            <td class="w-15-r ml-1-r">Balance Owed</td>
+            <td class="w-7">${toCurrency(Math.abs(matchedUserData.responsibilityBalance))}</td>
+          </tr>`
+        }
         <tr class="category">
-          <td class="w-8-r ml-1-r">Shared Expenses</td>
-          <td class="w-8">${toCurrency(
+          <td class="w-15-r ml-1-r">Shared Responsibility</td>
+          <td class="w-7">${toCurrency(matchedUserData.responsibilityTotal)} ( ${fixRounding(matchedUserData.percentOfTotalIncome * 100,1)}% )</td>
+        </tr>
+        <tr class="category">
+          <td class="w-15-r ml-1-r">Remaining Balance</td>
+          <td class="w-7">${toCurrency(matchedUserData.finalPersonalBalance)}</td>
+        </tr>
+        <tr class="category">
+          <td class="w-15-r ml-1-r">Shared Expenses</td>
+          <td class="w-7">${toCurrency(
             sharedExpenseTotal[0]
           )} of ${toCurrency(sharedExpenseTotal[1])}</td>
         </tr>
         <tr class="category">
-          <td class="w-8-r ml-1-r">Individual Expenses</td>
-          <td class="w-8">${toCurrency(
+          <td class="w-15-r ml-1-r">Individual Expenses</td>
+          <td class="w-7">${toCurrency(
             individualExpenseTotal[0]
           )}</td>
         </tr>
         <tr class="category">
-          <td class="w-8-r ml-1-r">Shared Income</td>
-          <td class="w-8">${toCurrency(
+          <td class="w-15-r ml-1-r">Shared Income</td>
+          <td class="w-7">${toCurrency(
             sharedIncomeTotal[0]
           )} of ${toCurrency(sharedIncomeTotal[1])}</td>
         </tr>
         <tr class="category">
-          <td class="w-8-r ml-1-r">Individual Income</td>
-          <td class="w-8">${toCurrency(
+          <td class="w-15-r ml-1-r">Individual Income</td>
+          <td class="w-7">${toCurrency(
             individualIncomeTotal[0]
           )}</td>
         </tr>      
         <tr class="category">
-          <td class="w-8-r ml-1-r">Transfers</td>
-          <td class="w-8">${toCurrency(
+          <td class="w-15-r ml-1-r">Transfers</td>
+          <td class="w-7">${toCurrency(
             transferVals[0]
           )} Out / ${toCurrency(transferVals[1])} In</td>
         </tr>

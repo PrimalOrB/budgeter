@@ -174,6 +174,14 @@ const css = `
     width: 10rem;
   }
 
+  .w-15-r {
+    width: 15rem;
+  }
+
+  .w-15-r {
+    width: 15rem;
+  }
+
   .ml-05-r {
     padding-left: 0.5rem;
   }
