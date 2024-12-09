@@ -91,7 +91,9 @@ function createMonthlyCategoryObj() {
 function parseMonthlyEntries(month) {
   const monthData = { ...month };
   const userData = [];
+  console.log( month )
   month.entries.map((entry) => {
+    console.log( entry )
     let indexOfUser = userData.findIndex((user) =>
         user.userID?._id.equals(entry.userID._id)
       ),
