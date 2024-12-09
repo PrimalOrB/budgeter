@@ -392,6 +392,7 @@ const resolvers = {
     },
 
     queryBudget: async (parent, { input }, context) => {
+      console.log( context.token.headers.authorization )
       if (context.token.headers.authorization !== undefined) {
         const lengthOfInitialQuery = 6;
 
@@ -401,7 +402,7 @@ const resolvers = {
           const label = createMonthLabelFromOffset(offset);
           return createdMonths.push(createMonthObj(label, offset));
         });
-
+        console.log( createdMonths )
         // Get budget data
         const findBudget = await Budget.findOne({ _id: input.budget })
           .populate("categories")
@@ -434,6 +435,9 @@ const resolvers = {
         });
         await Promise.all(queryEachMonth);
 
+        
+        console.log( newMonths )
+
         const populatedMonths = [];
         newMonths
           .sort((a, b) => a.order - b.order)
@@ -443,6 +447,7 @@ const resolvers = {
 
         // Balancing Calculations
         populatedMonths.map((month) => {
+          console.log( month )
           return parseMonthlyBalances(month);
         });
 
