@@ -46,7 +46,6 @@ const EditTransferEntry = ({
 
   useEffect(() => {
     if (entryData?.requestSingleTransfer) {
-      console.log(entryData)
       const { value, createdAt, toUserID, userID } = entryData.requestSingleTransfer;
       setFormInput({
         value,

@@ -10,8 +10,10 @@ const {
   createMonthObj,
   parseMonthlyEntries,
   parseMonthlyBalances,
+  fixRounding,
 } = require("../utils/helpers.cjs");
 const build_PDF_MonthlyReport = require("../utils/build_PDF_monthlyReport.cjs");
+const { eachMonthOfInterval } = require("date-fns");
 
 const resolvers = {
   Date: dateScalar,
@@ -79,7 +81,6 @@ const resolvers = {
       context
     ) => {
       if (context.token.headers.authorization !== undefined) {
-
         const user = await User.findOne({ _id: userID });
 
         if (!user) {
@@ -116,7 +117,7 @@ const resolvers = {
           throw new AuthenticationError("User Not Authorized");
         }
 
-        return findEntry
+        return findEntry;
       }
       throw new AuthenticationError("Incorrect credentials");
     },
@@ -126,7 +127,6 @@ const resolvers = {
       context
     ) => {
       if (context.token.headers.authorization !== undefined) {
-
         const user = await User.findOne({ _id: userID });
 
         if (!user) {
@@ -163,7 +163,126 @@ const resolvers = {
           throw new AuthenticationError("User Not Authorized");
         }
 
-        return findEntry
+        return findEntry;
+      }
+      throw new AuthenticationError("Incorrect credentials");
+    },
+    requestCustomReport: async (
+      parent,
+      { budgetID, userID, startDate, endDate },
+      context
+    ) => {
+      if (context.token.headers.authorization !== undefined) {
+        console.log(budgetID, userID, startDate, endDate);
+
+        const user = await User.findOne({ _id: userID });
+
+        if (!user) {
+          throw new AuthenticationError("Incorrect credentials");
+        }
+
+        const findBudget = await Budget.findOne({ _id: budgetID });
+
+        if (!findBudget) {
+          throw new AuthenticationError("No Budget Found");
+        }
+
+        // gather owner IDs
+        const owners = extractPropAsStrToArr(findBudget.ownerIDs, "_id");
+
+        // ensure user is authorized
+        const userMatch = owners.includes(userID);
+
+        if (!userMatch) {
+          throw new AuthenticationError("User Not Authorized");
+        }
+
+        const monthsBetweenDates = eachMonthOfInterval({
+            start: startDate,
+            end: endDate,
+          }),
+          createdMonths = [];
+        monthsBetweenDates
+          .sort((a, b) => b - a)
+          .map((date, i) => {
+            return createdMonths.push(createMonthObj(dateToMonthStr(date), i));
+          });
+
+        // Get data for each monmth
+        const newMonths = [];
+        const queryEachMonth = createdMonths.map(async (month) => {
+          const monthlyEntries = await Entry.find({
+            budgetID: findBudget._id,
+            monthString: month.label,
+          })
+            .populate("userID")
+            .populate("toUserID");
+          const findMonthInArr = createdMonths.find(
+            (findMonth) => findMonth.label === month.label
+          );
+          findMonthInArr.entries = [...monthlyEntries];
+          return newMonths.push(findMonthInArr);
+        });
+        await Promise.all(queryEachMonth);
+
+        const populatedMonths = [];
+        const populateMonths = newMonths
+          .sort((a, b) => a.order - b.order)
+          .map((month) => {
+            return populatedMonths.push(parseMonthlyEntries(month));
+          });
+        await Promise.all(populateMonths);
+
+        // Balancing Calculations
+        const balanedMonths = populatedMonths.map((month) => {
+          return parseMonthlyBalances(month);
+        });
+        await Promise.all(balanedMonths);
+
+        let reportTotals = {
+          label: "",
+          order: 1,
+          incomeTotal: 0,
+          expenseTotal: 0,
+          transferTotals: 0,
+          sharedIncomeTotal: 0,
+          sharedExpenseTotal: 0,
+          userData: [],
+          entries: [],
+          incomeCategories: [],
+          expenseCategories: [],
+        };
+
+        // ADD TOTALS
+        populatedMonths.map((month) => {
+          reportTotals.incomeTotal = fixRounding(
+            reportTotals.incomeTotal + month.incomeTotal,
+            2
+          );
+          reportTotals.expenseTotal = fixRounding(
+            reportTotals.expenseTotal + month.expenseTotal,
+            2
+          );
+          reportTotals.transferTotals = fixRounding(
+            reportTotals.transferTotals + month.transferTotals,
+            2
+          );
+          reportTotals.sharedIncomeTotal = fixRounding(
+            reportTotals.sharedIncomeTotal + month.sharedIncomeTotal,
+            2
+          );
+          reportTotals.sharedExpenseTotal = fixRounding(
+            reportTotals.sharedExpenseTotal + month.sharedExpenseTotal,
+            2
+          );
+
+          // MAP PER MONTH VALUES FOR USER
+        });
+
+        findBudget.months = populatedMonths;
+
+        // return findEntry
+        return reportTotals;
       }
       throw new AuthenticationError("Incorrect credentials");
     },
@@ -489,10 +608,10 @@ const resolvers = {
         await Promise.all(populateMonths);
 
         // Balancing Calculations
-        const balaneMonths = populatedMonths.map((month) => {
+        const balanedMonths = populatedMonths.map((month) => {
           return parseMonthlyBalances(month);
         });
-        await Promise.all(balaneMonths);
+        await Promise.all(balanedMonths);
 
         findBudget.months = populatedMonths;
 

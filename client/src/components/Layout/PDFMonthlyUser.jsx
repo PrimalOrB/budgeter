@@ -1,17 +1,13 @@
 import React, { useState } from "react";
-import generatePDF from "../../utils/generatePDF";
+// import generatePDF from "../../utils/generatePDF";
 import { useLazyQuery } from "@apollo/client";
 import { REQUEST_MONTHLY_USER_REPORT_PDF } from "../../utils/queries";
 
 const PDFMonthlyUser = ({
   user,
-  date,
+  // date,
   month,
   budget,
-  // categories,
-  // expenses,
-  // incomes,
-  // transfers,
 }) => {
   const [printReq, setPrintReq] = useState(false);
 

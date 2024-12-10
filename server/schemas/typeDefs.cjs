@@ -139,6 +139,7 @@ const typeDefs = `
         requestMonthlyUserReport(month: String!, user: ID!, budgetID: ID!): PDF
         requestSingleTransaction(entryID: ID!, userID: ID!, budgetID: ID!): Entry
         requestSingleTransfer(entryID: ID!, userID: ID!, budgetID: ID!): Entry
+        requestCustomReport(budgetID: ID!, userID: ID!, startDate: Date!, endDate: Date!): Month
     }
 
     type Mutation {

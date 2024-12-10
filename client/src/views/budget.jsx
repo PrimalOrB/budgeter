@@ -265,7 +265,7 @@ const Budget = () => {
           )}
           {pageState === "reports" && (
             <>
-              <Reports/>
+              <Reports setErrorState={setErrorState}/>
             </>
           )}
         </>

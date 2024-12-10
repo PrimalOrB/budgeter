@@ -10,7 +10,11 @@ export const REQUEST_MONTHLY_USER_REPORT_PDF = gql`
 
 export const QUERY_SINGLE_TRANSACTION = gql`
   query requestSingleTransaction($entryID: ID!, $userID: ID!, $budgetID: ID!) {
-    requestSingleTransaction(entryID: $entryID, userID: $userID, budgetID: $budgetID) {
+    requestSingleTransaction(
+      entryID: $entryID
+      userID: $userID
+      budgetID: $budgetID
+    ) {
       _id
       createdAt
       title
@@ -37,7 +41,11 @@ export const QUERY_SINGLE_TRANSACTION = gql`
 
 export const QUERY_SINGLE_TRANSFER = gql`
   query requestSingleTransfer($entryID: ID!, $userID: ID!, $budgetID: ID!) {
-    requestSingleTransfer(entryID: $entryID, userID: $userID, budgetID: $budgetID) {
+    requestSingleTransfer(
+      entryID: $entryID
+      userID: $userID
+      budgetID: $budgetID
+    ) {
       _id
       createdAt
       value
@@ -54,6 +62,28 @@ export const QUERY_SINGLE_TRANSFER = gql`
         userInitials
         userColor
       }
+    }
+  }
+`;
+
+export const QUERY_CUSTOM_REPORT = gql`
+  query requestCustomReport(
+    $budgetID: ID!
+    $userID: ID!
+    $startDate: Date!
+    $endDate: Date!
+  ) {
+    requestCustomReport(
+      budgetID: $budgetID
+      userID: $userID
+      startDate: $startDate
+      endDate: $endDate
+    ) {
+      incomeTotal
+      expenseTotal
+      transferTotals
+      sharedIncomeTotal
+      sharedExpenseTotal
     }
   }
 `;
