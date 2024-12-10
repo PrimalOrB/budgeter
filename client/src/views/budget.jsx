@@ -140,13 +140,6 @@ const Budget = () => {
       svg: FaFolder,
       svgClass: "icon-margin",
     },
-    // {
-    //   text: "Add Category",
-    //   desc: "",
-    //   link: `add-category`,
-    //   svg: FaFolderPlus,
-    //   svgClass: "icon-margin",
-    // },
   ];
 
   return (

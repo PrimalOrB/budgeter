@@ -14,7 +14,7 @@ const AllCategories = ({ categories, setPageState }) => {
 
   const setAdd = () => {
     setPageState("add-category");
-  }
+  };
 
   return (
     <section className="full-container">
@@ -36,8 +36,7 @@ const AllCategories = ({ categories, setPageState }) => {
         ) : (
           categories
             .filter((category) => category.categoryType === "expense")
-            .map((category,i) => {
-              
+            .map((category, i) => {
               return (
                 <li
                   key={`exp_${category.title}_${i}`}
@@ -103,7 +102,11 @@ const AllCategories = ({ categories, setPageState }) => {
             );
           })}
       </ul>
-      <ActionButton action={ setAdd } text={ 'Add New Cateogry' } additionalClass={ 'large-button' } />
+      <ActionButton
+        action={setAdd}
+        text={"Add New Cateogry"}
+        additionalClass={"large-button"}
+      />
     </section>
   );
 };
