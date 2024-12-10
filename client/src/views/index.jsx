@@ -11,6 +11,7 @@ import EditTransferEntry from './editTransfer'
 import RecentTransactions from './recentTransactions'
 import AllCategories from './allCategories'
 import MonthSummary from './monthSummary'
+import Reports from './reports'
 
 export { 
     Home,
@@ -25,5 +26,6 @@ export {
     EditTransferEntry,
     RecentTransactions,
     AllCategories,
-    MonthSummary
+    MonthSummary,
+    Reports
  };

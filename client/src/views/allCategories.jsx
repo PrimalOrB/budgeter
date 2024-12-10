@@ -1,9 +1,8 @@
 import React from "react";
 import { Title } from "../components/Layout";
-import { format } from "date-fns";
-import { toCurrency } from "../utils/helpers";
 import { FaEdit } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { ActionButton } from "../components/Buttons";
 
 const AllCategories = ({ categories, setPageState }) => {
   const navigate = useNavigate();
@@ -12,6 +11,10 @@ const AllCategories = ({ categories, setPageState }) => {
     setPageState("edit-category");
     navigate(`/budget/${budget}/edit-category/${category}`);
   };
+
+  const setAdd = () => {
+    setPageState("add-category");
+  }
 
   return (
     <section className="full-container">
@@ -100,6 +103,7 @@ const AllCategories = ({ categories, setPageState }) => {
             );
           })}
       </ul>
+      <ActionButton action={ setAdd } text={ 'Add New Cateogry' } additionalClass={ 'large-button' } />
     </section>
   );
 };

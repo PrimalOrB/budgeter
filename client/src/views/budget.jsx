@@ -18,6 +18,7 @@ import {
   AllCategories,
   EditCategory,
   MonthSummary,
+  Reports
 } from ".";
 import { dateToMonthStr } from "../utils/helpers";
 import { format } from "date-fns";
@@ -25,8 +26,8 @@ import {
   FaCaretUp,
   FaCaretDown,
   FaFolder,
-  FaFolderPlus,
   FaHome,
+  FaListUl,
 } from "react-icons/fa";
 import { BiTransferAlt } from "react-icons/bi";
 
@@ -126,19 +127,26 @@ const Budget = () => {
       svgClass: "transfer",
     },
     {
+      text: "Reports",
+      desc: "",
+      link: `reports`,
+      svg: FaListUl,
+      svgClass: "icon-margin",
+    },
+    {
       text: "Categories",
       desc: "",
       link: `categories`,
       svg: FaFolder,
       svgClass: "icon-margin",
     },
-    {
-      text: "Add Category",
-      desc: "",
-      link: `add-category`,
-      svg: FaFolderPlus,
-      svgClass: "icon-margin",
-    },
+    // {
+    //   text: "Add Category",
+    //   desc: "",
+    //   link: `add-category`,
+    //   svg: FaFolderPlus,
+    //   svgClass: "icon-margin",
+    // },
   ];
 
   return (
@@ -260,6 +268,11 @@ const Budget = () => {
           {pageState === "edit-category" && (
             <>
               <EditCategory refetch={queryBudget} setPageState={setPageState} />
+            </>
+          )}
+          {pageState === "reports" && (
+            <>
+              <Reports/>
             </>
           )}
         </>
