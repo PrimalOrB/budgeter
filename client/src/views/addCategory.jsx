@@ -4,17 +4,14 @@ import { InlineTextInput, InlineSelectInput } from "../components/Forms";
 import { InlineNotification } from "../components/Notifications";
 import { useMutation } from "@apollo/client";
 import { CREATE_NEW_BUDGET_CATEGORY } from "../utils/mutations";
-import { useNavigate } from "react-router-dom";
 import { Title } from "../components/Layout";
 
-const AddCategory = ({ id }) => {
+const AddCategory = ({ id , refetch, setPageState}) => {
   const [formInput, setFormInput] = useState({
     budgetID: id,
     title: "",
     categoryType: "",
   });
-
-  const navigate = useNavigate();
 
   function validateForm(form) {
     if (
@@ -68,8 +65,8 @@ const AddCategory = ({ id }) => {
       update: (cache, data) => {
         try {
           if (data) {
-            navigate(`/budget/${formInput.budgetID}`, {replace: true});
-            return navigate(0)
+            refetch()
+          return setPageState( 'dashboard' )
           }
         } catch (e) {
           console.error(createdError);

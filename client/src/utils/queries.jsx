@@ -34,3 +34,26 @@ export const QUERY_SINGLE_TRANSACTION = gql`
     }
   }
 `;
+
+export const QUERY_SINGLE_TRANSFER = gql`
+  query requestSingleTransfer($entryID: ID!, $userID: ID!, $budgetID: ID!) {
+    requestSingleTransfer(entryID: $entryID, userID: $userID, budgetID: $budgetID) {
+      _id
+      createdAt
+      value
+      budgetID
+      userID {
+        _id
+        email
+        userInitials
+        userColor
+      }
+      toUserID {
+        _id
+        email
+        userInitials
+        userColor
+      }
+    }
+  }
+`;

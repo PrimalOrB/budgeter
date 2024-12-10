@@ -21,7 +21,7 @@ import { MdPerson, MdPeople } from "react-icons/md";
 
 const EditTransactionEntry = ({
   budgetState,
-  setBudgetState,
+  refetch,
   editingID,
   setPageState,
 }) => {
@@ -55,7 +55,7 @@ const EditTransactionEntry = ({
         title,
         value,
         createdAt,
-        userID,
+        userID: userID._id,
         individualEntry,
       });
       setPopulated(true);
@@ -119,14 +119,7 @@ const EditTransactionEntry = ({
       update: (cache, data) => {
         try {
           if (data) {
-            const newBudgetState = { ...budgetState };
-            newBudgetState.entries = [
-              ...newBudgetState.entries.filter(
-                (entry) => entry._id !== data.data.editTransaction._id
-              ),
-              data.data.editTransaction,
-            ];
-            setBudgetState({ ...newBudgetState });
+            refetch();
             return setPageState("dashboard");
           }
         } catch (e) {

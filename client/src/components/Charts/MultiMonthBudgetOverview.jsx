@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import "chart.js/auto";
 import { Chart } from "react-chartjs-2";
+import { toCurrency } from "../../utils/helpers";
 
 const determineBorderRadius = (context) => {
   const numDatasets = context.chart.data.datasets.length;
@@ -144,6 +145,30 @@ const MultiMonthBudgetOverview = ({
       },
       legend: {
         display: false,
+      },
+      tooltip: {
+        callbacks: {
+          title: function (context) {
+            const title = context[0].label + " Overview";
+            return title;
+          },
+          label: function (context) {
+            const label = [];
+
+            const totalIncome =
+                graphDataState.datasets[1].data[context.dataIndex],
+              totalExpenses =
+                graphDataState.datasets[2].data[context.dataIndex];
+
+            label.push(
+              `Balance:      ${toCurrency(totalIncome - totalExpenses)}`
+            );
+            label.push(`- Income:     ${toCurrency(totalIncome)}`);
+            label.push(`- Expenses: ${toCurrency(totalExpenses)}`);
+
+            return label;
+          },
+        },
       },
     },
     responsive: true,

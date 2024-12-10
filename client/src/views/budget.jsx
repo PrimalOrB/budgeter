@@ -230,7 +230,11 @@ const Budget = () => {
           )}
           {pageState === "add-category" && (
             <>
-              <AddCategory id={_id} />
+              <AddCategory
+                id={_id}
+                refetch={queryBudget}
+                setPageState={setPageState}
+              />
             </>
           )}
           {pageState === "edit-transaction" && (
@@ -238,8 +242,8 @@ const Budget = () => {
               <EditTransactionEntry
                 editingID={editingTransaction}
                 budgetState={budgetState}
+                refetch={queryBudget}
                 setPageState={setPageState}
-                setBudgetState={setBudgetState}
               />
             </>
           )}
@@ -248,14 +252,14 @@ const Budget = () => {
               <EditTransferEntry
                 editingID={editingTransaction}
                 budgetState={budgetState}
+                refetch={queryBudget}
                 setPageState={setPageState}
-                setBudgetState={setBudgetState}
               />
             </>
           )}
           {pageState === "edit-category" && (
             <>
-              <EditCategory />
+              <EditCategory refetch={queryBudget} setPageState={setPageState} />
             </>
           )}
         </>

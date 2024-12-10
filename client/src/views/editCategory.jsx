@@ -8,10 +8,9 @@ import {
   QUERY_BUDGET_CATEGORY,
   UPDATE_BUDGET_CATEGORY,
 } from "../utils/mutations";
-import { useNavigate } from "react-router-dom";
 import { Title } from "../components/Layout";
 
-const EditCategory = () => {
+const EditCategory = ({ refetch, setPageState }) => {
   const { cat } = useParams();
 
   const [formInput, setFormInput] = useState({
@@ -49,8 +48,6 @@ const EditCategory = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const navigate = useNavigate();
 
   function validateForm(form) {
     if (
@@ -103,15 +100,14 @@ const EditCategory = () => {
       update: (cache, data) => {
         try {
           if (data) {
-            navigate(`/budget/${formInput.budgetID}`, {replace: true});
-            return navigate(0)
+            refetch();
+            return setPageState("dashboard");
           }
         } catch (e) {
           console.error(createdError);
         }
       },
-    }
-    );
+    });
 
   return (
     <section className="full-container">

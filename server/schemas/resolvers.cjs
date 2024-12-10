@@ -120,6 +120,53 @@ const resolvers = {
       }
       throw new AuthenticationError("Incorrect credentials");
     },
+    requestSingleTransfer: async (
+      parent,
+      { entryID, userID, budgetID },
+      context
+    ) => {
+      if (context.token.headers.authorization !== undefined) {
+
+        const user = await User.findOne({ _id: userID });
+
+        if (!user) {
+          throw new AuthenticationError("Incorrect credentials");
+        }
+
+        const findEntry = await Entry.findOne({ _id: entryID })
+          .populate("userID")
+          .populate("toUserID");
+
+        if (!findEntry) {
+          throw new AuthenticationError("No Entry Found");
+        }
+
+        const findBudget = await Budget.findOne({ _id: budgetID });
+
+        if (!findBudget) {
+          throw new AuthenticationError("No Budget Found");
+        }
+
+        const entryMatchesBudget = findEntry.budgetID.equals(budgetID);
+
+        if (!entryMatchesBudget) {
+          throw new AuthenticationError("Budget Does Not Contain Entry");
+        }
+
+        // gather owner IDs
+        const owners = extractPropAsStrToArr(findBudget.ownerIDs, "_id");
+
+        // ensure user is authorized
+        const userMatch = owners.includes(userID);
+
+        if (!userMatch) {
+          throw new AuthenticationError("User Not Authorized");
+        }
+
+        return findEntry
+      }
+      throw new AuthenticationError("Incorrect credentials");
+    },
   },
 
   Mutation: {
