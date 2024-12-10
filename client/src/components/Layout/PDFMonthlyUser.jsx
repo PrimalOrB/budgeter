@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-// import generatePDF from "../../utils/generatePDF";
 import { useLazyQuery } from "@apollo/client";
 import { REQUEST_MONTHLY_USER_REPORT_PDF } from "../../utils/queries";
 
