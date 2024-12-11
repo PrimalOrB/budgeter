@@ -112,6 +112,20 @@ const typeDefs = `
         expenseCategories: [ cateogryGroup ]
     }
 
+    type ReportPeriod {
+        balance: Float
+        incomeTotal: Float
+        expenseTotal: Float
+        transferTotals: Float
+        sharedBalance: Float
+        sharedIncomeTotal: Float
+        sharedExpenseTotal: Float
+        userData: [ MonthUser ]
+        entries: [ Entry ]
+        incomeCategories: [ cateogryGroup ]
+        expenseCategories: [ cateogryGroup ]
+    }
+
     type cateogryGroup {        
         categoryID: ID
         total: Float
@@ -139,7 +153,7 @@ const typeDefs = `
         requestMonthlyUserReport(month: String!, user: ID!, budgetID: ID!): PDF
         requestSingleTransaction(entryID: ID!, userID: ID!, budgetID: ID!): Entry
         requestSingleTransfer(entryID: ID!, userID: ID!, budgetID: ID!): Entry
-        requestCustomReport(budgetID: ID!, userID: ID!, startDate: Date!, endDate: Date!): Month
+        requestCustomReport(budgetID: ID!, userID: ID!, startDate: Date!, endDate: Date!): ReportPeriod
     }
 
     type Mutation {

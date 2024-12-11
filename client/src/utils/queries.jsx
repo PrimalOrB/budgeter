@@ -79,8 +79,10 @@ export const QUERY_CUSTOM_REPORT = gql`
       startDate: $startDate
       endDate: $endDate
     ) {
+      balance
       incomeTotal
       expenseTotal
+      sharedBalance
       transferTotals
       sharedIncomeTotal
       sharedExpenseTotal

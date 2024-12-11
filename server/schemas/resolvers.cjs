@@ -242,9 +242,11 @@ const resolvers = {
         let reportTotals = {
           label: "",
           order: 1,
+          balance: 0,
           incomeTotal: 0,
           expenseTotal: 0,
           transferTotals: 0,
+          sharedBalance: 0,
           sharedIncomeTotal: 0,
           sharedExpenseTotal: 0,
           userData: [],
@@ -278,6 +280,16 @@ const resolvers = {
 
           // MAP PER MONTH VALUES FOR USER
         });
+
+        // BALANCES
+        reportTotals.balance = fixRounding(
+          reportTotals.incomeTotal - reportTotals.expenseTotal,
+          2
+        )
+        reportTotals.sharedBalance = fixRounding(
+          reportTotals.sharedIncomeTotal - reportTotals.sharedExpenseTotal,
+          2
+        )
 
         findBudget.months = populatedMonths;
 
