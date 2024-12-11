@@ -31,7 +31,8 @@ const Reports = ({ setErrorState }) => {
   function runGetCustomReport(){
     const variables = {
       budgetID: _id,
-      userID: currentUser._id,
+      userID: currentUser._id, // ANDREW      
+      // userID: "627d8baba7324c35bce9df9e", // ERYNN
       startDate: sub(new Date(), { months: 11 }),
       endDate: new Date(),
     }
