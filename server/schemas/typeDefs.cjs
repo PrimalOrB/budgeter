@@ -82,6 +82,21 @@ const typeDefs = `
         individualEntry: Boolean
     }
 
+    type ReportEntry {
+        _id: ID!
+        createdAt: Date!
+        monthString: String
+        title: String!
+        value: Float!
+        valueIndividual: Float
+        valueType: String!
+        budgetID: ID!
+        userID: User
+        toUserID: User
+        categoryID: ID
+        individualEntry: Boolean
+    }
+
     type MonthUser {
         userID: User
         incomeTotal: Float
@@ -116,12 +131,15 @@ const typeDefs = `
         balance: Float
         incomeTotal: Float
         expenseTotal: Float
+        balanceIndividual: Float
+        incomeIndividual: Float
+        expenseIndividual: Float
         transferTotals: Float
         sharedBalance: Float
         sharedIncomeTotal: Float
         sharedExpenseTotal: Float
         userData: [ MonthUser ]
-        entries: [ Entry ]
+        entries: [ ReportEntry ]
         incomeCategories: [ cateogryGroup ]
         expenseCategories: [ cateogryGroup ]
     }
@@ -129,6 +147,7 @@ const typeDefs = `
     type cateogryGroup {        
         categoryID: ID
         total: Float
+        totalIndividual: Float
     }
 
     type Budget {

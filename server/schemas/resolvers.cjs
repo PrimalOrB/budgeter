@@ -8,6 +8,8 @@ const {
   dateToMonthStr,
   createMonthLabelFromOffset,
   createMonthObj,
+  createMonthlyCategoryObj,
+  copyObject,
   parseMonthlyEntries,
   parseMonthlyBalances,
   fixRounding,
@@ -245,6 +247,9 @@ const resolvers = {
           balance: 0,
           incomeTotal: 0,
           expenseTotal: 0,
+          balanceIndividual: 0,
+          incomeIndividual: 0,
+          expenseIndividual: 0,
           transferTotals: 0,
           sharedBalance: 0,
           sharedIncomeTotal: 0,
@@ -278,18 +283,116 @@ const resolvers = {
             2
           );
 
+          const monthUser = month.userData.find((user) =>
+            user.userID._id.equals(userID)
+          );
+
           // MAP PER MONTH VALUES FOR USER
+          month.entries.map((entry, i) => {
+            if (entry.individualEntry === false) {
+              entry.valueIndividual = fixRounding(
+                entry.value * monthUser.percentOfTotalIncome,
+                2
+              );
+            }
+            if (entry.valueType === "income") {
+              // add to user value
+              reportTotals.incomeIndividual = fixRounding(
+                reportTotals.incomeIndividual +
+                  entry.value *
+                    (entry.individualEntry
+                      ? 1
+                      : monthUser.percentOfTotalIncome),
+                2
+              );
+
+              // get monthly category value
+              let indexOfCategory = reportTotals.incomeCategories.findIndex(
+                (category) =>
+                  category.categoryID?._id.equals(entry.categoryID._id)
+              );
+              if (indexOfCategory < 0) {
+                const createdCategory = copyObject(createMonthlyCategoryObj());
+                createdCategory.categoryID = entry.categoryID;
+                indexOfCategory = reportTotals.incomeCategories.length;
+                reportTotals.incomeCategories[indexOfCategory] =
+                  createdCategory;
+              }
+              reportTotals.incomeCategories[indexOfCategory].total =
+                fixRounding(
+                  reportTotals.incomeCategories[indexOfCategory].total +
+                    entry.value,
+                  2
+                );
+
+              if (!entry.individualEntry) {
+                reportTotals.incomeCategories[indexOfCategory].totalIndividual =
+                  fixRounding(
+                    reportTotals.incomeCategories[indexOfCategory]
+                      .totalIndividual +
+                      entry.value * monthUser.percentOfTotalIncome,
+                    2
+                  );
+              }
+            }
+            if (entry.valueType === "expense") {
+              // add to user value
+              reportTotals.expenseIndividual = fixRounding(
+                reportTotals.expenseIndividual +
+                  entry.value *
+                    (entry.individualEntry
+                      ? 1
+                      : monthUser.percentOfTotalIncome),
+                2
+              );
+
+              // get monthly category value
+              let indexOfCategory = reportTotals.expenseCategories.findIndex(
+                (category) =>
+                  category.categoryID?._id.equals(entry.categoryID._id)
+              );
+              if (indexOfCategory < 0) {
+                const createdCategory = copyObject(createMonthlyCategoryObj());
+                createdCategory.categoryID = entry.categoryID;
+                indexOfCategory = reportTotals.expenseCategories.length;
+                reportTotals.expenseCategories[indexOfCategory] =
+                  createdCategory;
+              }
+              reportTotals.expenseCategories[indexOfCategory].total =
+                fixRounding(
+                  reportTotals.expenseCategories[indexOfCategory].total +
+                    entry.value,
+                  2
+                );
+
+              if (!entry.individualEntry) {
+                reportTotals.expenseCategories[
+                  indexOfCategory
+                ].totalIndividual = fixRounding(
+                  reportTotals.expenseCategories[indexOfCategory]
+                    .totalIndividual +
+                    entry.value * monthUser.percentOfTotalIncome,
+                  2
+                );
+              }
+            }
+            reportTotals.entries.push(entry);
+          });
         });
 
         // BALANCES
         reportTotals.balance = fixRounding(
           reportTotals.incomeTotal - reportTotals.expenseTotal,
           2
-        )
+        );
+        reportTotals.balanceIndividual = fixRounding(
+          reportTotals.incomeIndividual - reportTotals.expenseIndividual,
+          2
+        );
         reportTotals.sharedBalance = fixRounding(
           reportTotals.sharedIncomeTotal - reportTotals.sharedExpenseTotal,
           2
-        )
+        );
 
         findBudget.months = populatedMonths;
 

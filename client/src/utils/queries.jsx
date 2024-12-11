@@ -82,10 +82,46 @@ export const QUERY_CUSTOM_REPORT = gql`
       balance
       incomeTotal
       expenseTotal
+      balanceIndividual
+      incomeIndividual
+      expenseIndividual
       sharedBalance
       transferTotals
       sharedIncomeTotal
       sharedExpenseTotal
+      entries {
+        _id
+        createdAt
+        title
+        value
+        valueIndividual
+        valueType
+        budgetID
+        categoryID
+        userID {
+          _id
+          email
+          userInitials
+          userColor
+        }
+        toUserID {
+          _id
+          email
+          userInitials
+          userColor
+        }
+        individualEntry
+      }      
+      incomeCategories {
+        categoryID
+        total
+        totalIndividual
+      }
+      expenseCategories {
+        categoryID
+        total
+        totalIndividual
+      }
     }
   }
 `;

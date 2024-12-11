@@ -85,6 +85,7 @@ function createMonthlyCategoryObj() {
   return (defaultUser = {
     categoryID: {},
     total: 0,
+    totalIndividual: 0,
   });
 }
 
@@ -265,6 +266,7 @@ module.exports = {
   copyObject,
   createMonthLabelFromOffset,
   createMonthObj,
+  createMonthlyCategoryObj,
   parseMonthlyEntries,
   parseMonthlyBalances,
 };
