@@ -38,7 +38,7 @@ const Reports = ({ setErrorState }) => {
     getCustomReport({variables})
   }
 
-  console.log(reportData)
+  console.log(reportData?.requestCustomReport)
 
   return (
     <section className="full-container">

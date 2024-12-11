@@ -289,20 +289,23 @@ const resolvers = {
 
           // MAP PER MONTH VALUES FOR USER
           month.entries.map((entry, i) => {
-            if (entry.individualEntry === false) {
-              entry.valueIndividual = fixRounding(
-                entry.value * monthUser.percentOfTotalIncome,
-                2
-              );
-            }
+            entry.valueIndividual = fixRounding(
+              entry.valueIndividual +
+                entry.value *
+                  (entry.individualEntry
+                    ? entry.userID._id.equals(userID)
+                      ? 1
+                      : 0
+                    : monthUser.percentOfTotalIncome),
+              2
+            );
+
+            // MAP INCOME ENTRIES
             if (entry.valueType === "income") {
               // add to user value
               reportTotals.incomeIndividual = fixRounding(
                 reportTotals.incomeIndividual +
-                  entry.value *
-                    (entry.individualEntry
-                      ? 1
-                      : monthUser.percentOfTotalIncome),
+                  entry.value * (entry.userID._id.equals(userID) ? 1 : 0),
                 2
               );
 
@@ -325,23 +328,30 @@ const resolvers = {
                   2
                 );
 
-              if (!entry.individualEntry) {
-                reportTotals.incomeCategories[indexOfCategory].totalIndividual =
-                  fixRounding(
-                    reportTotals.incomeCategories[indexOfCategory]
-                      .totalIndividual +
-                      entry.value * monthUser.percentOfTotalIncome,
-                    2
-                  );
-              }
+              reportTotals.incomeCategories[indexOfCategory].totalIndividual =
+                fixRounding(
+                  reportTotals.incomeCategories[indexOfCategory]
+                    .totalIndividual +
+                    entry.value *
+                      (entry.individualEntry
+                        ? entry.userID._id.equals(userID)
+                          ? 1
+                          : 0
+                        : monthUser.percentOfTotalIncome),
+                  2
+                );
             }
+
+            // MAP EXPENSE ENTRIES
             if (entry.valueType === "expense") {
               // add to user value
               reportTotals.expenseIndividual = fixRounding(
                 reportTotals.expenseIndividual +
                   entry.value *
                     (entry.individualEntry
-                      ? 1
+                      ? entry.userID._id.equals(userID)
+                        ? 1
+                        : 0
                       : monthUser.percentOfTotalIncome),
                 2
               );
@@ -365,16 +375,18 @@ const resolvers = {
                   2
                 );
 
-              if (!entry.individualEntry) {
-                reportTotals.expenseCategories[
-                  indexOfCategory
-                ].totalIndividual = fixRounding(
+              reportTotals.expenseCategories[indexOfCategory].totalIndividual =
+                fixRounding(
                   reportTotals.expenseCategories[indexOfCategory]
                     .totalIndividual +
-                    entry.value * monthUser.percentOfTotalIncome,
+                    entry.value *
+                      (entry.individualEntry
+                        ? entry.userID._id.equals(userID)
+                          ? 1
+                          : 0
+                        : monthUser.percentOfTotalIncome),
                   2
                 );
-              }
             }
             reportTotals.entries.push(entry);
           });
