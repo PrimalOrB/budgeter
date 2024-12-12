@@ -46,6 +46,9 @@ const InlineBarBalance = ({ inputData, title, valueProp }) => {
         bottom: -10,
       },
     },
+    animation: {
+      duration: 0,
+    },
     maintainAspectRatio: false,
     scales: {
       y: {
@@ -135,8 +138,12 @@ const InlineBarBalance = ({ inputData, title, valueProp }) => {
           </section>
         </div>
       ) : (
-        <div className="container-flex f-full margin-top-full f-valign">
-          <span>Balanced</span>
+        <div className="container-flex f-full f-j-l margin-top-full f-valign">
+          <span>
+            Loading
+            <span className="loading-dots">...</span>
+          </span>
+          <section className="chart-inline-section"></section>
         </div>
       )}
     </>

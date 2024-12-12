@@ -12,6 +12,7 @@ import {
   BudgetCategoryExpandableList,
   BudgetCategoryEntriesExpandableList,
 } from "../components/Layout";
+import { InlineBarTotal, InlineBarPerUser } from "../components/Charts";
 import {
   FaCaretUp,
   FaCaretDown,
@@ -106,6 +107,81 @@ const Reports = ({ budgetState, categories, setErrorState, setPageState }) => {
               {format(formInput.startDate, "MMM d, yyyy")} -{" "}
               {format(formInput.endDate, "MMM d, yyyy")}
             </h4>
+            <ul className="monthly-group-detail border-b-l-rad-none border-b-r-rad-none border_b_none">
+        <BudgetCategoryExpandableTitle
+          data={reportData.requestCustomReport}
+          title={"Balance"}
+          expandedProp={"balance"}
+          expandedState={expandedState}
+          totalProp={'balance'}
+          individualProp={'balanceIndividual'}
+          setExpandedState={setExpandedState}
+        />
+        {expandedState.balance && (
+          <React.Fragment>
+            <InlineBarTotal
+              key={`report_iR`}
+              inputData={reportData.requestCustomReport}
+              title={["Income to Expenses Ratio", "Income", "Expenses"]}
+              valueProp={["incomeTotal", "expenseTotal"]}
+            />
+            <InlineBarTotal
+              key={`report_sR`}
+              inputData={reportData.requestCustomReport}
+              title={["Shared Income to Expenses Ratio", "Income", "Expenses"]}
+              valueProp={["sharedIncomeTotal", "sharedExpenseTotal"]}
+            />
+            {/* <InlineBarPerUser
+              key={`report_sIn`}
+              inputData={reportData.requestCustomReport}
+              title={"Shared Income By User"}
+              valueProp={"sharedIncomeTotal"}
+            /> */}
+            {/* <InlineBarPerUser
+              key={`report_sOut`}
+              inputData={reportData.requestCustomReport}
+              title={"Shared Expenses By User"}
+              valueProp={"sharedExpenseTotal"}
+            /> */}
+            {/* <InlineBarPerUser
+              key={`report_tIn`}
+              inputData={reportData.requestCustomReport}
+              title={"Total Income By User"}
+              valueProp={"incomeTotal"}
+            /> */}
+            {/* <InlineBarPerUser
+              key={`report_tOut`}
+              inputData={reportData.requestCustomReport}
+              title={"Total Expenses By User"}
+              valueProp={"expenseTotal"}
+            /> */}
+            {/* <InlineBarPerUser
+              key={`report_uR`}
+              inputData={reportData.requestCustomReport}
+              title={"User Resposibility"}
+              valueProp={"responsibilityTotal"}
+            /> */}
+            {/* <InlineBarBalance
+              key={`report_B`}
+              inputData={reportData.requestCustomReport}
+              title={"Balance"}
+              valueProp={"userBalance"}
+              total={"expensesShared"}
+            /> */}
+            {/* {reportData.requestCustomReport.userData.map((user) => {
+              return (
+                <InlineBarPerUserBalance
+                  key={`report_${user.userID._id}`}
+                  inputData={user}
+                  title={`${user.userInitials} Balance`}
+                  valueProp={"balancedIncome"}
+                  total={"balancedExpenses"}
+                />
+              );
+            })} */}
+          </React.Fragment>
+        )}
+      </ul>
             {/* expenses section */}
             <ul className="monthly-group-detail border-b-l-rad-none border-b-r-rad-none border_b_none border-t-l-rad-none border-t-r-rad-none">
               <BudgetCategoryExpandableTitle

@@ -1,7 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
 import { FaCaretDown, FaCaretUp } from "react-icons/fa";
-import { MdSubdirectoryArrowRight } from "react-icons/md";
-import { BudgetCategoryEntriesExpandableList } from ".";
 import { toCurrency } from "../../utils/helpers";
 
 const BudgetCategoryExpandableTitle = ({

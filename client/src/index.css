@@ -1149,6 +1149,21 @@ input::-ms-clear {
   fill: var(--primary-color);
 }
 
+/* Animations */
+.loading-dots {
+  font-weight: bold;
+  display: inline-block;
+  font-family: monospace;
+  clip-path: inset(0 3ch 0 0);
+  animation: l 1s steps(4, jump-none) infinite;
+}
+
+@keyframes l {
+  to {
+    clip-path: inset(0);
+  }
+}
+
 /* Media */
 @media screen and (min-width: 1000px) {
   * {

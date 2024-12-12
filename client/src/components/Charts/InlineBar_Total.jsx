@@ -57,6 +57,9 @@ const InlineBarTotal = ({ inputData, title, valueProp }) => {
         bottom: -10,
       },
     },
+    animation: {
+      duration: 0,
+    },
     maintainAspectRatio: false,
     scales: {
       y: {
@@ -128,7 +131,14 @@ const InlineBarTotal = ({ inputData, title, valueProp }) => {
           </section>
         </div>
       ) : (
-        <li>loading</li>
+        <div className="container-flex f-full f-j-l margin-top-full f-valign">
+          <span>
+            Loading 
+            <span className="loading-dots">...</span>
+          </span>
+          <section className="chart-inline-section">
+          </section>
+        </div>
       )}
     </>
   );
