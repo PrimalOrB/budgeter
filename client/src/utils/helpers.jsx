@@ -19,7 +19,13 @@ export function toCurrency(input) {
     commaSeparatedNumberDisplay(dollars) +
     "." +
     cents
-  );
+  );}
+
+export function fixRounding(value, precision) {
+  const roundingFactor = Math.pow(10, precision),
+    isNegative = value < 0,
+    rounded = Math.round(Math.abs(value) * roundingFactor) / roundingFactor;
+  return rounded > 0 ? rounded * (isNegative ? -1 : 1) : 0;
 }
 
 export function randomHexColor() {

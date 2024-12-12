@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import "chart.js/auto";
 import { Chart } from "react-chartjs-2";
-import { toCurrency } from "../../utils/helpers";
+import { toCurrency, fixRounding } from "../../utils/helpers";
 
 const determineBorderRadius = (context) => {
   const numDatasets = context.chart.data.datasets.length;
@@ -31,16 +31,16 @@ const determineBorderRadius = (context) => {
   let radius = 0;
   if (context.parsed.y > 0) {
     return {
-      topLeft: 25,
-      topRight: 25,
+      topLeft: 25 / 3.5,
+      topRight: 25 / 3.5,
     };
   } else if (context.parsed.y < 0) {
     return {
-      bottomLeft: 25,
-      bottomRight: 25,
+      bottomLeft: 25 / 3.5,
+      bottomRight: 25 / 3.5,
     };
   }
-  return radius;
+  return radius / 3.5;
 };
 
 const MultiMonthBudgetOverview = ({
@@ -78,7 +78,9 @@ const MultiMonthBudgetOverview = ({
         data: new Array(displayLength).fill().map((x, i) => {
           return 0;
         }),
-        backgroundColor: "rgba(0, 128, 0, 1)",
+        backgroundColor: "rgba(0, 128, 0, 0.5)",
+        borderColor: "rgba(0, 128, 0, 1)",
+        borderWidth: 2,
         stack: "Stack 0",
         barThickness: 25,
         borderRadius: determineBorderRadius,
@@ -86,6 +88,30 @@ const MultiMonthBudgetOverview = ({
       {
         type: "bar",
         label: "Expense",
+        data: new Array(displayLength).fill().map((x, i) => {
+          return 0;
+        }),
+        backgroundColor: "rgba(200, 0, 0, 0.5)",
+        borderColor: "rgba(200, 0, 0, 1)",
+        borderWidth: 2,
+        stack: "Stack 1",
+        barThickness: 25,
+        borderRadius: determineBorderRadius,
+      },
+      {
+        type: "bar",
+        label: "Income Shared",
+        data: new Array(displayLength).fill().map((x, i) => {
+          return 0;
+        }),
+        backgroundColor: "rgba(0, 128, 0, 1)",
+        stack: "Stack 0",
+        barThickness: 25,
+        borderRadius: determineBorderRadius,
+      },
+      {
+        type: "bar",
+        label: "Expense Shared",
         data: new Array(displayLength).fill().map((x, i) => {
           return 0;
         }),
@@ -101,8 +127,12 @@ const MultiMonthBudgetOverview = ({
         (month) => month.order === displayLength + startIndex - i - 1
       );
       labels.push(targetMonth.label);
-      datasets[1].data[i] = targetMonth.incomeTotal;
-      datasets[2].data[i] = targetMonth.expenseTotal;
+      datasets[1].data[i] =
+        targetMonth.incomeTotal - targetMonth.sharedIncomeTotal;
+      datasets[2].data[i] =
+        targetMonth.expenseTotal - targetMonth.sharedExpenseTotal;
+      datasets[3].data[i] = targetMonth.sharedIncomeTotal;
+      datasets[4].data[i] = targetMonth.sharedExpenseTotal;
       //   datasets[0].data[i] += targetMonth.incomeTotal;
       //   return (datasets[0].data[i] -= targetMonth.expenseTotal);
       return;
@@ -155,16 +185,32 @@ const MultiMonthBudgetOverview = ({
           label: function (context) {
             const label = [];
 
-            const totalIncome =
-                graphDataState.datasets[1].data[context.dataIndex],
+            const sharedIncome =
+                graphDataState.datasets[3].data[context.dataIndex],
+              sharedExpense =
+                graphDataState.datasets[4].data[context.dataIndex],
+              totalIncome =
+                graphDataState.datasets[1].data[context.dataIndex] +
+                sharedIncome,
               totalExpenses =
-                graphDataState.datasets[2].data[context.dataIndex];
+                graphDataState.datasets[2].data[context.dataIndex] +
+                sharedExpense;
 
             label.push(
               `Balance:      ${toCurrency(totalIncome - totalExpenses)}`
             );
-            label.push(`- Income:     ${toCurrency(totalIncome)}`);
-            label.push(`- Expenses: ${toCurrency(totalExpenses)}`);
+            label.push(
+              `- Income:     ${toCurrency(totalIncome)} ( ${fixRounding(
+                (sharedIncome / totalIncome) * 100,
+                1
+              )}% Shared)`
+            );
+            label.push(
+              `- Expenses: ${toCurrency(totalExpenses)} ( ${fixRounding(
+                (sharedExpense / totalExpenses) * 100,
+                1
+              )}% Shared)`
+            );
 
             return label;
           },
