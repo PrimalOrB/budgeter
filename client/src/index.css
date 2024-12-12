@@ -472,6 +472,7 @@ section {
 
 .large-button {
   margin-top: 1rem;
+  /* margin-bottom: 2px; */
   width: calc(100% - 1rem);
   font-size: 1.5rem;
   font-weight: bold;
@@ -482,8 +483,9 @@ section {
 }
 
 .large-button:hover {
-  margin-top: calc(1rem + 2px);
-  border-bottom: 1px inset var(--highlight-2-color);
+  /* margin-top: calc(1rem + 2px); */
+  /* margin-bottom: 0px; */
+  border-bottom: 3px inset var(--highlight-2-color);
 }
 
 .chart-full-section #multi-month-menu {
@@ -1094,6 +1096,11 @@ input::-ms-clear {
 
 .border-b-r-rad-none {
   border-bottom-right-radius: 0;
+}
+
+/* Margin Overrides */
+.margin-top-1 {
+  margin-top: 1rem;
 }
 
 /* Styled Elements */

@@ -72,26 +72,27 @@ const Reports = ({ budgetState, categories, setErrorState, setPageState }) => {
   return (
     <section className="full-container">
       <Title text={`Reports`} />
-      <div>TBD</div>
-      <InlineUserInput
-        prop={"userID"}
-        input={formInput}
-        setInput={setFormInput}
-        label={"User"}
-        optionList={budgetState.ownerIDs}
-      />
-      <InlineDateInput
-        prop={`startDate`}
-        input={formInput}
-        setInput={setFormInput}
-        label={"Start Date"}
-      />
-      <InlineDateInput
-        prop={`endDate`}
-        input={formInput}
-        setInput={setFormInput}
-        label={"End Date"}
-      />
+      <form autoComplete="off">
+        <InlineUserInput
+          prop={"userID"}
+          input={formInput}
+          setInput={setFormInput}
+          label={"User"}
+          optionList={budgetState.ownerIDs}
+        />
+        <InlineDateInput
+          prop={`startDate`}
+          input={formInput}
+          setInput={setFormInput}
+          label={"Start Date"}
+        />
+        <InlineDateInput
+          prop={`endDate`}
+          input={formInput}
+          setInput={setFormInput}
+          label={"End Date"}
+        />
+      </form>
       <ActionButton
         action={runGetCustomReport}
         text={"Get Report"}
@@ -99,7 +100,7 @@ const Reports = ({ budgetState, categories, setErrorState, setPageState }) => {
       />
       {reportData?.requestCustomReport ? (
         <>
-          <section id="month-summary" key={`results`}>
+          <section id="month-summary" key={`results`} className="margin-top-1">
             <h4 className="sub-container-description section-list-title noselect">
               {format(formInput.startDate, "MMM d, yyyy")} -{" "}
               {format(formInput.endDate, "MMM d, yyyy")}
@@ -120,6 +121,8 @@ const Reports = ({ budgetState, categories, setErrorState, setPageState }) => {
                 </span>
                 <span className="f1 bold noselect">Expenses</span>
                 <span className="f1 bold right noselect">
+                  {toCurrency(reportData.requestCustomReport.expenseIndividual)}
+                  {" / "}
                   {toCurrency(reportData.requestCustomReport.expenseTotal)}
                 </span>
               </li>
@@ -170,7 +173,7 @@ const Reports = ({ budgetState, categories, setErrorState, setPageState }) => {
                   {expandedState.income ? FaCaretUp() : FaCaretDown()}
                 </span>
                 <span className="f1 bold noselect">Income</span>
-                <span className="f1 bold right noselect">
+                <span className="f1 bold right noselect">{toCurrency(reportData.requestCustomReport.incomeIndividual)}{' / '}
                   {toCurrency(reportData.requestCustomReport.incomeTotal)}
                 </span>
               </li>

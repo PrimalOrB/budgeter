@@ -112,7 +112,7 @@ export const QUERY_CUSTOM_REPORT = gql`
           userColor
         }
         individualEntry
-      }      
+      }   
       incomeCategories {
         categoryID
         total

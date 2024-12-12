@@ -181,7 +181,6 @@ const resolvers = {
       context
     ) => {
       if (context.token.headers.authorization !== undefined) {
-        console.log(budgetID, userID, startDate, endDate);
 
         const user = await User.findOne({ _id: userID });
 
@@ -271,27 +270,6 @@ const resolvers = {
 
         // ADD TOTALS
         populatedMonths.map((month) => {
-          // reportTotals.incomeTotal = fixRounding(
-          //   reportTotals.incomeTotal + month.incomeTotal,
-          //   2
-          // );
-          // reportTotals.expenseTotal = fixRounding(
-          //   reportTotals.expenseTotal + month.expenseTotal,
-          //   2
-          // );
-          // reportTotals.transferTotals = fixRounding(
-          //   reportTotals.transferTotals + month.transferTotals,
-          //   2
-          // );
-          // reportTotals.sharedIncomeTotal = fixRounding(
-          //   reportTotals.sharedIncomeTotal + month.sharedIncomeTotal,
-          //   2
-          // );
-          // reportTotals.sharedExpenseTotal = fixRounding(
-          //   reportTotals.sharedExpenseTotal + month.sharedExpenseTotal,
-          //   2
-          // );
-
           const monthUser = month.userData.find((user) =>
               user.userID._id.equals(userID)
             ),
@@ -514,9 +492,6 @@ const resolvers = {
         reportTotals.incomeCategories.sort((a, b) => b.total - a.total);
         reportTotals.expenseCategories.sort((a, b) => b.total - a.total);
 
-        // findBudget.months = populatedMonths;
-
-        // return findEntry
         return reportTotals;
       }
       throw new AuthenticationError("Incorrect credentials");
