@@ -8,6 +8,7 @@ import { sub, format } from "date-fns";
 import { ActionButton } from "../components/Buttons";
 import { InlineUserInput, InlineDateInput } from "../components/Forms";
 import {
+  BudgetCategoryExpandableTitle,
   BudgetCategoryExpandableList,
   BudgetCategoryEntriesExpandableList,
 } from "../components/Layout";
@@ -29,7 +30,7 @@ const Reports = ({ budgetState, categories, setErrorState, setPageState }) => {
 
   const initialFormState = {
     userID: currentUser._id,
-    startDate: sub(new Date(), { days: 3 }),
+    startDate: sub(new Date(), { months: 3 }),
     endDate: new Date(),
   };
   const [formInput, setFormInput] = useState({ ...initialFormState });
@@ -100,32 +101,22 @@ const Reports = ({ budgetState, categories, setErrorState, setPageState }) => {
       />
       {reportData?.requestCustomReport ? (
         <>
-          <section id="month-summary" key={`results`} className="margin-top-1">
+          <section id="month-summary" key={`results`} className="margin-top-full">
             <h4 className="sub-container-description section-list-title noselect">
               {format(formInput.startDate, "MMM d, yyyy")} -{" "}
               {format(formInput.endDate, "MMM d, yyyy")}
             </h4>
             {/* expenses section */}
             <ul className="monthly-group-detail border-b-l-rad-none border-b-r-rad-none border_b_none border-t-l-rad-none border-t-r-rad-none">
-              <li
-                className="flex nowrap flex-just-space-around f-full"
-                onClick={() =>
-                  setExpandedState({
-                    ...expandedState,
-                    expense: !expandedState.expense,
-                  })
-                }
-              >
-                <span className="f0 margin-right-half">
-                  {expandedState.expense ? FaCaretUp() : FaCaretDown()}
-                </span>
-                <span className="f1 bold noselect">Expenses</span>
-                <span className="f1 bold right noselect">
-                  {toCurrency(reportData.requestCustomReport.expenseIndividual)}
-                  {" / "}
-                  {toCurrency(reportData.requestCustomReport.expenseTotal)}
-                </span>
-              </li>
+              <BudgetCategoryExpandableTitle
+                data={reportData.requestCustomReport}
+                title={'Expenses'}
+                expandedProp={"expense"}
+                individualProp={"expenseIndividual"}
+                totalProp={"expenseTotal"}
+                expandedState={expandedState}
+                setExpandedState={setExpandedState}
+              />
               {expandedState.expense ? (
                 [...reportData.requestCustomReport.expenseCategories].map(
                   (entry) => {
@@ -160,23 +151,15 @@ const Reports = ({ budgetState, categories, setErrorState, setPageState }) => {
 
             {/* income section */}
             <ul className="monthly-group-detail border-b-l-rad-none border-b-r-rad-none border_b_none border-t-l-rad-none border-t-r-rad-none">
-              <li
-                className="flex nowrap flex-just-space-around f-full"
-                onClick={() =>
-                  setExpandedState({
-                    ...expandedState,
-                    income: !expandedState.income,
-                  })
-                }
-              >
-                <span className="f0 margin-right-half">
-                  {expandedState.income ? FaCaretUp() : FaCaretDown()}
-                </span>
-                <span className="f1 bold noselect">Income</span>
-                <span className="f1 bold right noselect">{toCurrency(reportData.requestCustomReport.incomeIndividual)}{' / '}
-                  {toCurrency(reportData.requestCustomReport.incomeTotal)}
-                </span>
-              </li>
+              <BudgetCategoryExpandableTitle
+                data={reportData.requestCustomReport}
+                title={'Income'}
+                expandedProp={"income"}
+                individualProp={"incomeIndividual"}
+                totalProp={"incomeTotal"}
+                expandedState={expandedState}
+                setExpandedState={setExpandedState}
+              />
               {expandedState.income ? (
                 [...reportData.requestCustomReport.incomeCategories].map(
                   (entry) => {
@@ -211,23 +194,14 @@ const Reports = ({ budgetState, categories, setErrorState, setPageState }) => {
 
             {/* transfer section */}
             <ul className="monthly-group-detail border-t-l-rad-none border-t-r-rad-none">
-              <li
-                className="flex nowrap flex-just-space-around f-full"
-                onClick={() =>
-                  setExpandedState({
-                    ...expandedState,
-                    transfers: !expandedState.transfers,
-                  })
-                }
-              >
-                <span className="f0 margin-right-half">
-                  {expandedState.transfers ? FaCaretUp() : FaCaretDown()}
-                </span>
-                <span className="f1 bold noselect">Transfers</span>
-                <span className="f1 bold right noselect">
-                  {toCurrency(reportData.requestCustomReport.transferTotals)}
-                </span>
-              </li>
+              <BudgetCategoryExpandableTitle
+                data={reportData.requestCustomReport}
+                title={'Transfers'}
+                expandedProp={"transfers"}
+                totalProp={"transferTotals"}
+                expandedState={expandedState}
+                setExpandedState={setExpandedState}
+              />
               {expandedState.transfers &&
                 [...reportData.requestCustomReport.entries]
                   .filter((entry) => entry.valueType === "transfer")

@@ -8,6 +8,7 @@ import {
   InlineBarPerUserBalance,
 } from "../components/Charts";
 import {
+  BudgetCategoryExpandableTitle,
   BudgetCategoryExpandableList,
   BudgetCategoryEntriesExpandableList,
   PDFMonthlyUser,
@@ -46,23 +47,14 @@ const MonthSummary = ({
 
       {/* balances section */}
       <ul className="monthly-group-detail border-b-l-rad-none border-b-r-rad-none border_b_none">
-        <li
-          className="flex nowrap flex-just-space-around f-full"
-          onClick={() =>
-            setExpandedState({
-              ...expandedState,
-              balance: !expandedState.balance,
-            })
-          }
-        >
-          <span className="f0 margin-right-half">
-            {expandedState.balance ? FaCaretUp() : FaCaretDown()}
-          </span>
-          <span className="f1 bold noselect">Balance</span>
-          <span className="f1 bold right noselect">
-            {toCurrency(monthData.incomeTotal - monthData.expenseTotal)}
-          </span>
-        </li>
+        <BudgetCategoryExpandableTitle
+          data={monthData}
+          title={"Balance"}
+          expandedProp={"balance"}
+          expandedState={expandedState}
+          definedValue={monthData.incomeTotal - monthData.expenseTotal}
+          setExpandedState={setExpandedState}
+        />
         {expandedState.balance && (
           <React.Fragment>
             <InlineBarTotal
@@ -131,23 +123,14 @@ const MonthSummary = ({
 
       {/* expenses section */}
       <ul className="monthly-group-detail border-b-l-rad-none border-b-r-rad-none border_b_none border-t-l-rad-none border-t-r-rad-none">
-        <li
-          className="flex nowrap flex-just-space-around f-full"
-          onClick={() =>
-            setExpandedState({
-              ...expandedState,
-              expense: !expandedState.expense,
-            })
-          }
-        >
-          <span className="f0 margin-right-half">
-            {expandedState.expense ? FaCaretUp() : FaCaretDown()}
-          </span>
-          <span className="f1 bold noselect">Expenses</span>
-          <span className="f1 bold right noselect">
-            {toCurrency(monthData.expenseTotal)}
-          </span>
-        </li>
+        <BudgetCategoryExpandableTitle
+          data={monthData}
+          title={"Expenses"}
+          expandedProp={"expense"}
+          totalProp={"expenseTotal"}
+          expandedState={expandedState}
+          setExpandedState={setExpandedState}
+        />
         {expandedState.expense ? (
           [...monthData.expenseCategories]
             .sort((a, b) => b.total - a.total)
@@ -184,23 +167,14 @@ const MonthSummary = ({
 
       {/* income section */}
       <ul className="monthly-group-detail border-b-l-rad-none border-b-r-rad-none border_b_none border-t-l-rad-none border-t-r-rad-none">
-        <li
-          className="flex nowrap flex-just-space-around f-full"
-          onClick={() =>
-            setExpandedState({
-              ...expandedState,
-              income: !expandedState.income,
-            })
-          }
-        >
-          <span className="f0 margin-right-half">
-            {expandedState.income ? FaCaretUp() : FaCaretDown()}
-          </span>
-          <span className="f1 bold noselect">Income</span>
-          <span className="f1 bold right noselect">
-            {toCurrency(monthData.incomeTotal)}
-          </span>
-        </li>
+        <BudgetCategoryExpandableTitle
+          data={monthData}
+          title={"Income"}
+          expandedProp={"income"}
+          totalProp={"incomeTotal"}
+          expandedState={expandedState}
+          setExpandedState={setExpandedState}
+        />
         {expandedState.income ? (
           [...monthData.incomeCategories]
             .sort((a, b) => b.total - a.total)
@@ -237,23 +211,14 @@ const MonthSummary = ({
 
       {/* transfer section */}
       <ul className="monthly-group-detail border-b-l-rad-none border-b-r-rad-none border_b_none border-t-l-rad-none border-t-r-rad-none">
-        <li
-          className="flex nowrap flex-just-space-around f-full"
-          onClick={() =>
-            setExpandedState({
-              ...expandedState,
-              transfers: !expandedState.transfers,
-            })
-          }
-        >
-          <span className="f0 margin-right-half">
-            {expandedState.transfers ? FaCaretUp() : FaCaretDown()}
-          </span>
-          <span className="f1 bold noselect">Transfers</span>
-          <span className="f1 bold right noselect">
-            {toCurrency(monthData.transferTotals)}
-          </span>
-        </li>
+        <BudgetCategoryExpandableTitle
+          data={monthData}
+          title={"Transfers"}
+          expandedProp={"transfers"}
+          totalProp={"transferTotals"}
+          expandedState={expandedState}
+          setExpandedState={setExpandedState}
+        />
         {expandedState.transfers &&
           [...monthData.entries]
             .filter((entry) => entry.valueType === "transfer")
@@ -272,20 +237,13 @@ const MonthSummary = ({
 
       {/* report section */}
       <ul className="monthly-group-detail border-t-l-rad-none border-t-r-rad-none">
-        <li
-          className="flex nowrap flex-just-space-around f-full"
-          onClick={() =>
-            setExpandedState({
-              ...expandedState,
-              reports: !expandedState.reports,
-            })
-          }
-        >
-          <span className="f0 margin-right-half">
-            {expandedState.reports ? FaCaretUp() : FaCaretDown()}
-          </span>
-          <span className="f1 bold noselect">Reports</span>
-        </li>
+        <BudgetCategoryExpandableTitle
+          data={monthData}
+          title={"Report"}
+          expandedProp={"reports"}
+          expandedState={expandedState}
+          setExpandedState={setExpandedState}
+        />
         {expandedState.reports &&
           (monthData.userData ? (
             <li className="flex nowrap flex-just-space-around f-full">

@@ -388,6 +388,21 @@ section {
   );
 }
 
+.monthly-group-detail > li .personal-cost {
+  color: gray;
+  font-size: 0.75rem;
+  justify-content: flex-end;
+  align-items: center;
+  display: flex;
+}
+
+.monthly-group-detail > li .personal-cost::before {
+  content: "(\00a0";
+}
+.monthly-group-detail > li .personal-cost::after {
+  content: "\00a0)";
+}
+
 .chart-full-section {
   height: 15rem;
 }
@@ -1096,11 +1111,6 @@ input::-ms-clear {
 
 .border-b-r-rad-none {
   border-bottom-right-radius: 0;
-}
-
-/* Margin Overrides */
-.margin-top-1 {
-  margin-top: 1rem;
 }
 
 /* Styled Elements */

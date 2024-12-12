@@ -25,7 +25,14 @@ const BudgetCategoryExpandableList = ({
           {expandedState ? FaCaretUp() : FaCaretDown()}
         </span>
         <span className="f1 bold noselect">{category.title}</span>
-        <span className="f1 italic noselect right margin-right-full">
+        {category?.totalIndividual ? (
+          <span className="f1 italic noselect right margin-right-full personal-cost">
+            {toCurrency(category.totalIndividual)}
+          </span>
+        ) : (
+          <></>
+        )}
+        <span className="f0 italic noselect right margin-right-full">
           {toCurrency(category.total)}
         </span>
       </li>
