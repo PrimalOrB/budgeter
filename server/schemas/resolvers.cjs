@@ -15,7 +15,13 @@ const {
   fixRounding,
 } = require("../utils/helpers.cjs");
 const build_PDF_MonthlyReport = require("../utils/build_PDF_monthlyReport.cjs");
-const { eachMonthOfInterval } = require("date-fns");
+const {
+  eachMonthOfInterval,
+  isBefore,
+  isAfter,
+  isEqual,
+  startOfDay,
+} = require("date-fns");
 
 const resolvers = {
   Date: dateScalar,
@@ -258,137 +264,231 @@ const resolvers = {
           entries: [],
           incomeCategories: [],
           expenseCategories: [],
+          averageResponsibilityRate: 0,
         };
+
+        const responsibilityRates = [];
 
         // ADD TOTALS
         populatedMonths.map((month) => {
-          reportTotals.incomeTotal = fixRounding(
-            reportTotals.incomeTotal + month.incomeTotal,
-            2
-          );
-          reportTotals.expenseTotal = fixRounding(
-            reportTotals.expenseTotal + month.expenseTotal,
-            2
-          );
-          reportTotals.transferTotals = fixRounding(
-            reportTotals.transferTotals + month.transferTotals,
-            2
-          );
-          reportTotals.sharedIncomeTotal = fixRounding(
-            reportTotals.sharedIncomeTotal + month.sharedIncomeTotal,
-            2
-          );
-          reportTotals.sharedExpenseTotal = fixRounding(
-            reportTotals.sharedExpenseTotal + month.sharedExpenseTotal,
-            2
-          );
+          // reportTotals.incomeTotal = fixRounding(
+          //   reportTotals.incomeTotal + month.incomeTotal,
+          //   2
+          // );
+          // reportTotals.expenseTotal = fixRounding(
+          //   reportTotals.expenseTotal + month.expenseTotal,
+          //   2
+          // );
+          // reportTotals.transferTotals = fixRounding(
+          //   reportTotals.transferTotals + month.transferTotals,
+          //   2
+          // );
+          // reportTotals.sharedIncomeTotal = fixRounding(
+          //   reportTotals.sharedIncomeTotal + month.sharedIncomeTotal,
+          //   2
+          // );
+          // reportTotals.sharedExpenseTotal = fixRounding(
+          //   reportTotals.sharedExpenseTotal + month.sharedExpenseTotal,
+          //   2
+          // );
 
           const monthUser = month.userData.find((user) =>
-            user.userID._id.equals(userID)
-          );
+              user.userID._id.equals(userID)
+            ),
+            monthResponsibilityRate = monthUser.percentOfTotalIncome;
+          responsibilityRates.push(monthResponsibilityRate);
 
           // MAP PER MONTH VALUES FOR USER
           month.entries.map((entry, i) => {
-            entry.valueIndividual = fixRounding(
-              entry.valueIndividual +
-                entry.value *
-                  (entry.individualEntry
-                    ? entry.userID._id.equals(userID)
-                      ? 1
-                      : 0
-                    : monthUser.percentOfTotalIncome),
-              2
-            );
+            const beforeOrEqualToEndDate =
+                isBefore(startOfDay(entry.createdAt), startOfDay(endDate)) ||
+                isEqual(startOfDay(entry.createdAt), startOfDay(endDate)),
+              afterOrEqualToStartDate =
+                isAfter(startOfDay(entry.createdAt), startOfDay(startDate)) ||
+                isEqual(startOfDay(entry.createdAt), startOfDay(startDate)),
+              isCurrentUserEntry = entry.userID._id.equals(userID);
 
-            // MAP INCOME ENTRIES
-            if (entry.valueType === "income") {
-              // add to user value
-              reportTotals.incomeIndividual = fixRounding(
-                reportTotals.incomeIndividual +
-                  entry.value * (entry.userID._id.equals(userID) ? 1 : 0),
-                2
-              );
+            if (!beforeOrEqualToEndDate || !afterOrEqualToStartDate) {
+              return entry;
+            } else {
+              // INCOME
+              if (entry.valueType === "income") {
+                // FIND INCOME CATEGORY
+                let indexOfCategory = reportTotals.incomeCategories.findIndex(
+                  (category) =>
+                    category.categoryID?._id.equals(entry.categoryID._id)
+                );
 
-              // get monthly category value
-              let indexOfCategory = reportTotals.incomeCategories.findIndex(
-                (category) =>
-                  category.categoryID?._id.equals(entry.categoryID._id)
-              );
-              if (indexOfCategory < 0) {
-                const createdCategory = copyObject(createMonthlyCategoryObj());
-                createdCategory.categoryID = entry.categoryID;
-                indexOfCategory = reportTotals.incomeCategories.length;
-                reportTotals.incomeCategories[indexOfCategory] =
-                  createdCategory;
+                // IF CATEGORY DOES NOT EXIST, CREATE IT
+                if (indexOfCategory < 0) {
+                  const createdCategory = copyObject(
+                    createMonthlyCategoryObj()
+                  );
+                  createdCategory.categoryID = entry.categoryID;
+                  indexOfCategory = reportTotals.incomeCategories.length;
+                  reportTotals.incomeCategories[indexOfCategory] =
+                    createdCategory;
+                }
+
+                // ADD TOTALS
+                reportTotals.incomeTotal = fixRounding(
+                  reportTotals.incomeTotal + entry.value,
+                  2
+                );
+                // ADD ENTRY TO GENERALS
+                if (entry.individualEntry && isCurrentUserEntry) {
+                  // IS INDIVIDUAL & CURRENT USER - ADD TO INDIVIDUAL INCOME / ADD ENTRY
+                  entry.valueIndividual = fixRounding(entry.value, 2);
+                  reportTotals.incomeIndividual = fixRounding(
+                    reportTotals.incomeIndividual + entry.valueIndividual,
+                    2
+                  );
+                  // ADD TO MONTLY TOTALS
+                  reportTotals.incomeCategories[indexOfCategory].total =
+                    fixRounding(
+                      reportTotals.incomeCategories[indexOfCategory].total +
+                        entry.value,
+                      2
+                    );
+                  reportTotals.incomeCategories[
+                    indexOfCategory
+                  ].totalIndividual = fixRounding(
+                    reportTotals.incomeCategories[indexOfCategory]
+                      .totalIndividual + entry.valueIndividual,
+                    2
+                  );
+                  // ADD ENTRY
+                  reportTotals.entries.push(entry);
+                } else if (!entry.individualEntry) {
+                  // IS NOT INDIVIDUAL - ADD TO SHARED INCOME / ADD ENTRY
+                  entry.valueIndividual = fixRounding(
+                    entry.value * monthResponsibilityRate,
+                    2
+                  );
+                  reportTotals.incomeIndividual = fixRounding(
+                    reportTotals.incomeIndividual + entry.valueIndividual,
+                    2
+                  );
+                  reportTotals.sharedIncomeTotal = fixRounding(
+                    reportTotals.sharedIncomeTotal + entry.value,
+                    2
+                  );
+                  // ADD TO MONTLY TOTALS
+                  reportTotals.incomeCategories[indexOfCategory].total =
+                    fixRounding(
+                      reportTotals.incomeCategories[indexOfCategory].total +
+                        entry.value,
+                      2
+                    );
+                  reportTotals.incomeCategories[
+                    indexOfCategory
+                  ].totalIndividual = fixRounding(
+                    reportTotals.incomeCategories[indexOfCategory]
+                      .totalIndividual + entry.valueIndividual,
+                    2
+                  );
+                  // ADD ENTRY
+                  reportTotals.entries.push(entry);
+                } else if (entry.individualEntry && !isCurrentUserEntry) {
+                  // IS INDIVIDUAL & NOT CURRENT USER - DO NOT ADD TO INDIVIDUAL INCOME / DO NOT ADD ENTRY
+                }
               }
-              reportTotals.incomeCategories[indexOfCategory].total =
-                fixRounding(
-                  reportTotals.incomeCategories[indexOfCategory].total +
-                    entry.value,
-                  2
+
+              // EXPENSE
+              if (entry.valueType === "expense") {
+                // FIND INCOME CATEGORY
+                let indexOfCategory = reportTotals.expenseCategories.findIndex(
+                  (category) =>
+                    category.categoryID?._id.equals(entry.categoryID._id)
                 );
 
-              reportTotals.incomeCategories[indexOfCategory].totalIndividual =
-                fixRounding(
-                  reportTotals.incomeCategories[indexOfCategory]
-                    .totalIndividual +
-                    entry.value *
-                      (entry.individualEntry
-                        ? entry.userID._id.equals(userID)
-                          ? 1
-                          : 0
-                        : monthUser.percentOfTotalIncome),
+                // IF CATEGORY DOES NOT EXIST, CREATE IT
+                if (indexOfCategory < 0) {
+                  const createdCategory = copyObject(
+                    createMonthlyCategoryObj()
+                  );
+                  createdCategory.categoryID = entry.categoryID;
+                  indexOfCategory = reportTotals.expenseCategories.length;
+                  reportTotals.expenseCategories[indexOfCategory] =
+                    createdCategory;
+                }
+
+                // ADD TOTALS
+                reportTotals.expenseTotal = fixRounding(
+                  reportTotals.expenseTotal + entry.value,
                   2
                 );
-            }
-
-            // MAP EXPENSE ENTRIES
-            if (entry.valueType === "expense") {
-              // add to user value
-              reportTotals.expenseIndividual = fixRounding(
-                reportTotals.expenseIndividual +
-                  entry.value *
-                    (entry.individualEntry
-                      ? entry.userID._id.equals(userID)
-                        ? 1
-                        : 0
-                      : monthUser.percentOfTotalIncome),
-                2
-              );
-
-              // get monthly category value
-              let indexOfCategory = reportTotals.expenseCategories.findIndex(
-                (category) =>
-                  category.categoryID?._id.equals(entry.categoryID._id)
-              );
-              if (indexOfCategory < 0) {
-                const createdCategory = copyObject(createMonthlyCategoryObj());
-                createdCategory.categoryID = entry.categoryID;
-                indexOfCategory = reportTotals.expenseCategories.length;
-                reportTotals.expenseCategories[indexOfCategory] =
-                  createdCategory;
+                // ADD ENTRY TO GENERALS
+                if (entry.individualEntry && isCurrentUserEntry) {
+                  // IS INDIVIDUAL & CURRENT USER - ADD TO INDIVIDUAL EXPENSE / ADD ENTRY
+                  entry.valueIndividual = fixRounding(entry.value, 2);
+                  reportTotals.expenseIndividual = fixRounding(
+                    reportTotals.expenseIndividual + entry.valueIndividual,
+                    2
+                  );
+                  // ADD TO MONTLY TOTALS
+                  reportTotals.expenseCategories[indexOfCategory].total =
+                    fixRounding(
+                      reportTotals.expenseCategories[indexOfCategory].total +
+                        entry.value,
+                      2
+                    );
+                  reportTotals.expenseCategories[
+                    indexOfCategory
+                  ].totalIndividual = fixRounding(
+                    reportTotals.expenseCategories[indexOfCategory]
+                      .totalIndividual + entry.valueIndividual,
+                    2
+                  );
+                  // ADD ENTRY
+                  reportTotals.entries.push(entry);
+                } else if (!entry.individualEntry) {
+                  // IS NOT INDIVIDUAL - ADD TO SHARED EXPENSE / ADD ENTRY
+                  entry.valueIndividual = fixRounding(
+                    entry.value * monthResponsibilityRate,
+                    2
+                  );
+                  reportTotals.expenseIndividual = fixRounding(
+                    reportTotals.expenseIndividual + entry.valueIndividual,
+                    2
+                  );
+                  reportTotals.sharedExpenseTotal = fixRounding(
+                    reportTotals.sharedExpenseTotal + entry.value,
+                    2
+                  );
+                  // ADD TO MONTLY TOTALS
+                  reportTotals.expenseCategories[indexOfCategory].total =
+                    fixRounding(
+                      reportTotals.expenseCategories[indexOfCategory].total +
+                        entry.value,
+                      2
+                    );
+                  reportTotals.expenseCategories[
+                    indexOfCategory
+                  ].totalIndividual = fixRounding(
+                    reportTotals.expenseCategories[indexOfCategory]
+                      .totalIndividual + entry.valueIndividual,
+                    2
+                  );
+                  // ADD ENTRY
+                  reportTotals.entries.push(entry);
+                } else if (entry.individualEntry && !isCurrentUserEntry) {
+                  // IS INDIVIDUAL & NOT CURRENT USER - DO NOT ADD TO INDIVIDUAL INCOME / DO NOT ADD ENTRY
+                }
               }
-              reportTotals.expenseCategories[indexOfCategory].total =
-                fixRounding(
-                  reportTotals.expenseCategories[indexOfCategory].total +
-                    entry.value,
-                  2
-                );
 
-              reportTotals.expenseCategories[indexOfCategory].totalIndividual =
-                fixRounding(
-                  reportTotals.expenseCategories[indexOfCategory]
-                    .totalIndividual +
-                    entry.value *
-                      (entry.individualEntry
-                        ? entry.userID._id.equals(userID)
-                          ? 1
-                          : 0
-                        : monthUser.percentOfTotalIncome),
-                  2
-                );
+              // TRANSFERS
+              if (entry.valueType === "transfer") {
+                const isFromUser = entry.userID._id.equals(userID),
+                  isToUser = entry.toUserID._id.equals(userID);
+                  if (isFromUser === true || isToUser === true) {
+                  reportTotals.transferTotals = fixRounding(
+                    reportTotals.transferTotals + entry.value
+                  ,2);
+                  reportTotals.entries.push(entry);
+                }
+              }
             }
-            reportTotals.entries.push(entry);
           });
         });
 
@@ -405,8 +505,16 @@ const resolvers = {
           reportTotals.sharedIncomeTotal - reportTotals.sharedExpenseTotal,
           2
         );
+        reportTotals.averageResponsibilityRate =
+          responsibilityRates.reduce((a, b) => a + b) /
+          responsibilityRates.length;
 
-        findBudget.months = populatedMonths;
+        // SORTING
+        reportTotals.entries.sort((a, b) => a.createdAt - b.createdAt);
+        reportTotals.incomeCategories.sort((a, b) => b.total - a.total);
+        reportTotals.expenseCategories.sort((a, b) => b.total - a.total);
+
+        // findBudget.months = populatedMonths;
 
         // return findEntry
         return reportTotals;

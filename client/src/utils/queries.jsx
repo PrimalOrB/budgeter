@@ -89,6 +89,7 @@ export const QUERY_CUSTOM_REPORT = gql`
       transferTotals
       sharedIncomeTotal
       sharedExpenseTotal
+      averageResponsibilityRate
       entries {
         _id
         createdAt

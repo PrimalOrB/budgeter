@@ -138,6 +138,7 @@ const typeDefs = `
         sharedBalance: Float
         sharedIncomeTotal: Float
         sharedExpenseTotal: Float
+        averageResponsibilityRate: Float
         userData: [ MonthUser ]
         entries: [ ReportEntry ]
         incomeCategories: [ cateogryGroup ]
