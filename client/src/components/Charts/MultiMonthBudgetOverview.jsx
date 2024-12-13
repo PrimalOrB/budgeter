@@ -58,20 +58,20 @@ const MultiMonthBudgetOverview = ({
   const createGraphData = () => {
     const labels = [];
     const datasets = [
-      {
-        type: "line",
-        label: "Balance",
-        data: new Array(displayLength).fill().map((x, i) => {
-          return 0;
-        }),
-        borderWidth: 8,
-        borderColor: "#71a9f7",
-        pointHoverBackgroundColor: "rgba( 255, 255, 255, 1)",
-        pointHitRadius: 5,
-        pointHoverRadius: 8,
-        pointHoverBorderWidth: 3,
-        tension: 0.25,
-      },
+      // {
+      //   type: "line",
+      //   label: "Balance",
+      //   data: new Array(displayLength).fill().map((x, i) => {
+      //     return 0;
+      //   }),
+      //   borderWidth: 8,
+      //   borderColor: "#71a9f7",
+      //   pointHoverBackgroundColor: "rgba( 255, 255, 255, 1)",
+      //   pointHitRadius: 5,
+      //   pointHoverRadius: 8,
+      //   pointHoverBorderWidth: 3,
+      //   tension: 0.25,
+      // },
       {
         type: "bar",
         label: "Income",
@@ -127,12 +127,12 @@ const MultiMonthBudgetOverview = ({
         (month) => month.order === displayLength + startIndex - i - 1
       );
       labels.push(targetMonth.label);
-      datasets[1].data[i] =
+      datasets[0].data[i] =
         targetMonth.incomeTotal - targetMonth.sharedIncomeTotal;
-      datasets[2].data[i] =
+      datasets[1].data[i] =
         targetMonth.expenseTotal - targetMonth.sharedExpenseTotal;
-      datasets[3].data[i] = targetMonth.sharedIncomeTotal;
-      datasets[4].data[i] = targetMonth.sharedExpenseTotal;
+      datasets[2].data[i] = targetMonth.sharedIncomeTotal;
+      datasets[3].data[i] = targetMonth.sharedExpenseTotal;
       //   datasets[0].data[i] += targetMonth.incomeTotal;
       //   return (datasets[0].data[i] -= targetMonth.expenseTotal);
       return;
@@ -186,14 +186,14 @@ const MultiMonthBudgetOverview = ({
             const label = [];
 
             const sharedIncome =
-                graphDataState.datasets[3].data[context.dataIndex],
+                graphDataState.datasets[2].data[context.dataIndex],
               sharedExpense =
-                graphDataState.datasets[4].data[context.dataIndex],
+                graphDataState.datasets[3].data[context.dataIndex],
               totalIncome =
-                graphDataState.datasets[1].data[context.dataIndex] +
+                graphDataState.datasets[0].data[context.dataIndex] +
                 sharedIncome,
               totalExpenses =
-                graphDataState.datasets[2].data[context.dataIndex] +
+                graphDataState.datasets[1].data[context.dataIndex] +
                 sharedExpense;
 
             label.push(
@@ -225,7 +225,7 @@ const MultiMonthBudgetOverview = ({
       y: {
         display: false,
         stacked: true,
-        // min: -maxYAxis.current,
+        min: 0,
         // max: maxYAxis.current,
         grid: {
           display: false,

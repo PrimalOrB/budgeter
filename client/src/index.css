@@ -405,6 +405,7 @@ section {
 
 .chart-full-section {
   height: 15rem;
+  padding-bottom: 1.5rem;
 }
 
 .chart-half-section {
@@ -504,7 +505,8 @@ section {
 }
 
 .chart-full-section #multi-month-menu {
-  margin-top: calc(-1.5rem - 5px);
+  /* margin-top: calc(-8.5rem - 5px); */
+  transform: translateY(1.5rem);
   margin-left: calc(-0.5rem);
   width: calc(100% + 1rem);
   justify-content: space-evenly;
