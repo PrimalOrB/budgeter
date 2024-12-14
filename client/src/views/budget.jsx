@@ -18,7 +18,7 @@ import {
   AllCategories,
   EditCategory,
   MonthSummary,
-  Reports
+  Reports,
 } from ".";
 import { dateToMonthStr } from "../utils/helpers";
 import { format } from "date-fns";
@@ -31,11 +31,15 @@ import {
 } from "react-icons/fa";
 import { BiTransferAlt } from "react-icons/bi";
 
-const Budget = () => {
-  const { id: _id, tab } = useParams();
-  const [pageState, setPageState] = useState(
-    tab === undefined ? "dashboard" : tab
-  );
+const Budget = ({
+  pageState,
+  setPageState,
+  editingModal,
+  setEditingModal,
+  editingTransaction,
+  setEditingTransaction,
+}) => {
+  const { id: _id } = useParams();
 
   const [state] = useStoreContext();
   const { currentUser } = state;
@@ -43,13 +47,12 @@ const Budget = () => {
   const [v, setV] = useState(0);
   const [budgetState, setBudgetState] = useState({});
   const [errorState, setErrorState] = useState();
-  const [editingTransaction, setEditingTransaction] = useState(null);
 
   const [highlightMonthState, setHighlightMonthState] = useState(
     format(new Date(), "M/yy")
   );
 
-  const [paginateState, setPaginatState] = useState({
+  const [paginateState, setPaginateState] = useState({
     limit: 6,
     offset: 0,
     page: 0,
@@ -68,7 +71,7 @@ const Budget = () => {
         try {
           if (data.data.queryBudget) {
             setV(v + 1);
-            setPaginatState({
+            setPaginateState({
               ...paginateState,
               length: data.data.queryBudget.entries.length,
             });
@@ -144,6 +147,7 @@ const Budget = () => {
 
   return (
     <>
+      {/* <EditModal/> */}
       {budgetState?.title && (
         <>
           <Title
@@ -179,7 +183,9 @@ const Budget = () => {
                 budget={budgetState}
                 categories={budgetState.categories}
                 paginateState={paginateState}
-                setPaginatState={setPaginatState}
+                setPaginateState={setPaginateState}
+                setEditingModal={setEditingModal}
+                setEditingTransaction={setEditingTransaction}
               />
               <MonthSummary
                 key={`summary_${v}`}
@@ -187,6 +193,7 @@ const Budget = () => {
                 budget={budgetState}
                 categories={budgetState.categories}
                 setPageState={setPageState}
+                setEditingModal={setEditingModal}
                 setEditingTransaction={setEditingTransaction}
               />
             </>
@@ -226,6 +233,8 @@ const Budget = () => {
               <AllCategories
                 categories={budgetState.categories}
                 setPageState={setPageState}
+                setEditingModal={setEditingModal}
+                setEditingTransaction={setEditingTransaction}
               />
             </>
           )}
@@ -260,14 +269,23 @@ const Budget = () => {
           )}
           {pageState === "edit-category" && (
             <>
-              <EditCategory refetch={queryBudget} setPageState={setPageState} />
+              <EditCategory
+                refetch={queryBudget}
+                setPageState={setPageState}
+                editingTransaction={editingTransaction}
+              />
             </>
           )}
           {pageState === "reports" && (
             <>
-              <Reports budgetState={budgetState} 
-                categories={budgetState.categories} setErrorState={setErrorState}
-                setPageState={setPageState}/>
+              <Reports
+                budgetState={budgetState}
+                categories={budgetState.categories}
+                setErrorState={setErrorState}
+                setPageState={setPageState}
+                setEditingModal={setEditingModal}
+                setEditingTransaction={setEditingTransaction}
+              />
             </>
           )}
         </>

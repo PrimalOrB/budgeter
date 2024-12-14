@@ -851,6 +851,7 @@ const resolvers = {
 
     queryCategory: async (parent, { input }, context) => {
       if (context.token.headers.authorization !== undefined) {
+        console.log( input )
         const matchCategory = await Category.findOne({ _id: input._id });
 
         if (!matchCategory) {

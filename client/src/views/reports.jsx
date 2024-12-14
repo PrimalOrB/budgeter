@@ -22,7 +22,14 @@ import {
 } from "react-icons/fa";
 import { toCurrency } from "../utils/helpers";
 
-const Reports = ({ budgetState, categories, setErrorState, setPageState }) => {
+const Reports = ({
+  budgetState,
+  categories,
+  setErrorState,
+  setPageState,
+  setEditingModal,
+  setEditingTransaction,
+}) => {
   const { id: _id } = useParams();
 
   const [state] = useStoreContext();
@@ -69,8 +76,6 @@ const Reports = ({ budgetState, categories, setErrorState, setPageState }) => {
     getCustomReport({ variables });
   }
 
-  console.log(reportData?.requestCustomReport);
-
   return (
     <section className="full-container">
       <Title text={`Reports`} />
@@ -102,73 +107,81 @@ const Reports = ({ budgetState, categories, setErrorState, setPageState }) => {
       />
       {reportData?.requestCustomReport ? (
         <>
-          <section id="month-summary" key={`results`} className="margin-top-full">
+          <section
+            id="month-summary"
+            key={`results`}
+            className="margin-top-full"
+          >
             <h4 className="sub-container-description section-list-title noselect">
               {format(formInput.startDate, "MMM d, yyyy")} -{" "}
               {format(formInput.endDate, "MMM d, yyyy")}
             </h4>
             <ul className="monthly-group-detail border-b-l-rad-none border-b-r-rad-none border_b_none">
-        <BudgetCategoryExpandableTitle
-          data={reportData.requestCustomReport}
-          title={"Balance"}
-          expandedProp={"balance"}
-          expandedState={expandedState}
-          totalProp={'balance'}
-          individualProp={'balanceIndividual'}
-          setExpandedState={setExpandedState}
-        />
-        {expandedState.balance && (
-          <React.Fragment>
-            <InlineBarTotal
-              key={`report_iR`}
-              inputData={reportData.requestCustomReport}
-              title={["Income to Expenses Ratio", "Income", "Expenses"]}
-              valueProp={["incomeTotal", "expenseTotal"]}
-            />
-            <InlineBarTotal
-              key={`report_sR`}
-              inputData={reportData.requestCustomReport}
-              title={["Shared Income to Expenses Ratio", "Income", "Expenses"]}
-              valueProp={["sharedIncomeTotal", "sharedExpenseTotal"]}
-            />
-            {/* <InlineBarPerUser
+              <BudgetCategoryExpandableTitle
+                data={reportData.requestCustomReport}
+                title={"Balance"}
+                expandedProp={"balance"}
+                expandedState={expandedState}
+                totalProp={"balance"}
+                individualProp={"balanceIndividual"}
+                setExpandedState={setExpandedState}
+              />
+              {expandedState.balance && (
+                <React.Fragment>
+                  <InlineBarTotal
+                    key={`report_iR`}
+                    inputData={reportData.requestCustomReport}
+                    title={["Income to Expenses Ratio", "Income", "Expenses"]}
+                    valueProp={["incomeTotal", "expenseTotal"]}
+                  />
+                  <InlineBarTotal
+                    key={`report_sR`}
+                    inputData={reportData.requestCustomReport}
+                    title={[
+                      "Shared Income to Expenses Ratio",
+                      "Income",
+                      "Expenses",
+                    ]}
+                    valueProp={["sharedIncomeTotal", "sharedExpenseTotal"]}
+                  />
+                  {/* <InlineBarPerUser
               key={`report_sIn`}
               inputData={reportData.requestCustomReport}
               title={"Shared Income By User"}
               valueProp={"sharedIncomeTotal"}
             /> */}
-            {/* <InlineBarPerUser
+                  {/* <InlineBarPerUser
               key={`report_sOut`}
               inputData={reportData.requestCustomReport}
               title={"Shared Expenses By User"}
               valueProp={"sharedExpenseTotal"}
             /> */}
-            {/* <InlineBarPerUser
+                  {/* <InlineBarPerUser
               key={`report_tIn`}
               inputData={reportData.requestCustomReport}
               title={"Total Income By User"}
               valueProp={"incomeTotal"}
             /> */}
-            {/* <InlineBarPerUser
+                  {/* <InlineBarPerUser
               key={`report_tOut`}
               inputData={reportData.requestCustomReport}
               title={"Total Expenses By User"}
               valueProp={"expenseTotal"}
             /> */}
-            {/* <InlineBarPerUser
+                  {/* <InlineBarPerUser
               key={`report_uR`}
               inputData={reportData.requestCustomReport}
               title={"User Resposibility"}
               valueProp={"responsibilityTotal"}
             /> */}
-            {/* <InlineBarBalance
+                  {/* <InlineBarBalance
               key={`report_B`}
               inputData={reportData.requestCustomReport}
               title={"Balance"}
               valueProp={"userBalance"}
               total={"expensesShared"}
             /> */}
-            {/* {reportData.requestCustomReport.userData.map((user) => {
+                  {/* {reportData.requestCustomReport.userData.map((user) => {
               return (
                 <InlineBarPerUserBalance
                   key={`report_${user.userID._id}`}
@@ -179,14 +192,14 @@ const Reports = ({ budgetState, categories, setErrorState, setPageState }) => {
                 />
               );
             })} */}
-          </React.Fragment>
-        )}
-      </ul>
+                </React.Fragment>
+              )}
+            </ul>
             {/* expenses section */}
             <ul className="monthly-group-detail border-b-l-rad-none border-b-r-rad-none border_b_none border-t-l-rad-none border-t-r-rad-none">
               <BudgetCategoryExpandableTitle
                 data={reportData.requestCustomReport}
-                title={'Expenses'}
+                title={"Expenses"}
                 expandedProp={"expense"}
                 individualProp={"expenseIndividual"}
                 totalProp={"expenseTotal"}
@@ -216,6 +229,8 @@ const Reports = ({ budgetState, categories, setErrorState, setPageState }) => {
                         category={category}
                         data={entries}
                         setPageState={setPageState}
+                        setEditingModal={setEditingModal}
+                        setEditingTransaction={setEditingTransaction}
                       />
                     );
                   }
@@ -229,7 +244,7 @@ const Reports = ({ budgetState, categories, setErrorState, setPageState }) => {
             <ul className="monthly-group-detail border-b-l-rad-none border-b-r-rad-none border_b_none border-t-l-rad-none border-t-r-rad-none">
               <BudgetCategoryExpandableTitle
                 data={reportData.requestCustomReport}
-                title={'Income'}
+                title={"Income"}
                 expandedProp={"income"}
                 individualProp={"incomeIndividual"}
                 totalProp={"incomeTotal"}
@@ -259,6 +274,8 @@ const Reports = ({ budgetState, categories, setErrorState, setPageState }) => {
                         category={category}
                         data={entries}
                         setPageState={setPageState}
+                        setEditingModal={setEditingModal}
+                        setEditingTransaction={setEditingTransaction}
                       />
                     );
                   }
@@ -272,7 +289,7 @@ const Reports = ({ budgetState, categories, setErrorState, setPageState }) => {
             <ul className="monthly-group-detail border-t-l-rad-none border-t-r-rad-none">
               <BudgetCategoryExpandableTitle
                 data={reportData.requestCustomReport}
-                title={'Transfers'}
+                title={"Transfers"}
                 expandedProp={"transfers"}
                 totalProp={"transferTotals"}
                 expandedState={expandedState}
@@ -287,6 +304,8 @@ const Reports = ({ budgetState, categories, setErrorState, setPageState }) => {
                         key={transfer._id}
                         entry={transfer}
                         setPageState={setPageState}
+                        setEditingModal={setEditingModal}
+                        setEditingTransaction={setEditingTransaction}
                       />
                     );
                   })}

@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { format } from "date-fns";
-import { toCurrency } from "../utils/helpers";
 import {
   InlineBarTotal,
   InlineBarPerUser,
@@ -13,13 +12,12 @@ import {
   BudgetCategoryEntriesExpandableList,
   PDFMonthlyUser,
 } from "../components/Layout";
-import { FaCaretDown, FaCaretUp } from "react-icons/fa";
 
 const MonthSummary = ({
   budget,
   highlightMonthState,
   categories,
-  setPageState,
+  setEditingModal,
   setEditingTransaction,
 }) => {
   const date = new Date(
@@ -155,7 +153,7 @@ const MonthSummary = ({
                   key={`exp_${category.categoryID}`}
                   category={category}
                   data={entries}
-                  setPageState={setPageState}
+                  setEditingModal={setEditingModal}
                   setEditingTransaction={setEditingTransaction}
                 />
               );
@@ -199,7 +197,7 @@ const MonthSummary = ({
                   key={`exp_${category.categoryID}`}
                   category={category}
                   data={entries}
-                  setPageState={setPageState}
+                  setEditingModal={setEditingModal}
                   setEditingTransaction={setEditingTransaction}
                 />
               );
@@ -228,7 +226,7 @@ const MonthSummary = ({
                 <BudgetCategoryEntriesExpandableList
                   key={transfer._id}
                   entry={transfer}
-                  setPageState={setPageState}
+                  setEditingModal={setEditingModal}
                   setEditingTransaction={setEditingTransaction}
                 />
               );

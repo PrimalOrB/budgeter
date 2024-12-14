@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router";
 import { ActionButton } from "../components/Buttons";
 import { InlineTextInput, InlineSelectInput } from "../components/Forms";
 import { InlineError, InlineNotification } from "../components/Notifications";
@@ -10,8 +9,7 @@ import {
 } from "../utils/mutations";
 import { Title } from "../components/Layout";
 
-const EditCategory = ({ refetch, setPageState }) => {
-  const { cat } = useParams();
+const EditCategory = ({ refetch, setPageState, editingTransaction }) => {
 
   const [formInput, setFormInput] = useState({
     budgetID: null,
@@ -24,7 +22,7 @@ const EditCategory = ({ refetch, setPageState }) => {
     useMutation(QUERY_BUDGET_CATEGORY, {
       variables: {
         input: {
-          _id: cat,
+          _id: editingTransaction,
         },
       },
       update: (cache, data) => {
@@ -43,7 +41,7 @@ const EditCategory = ({ refetch, setPageState }) => {
     });
 
   useEffect(() => {
-    if (cat !== undefined) {
+    if (editingTransaction) {
       queryCategory();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -93,7 +91,7 @@ const EditCategory = ({ refetch, setPageState }) => {
     useMutation(UPDATE_BUDGET_CATEGORY, {
       variables: {
         input: {
-          categoryID: cat,
+          categoryID: editingTransaction,
           title: formInput.title,
         },
       },

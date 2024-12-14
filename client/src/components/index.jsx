@@ -1,4 +1,4 @@
-import { Header, Footer } from './Layout';
+import { Header, Footer, EditModal } from './Layout';
 import { SpinLoader, FullPageSpinLoader } from './Loaders';
 
-export { Header, Footer, SpinLoader, FullPageSpinLoader };
+export { Header, Footer, EditModal, SpinLoader, FullPageSpinLoader };

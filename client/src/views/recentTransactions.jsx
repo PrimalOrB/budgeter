@@ -8,10 +8,12 @@ const RecentTransactions = ({
   budget,
   categories,
   paginateState,
-  setPaginatState,
+  setPaginateState,
+  setEditingModal,
+  setEditingTransaction,
 }) => {
   function incrementPage() {
-    setPaginatState({
+    setPaginateState({
       ...paginateState,
       offset: paginateState.offset + paginateState.limit,
       page: paginateState.page + 1,
@@ -19,7 +21,7 @@ const RecentTransactions = ({
   }
 
   function decrementPage() {
-    setPaginatState({
+    setPaginateState({
       ...paginateState,
       offset: paginateState.offset - paginateState.limit,
       page: paginateState.page - 1,
@@ -31,6 +33,11 @@ const RecentTransactions = ({
     transactions = [...transactions, ...month.entries];
   });
   transactions.sort((a, b) => b.createdAt - a.createdAt);
+
+  const setAsEditing = (entry) => {
+    setEditingModal(true);
+    return setEditingTransaction(entry);
+  };
 
   return (
     <section id="recent-transactions">
@@ -96,6 +103,7 @@ const RecentTransactions = ({
 
             return (
               <li
+                onClick={() => setAsEditing(entry)}
                 key={`recent_${entry._id}`}
                 className={
                   "flex-transaction-line-sm border-bot-hightlight-1 f-valign"

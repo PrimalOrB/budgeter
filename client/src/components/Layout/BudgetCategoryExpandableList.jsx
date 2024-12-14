@@ -7,7 +7,7 @@ import { toCurrency } from "../../utils/helpers";
 const BudgetCategoryExpandableList = ({
   category,
   data,
-  setPageState,
+  setEditingModal,
   setEditingTransaction,
 }) => {
   const [expandedState, setExpandedState] = useState(false);
@@ -42,7 +42,7 @@ const BudgetCategoryExpandableList = ({
             <BudgetCategoryEntriesExpandableList
               key={entry._id}
               entry={entry}
-              setPageState={setPageState}
+              setEditingModal={setEditingModal}
               setEditingTransaction={setEditingTransaction}
             />
           );
