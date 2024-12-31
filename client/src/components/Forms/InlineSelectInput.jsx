@@ -1,7 +1,7 @@
 import React from "react";
 import { titleCaseString } from '../../utils/helpers'
 
-const InlineSelectInput = ( { prop, input, setInput, label, optionList } ) => {
+const InlineSelectInput = ( { prop, input, setInput, label, optionList, auditState } ) => {
 
     function updateInput( e ){
         const { name, value } = e.target
@@ -11,7 +11,7 @@ const InlineSelectInput = ( { prop, input, setInput, label, optionList } ) => {
     return (
         <div className={ 'form-inline-select' } >
             <label className={ 'noselect' } htmlFor={ prop }>{ label }</label>
-            <select name={ prop } type="number" value={ input[prop] } onChange={ updateInput }>
+            <select className={ `${auditState[prop] ? 'audit-pass': 'audit-fail' }` } name={ prop } type="number" value={ input[prop] } onChange={ updateInput }>
                 <option disabled></option>
                 { optionList.map( option => {
                     if( option.email ){

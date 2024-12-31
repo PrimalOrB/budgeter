@@ -510,6 +510,11 @@ section {
   justify-content: center;
 }
 
+.nav-button:hover {
+  background-color: white;
+  border-bottom: 3px inset var(--highlight-color);
+}
+
 .nav-button svg {
   margin-right: 0.5rem;
 }
@@ -520,11 +525,6 @@ section {
 
 .nav-button-active {
   border-bottom: 3px inset var(--primary-color);
-}
-
-.nav-button:hover {
-  background-color: white;
-  border-bottom: 3px inset var(--highlight-color);
 }
 
 .large-button {
@@ -569,6 +569,12 @@ section {
   border-radius: var(--border-radius-none) var(--border-radius-none)
     var(--border-radius-half) var(--border-radius-none);
   border-right: none;
+}
+
+.nav-button-disabled {
+  color: var(--secondary-color);
+  background-color: white !important;
+  border-bottom: 3px inset var(--secondary-color) !important;
 }
 
 .logout,
@@ -1100,6 +1106,15 @@ form,
 
 .form-inline-checkbox div label:active .switch-handle {
   width: 60px;
+}
+
+.audit-pass {
+  /* border: 1px solid green !important; */
+}
+
+.audit-fail {
+  background-color: rgba(255, 0, 0, 0.1) !important;
+  border: 1px solid red !important;
 }
 
 input[type="month"]::-webkit-clear-button,

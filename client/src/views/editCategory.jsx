@@ -10,12 +10,41 @@ import {
 import { Title } from "../components/Layout";
 
 const EditCategory = ({ refetch, setPageState, editingTransaction }) => {
-
   const [formInput, setFormInput] = useState({
     budgetID: null,
     title: "",
     categoryType: "",
   });
+
+  const [populated, setPopulated] = useState(false);
+
+  const [auditState, setAuditState] = useState({ pass: false });
+
+  function audit() {
+    const currentAuditState = { ...auditState },
+      currentFormState = { ...formInput };
+
+    const auditField = [];
+
+    const textRequired = ["budgetID", "title", "categoryType"];
+    textRequired.map((field) => {
+      currentAuditState[field] = currentFormState[field].length > 0;
+      auditField.push(currentAuditState[field]);
+    });
+
+    currentAuditState.pass =
+      auditField.filter((x) => x === true).length === auditField.length;
+
+    setAuditState({ ...currentAuditState });
+    return;
+  }
+
+  useEffect(() => {
+    if (populated) {
+      audit();
+    }
+  }, [formInput]);
+
   const [errorState, setErrorState] = useState();
 
   const [queryCategory, { loading: queryLoading, error: queryError }] =
@@ -30,6 +59,7 @@ const EditCategory = ({ refetch, setPageState, editingTransaction }) => {
           if (data.data.queryCategory) {
             let newState = { ...data.data.queryCategory };
             setFormInput({ ...newState });
+            setPopulated(true);
           }
         } catch (e) {
           console.log(e);
@@ -47,30 +77,9 @@ const EditCategory = ({ refetch, setPageState, editingTransaction }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function validateForm(form) {
-    if (
-      form.title === undefined ||
-      form.budgetID === undefined ||
-      form.categoryType === undefined
-    ) {
-      return false;
-    }
-    if (
-      form.title.length > 0 &&
-      form.budgetID.length > 0 &&
-      form.categoryType.length
-    ) {
-      return true;
-    }
-    return false;
-  }
-
   function sumbitForm() {
-    // check form validity
-    const valid = validateForm(formInput);
-
     // if is valid, procees
-    if (valid) {
+    if (auditState.pass) {
       setFormInput({
         ...formInput,
         error: null,
@@ -120,14 +129,15 @@ const EditCategory = ({ refetch, setPageState, editingTransaction }) => {
               input={formInput}
               setInput={setFormInput}
               label={"Type"}
+              auditState={auditState}
               optionList={["income", "expense"]}
-              disabled
             />
             <InlineTextInput
               prop={"title"}
               input={formInput}
               setInput={setFormInput}
               label={"Category Name"}
+              auditState={auditState}
             />
             {formInput.error && <InlineError text={formInput.error} />}
           </form>
@@ -138,6 +148,7 @@ const EditCategory = ({ refetch, setPageState, editingTransaction }) => {
               action={sumbitForm}
               text={"Submit Edit"}
               additionalClass={"large-button"}
+              disabled={!auditState.pass}
             />
           )}
         </>

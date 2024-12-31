@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Title } from "../components/Layout";
 import { useParams } from "react-router-dom";
 import { useLazyQuery } from "@apollo/client";
@@ -12,15 +12,7 @@ import {
   BudgetCategoryExpandableList,
   BudgetCategoryEntriesExpandableList,
 } from "../components/Layout";
-import { InlineBarTotal, InlineBarPerUser } from "../components/Charts";
-import {
-  FaCaretUp,
-  FaCaretDown,
-  FaFolder,
-  FaHome,
-  FaListUl,
-} from "react-icons/fa";
-import { toCurrency } from "../utils/helpers";
+import { InlineBarTotal } from "../components/Charts";
 
 const Reports = ({
   budgetState,
@@ -48,6 +40,40 @@ const Reports = ({
     balance: false,
     transfers: false,
   });
+
+  const [auditState, setAuditState] = useState({ pass: false });
+
+  function audit() {
+    const currentAuditState = { ...auditState },
+      currentFormState = { ...formInput };
+
+    const auditField = [];
+
+    const numberRequired = ["startDate", "endDate"];
+    numberRequired.map((field) => {
+      const fieldAsNumber = Number(currentFormState[field]),
+        isNumber = !isNaN(fieldAsNumber),
+        isNotZero = fieldAsNumber !== 0;
+      currentAuditState[field] = isNumber && isNotZero;
+      auditField.push(currentAuditState[field]);
+    });
+
+    const textRequired = ["userID"];
+    textRequired.map((field) => {
+      currentAuditState[field] = currentFormState[field].length > 0;
+      auditField.push(currentAuditState[field]);
+    });
+
+    currentAuditState.pass =
+      auditField.filter((x) => x === true).length === auditField.length;
+
+    setAuditState({ ...currentAuditState });
+    return;
+  }
+
+  useEffect(() => {
+    audit();
+  }, [formInput]);
 
   let [getCustomReport, { data: reportData, error }] = useLazyQuery(
     QUERY_CUSTOM_REPORT,
@@ -86,24 +112,28 @@ const Reports = ({
           setInput={setFormInput}
           label={"User"}
           optionList={budgetState.ownerIDs}
+          auditState={auditState}
         />
         <InlineDateInput
           prop={`startDate`}
           input={formInput}
           setInput={setFormInput}
           label={"Start Date"}
+          auditState={auditState}
         />
         <InlineDateInput
           prop={`endDate`}
           input={formInput}
           setInput={setFormInput}
           label={"End Date"}
+          auditState={auditState}
         />
       </form>
       <ActionButton
         action={runGetCustomReport}
         text={"Get Report"}
         additionalClass={"large-button"}
+        disabled={!auditState.pass}
       />
       {reportData?.requestCustomReport ? (
         <>

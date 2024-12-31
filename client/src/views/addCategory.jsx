@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ActionButton } from "../components/Buttons";
 import { InlineTextInput, InlineSelectInput } from "../components/Forms";
 import { InlineNotification } from "../components/Notifications";
@@ -13,30 +13,34 @@ const AddCategory = ({ id , refetch, setPageState}) => {
     categoryType: "",
   });
 
-  function validateForm(form) {
-    if (
-      form.title === undefined ||
-      form.budgetID === undefined ||
-      form.categoryType === undefined
-    ) {
-      return false;
+   const [auditState, setAuditState] = useState({ pass: false });
+  
+    function audit(){
+      const currentAuditState = { ...auditState },
+      currentFormState = { ...formInput };
+  
+      const auditField = [];
+  
+      const textRequired = ["budgetID","title","categoryType"];
+      textRequired.map((field) => {
+        currentAuditState[field] = currentFormState[field].length > 0;
+        auditField.push(currentAuditState[field]);
+      });
+  
+      currentAuditState.pass =
+        auditField.filter((x) => x === true).length === auditField.length;
+  
+      setAuditState({ ...currentAuditState });
+      return;
     }
-    if (
-      form.title.length > 0 &&
-      form.budgetID.length > 0 &&
-      form.categoryType.length > 0
-    ) {
-      return true;
-    }
-    return false;
-  }
+  
+    useEffect(()=>{
+      audit()
+    },[formInput])
 
   function sumbitForm() {
-    // check form validity
-    const valid = validateForm(formInput);
-
     // if is valid, procees
-    if (valid) {
+    if (auditState.pass) {
       setFormInput({
         ...formInput,
         error: null,
@@ -83,6 +87,7 @@ const AddCategory = ({ id , refetch, setPageState}) => {
           input={formInput}
           setInput={setFormInput}
           label={"Type"}
+          auditState={auditState}
           optionList={["income", "expense"]}
         />
         <InlineTextInput
@@ -90,6 +95,7 @@ const AddCategory = ({ id , refetch, setPageState}) => {
           input={formInput}
           setInput={setFormInput}
           label={"Category Name"}
+          auditState={auditState}
         />
       </form>
       {createdLoading ? (
@@ -99,6 +105,7 @@ const AddCategory = ({ id , refetch, setPageState}) => {
           action={sumbitForm}
           text={"Submit"}
           additionalClass={"large-button"}
+          disabled={!auditState.pass}
         />
       )}
     </section>
