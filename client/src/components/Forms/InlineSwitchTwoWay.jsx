@@ -4,7 +4,7 @@ const InlineSwitchTwoWay = ( { prop, input, setInput, label, falseIcon, trueIcon
 
     function updateInput( e ){
         const { name } = e.target
-        setInput( { ...input, [name]: !input[prop], error: null } )
+        setInput( { ...input, [name]: !input[prop] } )
     }
 
     return (

@@ -8,29 +8,26 @@ import {
 } from "../components/Forms";
 import { InlineError, InlineNotification } from "../components/Notifications";
 import { useStoreContext } from "../utils/GlobalState";
-import { isEmail } from "../utils/helpers";
 import { useMutation } from "@apollo/client";
 import { CREATE_NEW_BUDGET } from "../utils/mutations";
 import { useNavigate } from "react-router-dom";
 import { Title } from "../components/Layout";
 
 const AddBudget = () => {
-  const [formInput, setFormInput] = useState({
+  const [state] = useStoreContext();
+  const navigate = useNavigate();
+
+  const initialFormState = {
     title: "",
     desc: "",
     email: "",
     owner: "",
     emails: [],
-    error: null,
-  });
-
+  };
+  const [formInput, setFormInput] = useState({ ...initialFormState });
   const [auditState, setAuditState] = useState({ pass: false });
-
+  const [errorState, setErrorState] = useState();
   const [populated, setPopulated] = useState(false);
-
-  const [state] = useStoreContext();
-
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (state?.currentUser) {
@@ -38,7 +35,7 @@ const AddBudget = () => {
         ...formInput,
         owner: state.currentUser.email,
       });
-      setPopulated(true)
+      setPopulated(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
@@ -49,11 +46,10 @@ const AddBudget = () => {
 
     const auditField = [];
 
-
-    const textRequired = ["title", "desc","owner"];
+    const textRequired = ["title", "desc", "owner"];
     textRequired.map((field) => {
-      if( currentFormState[field] === undefined ){
-        currentAuditState[field] = false
+      if (currentFormState[field] === undefined) {
+        currentAuditState[field] = false;
       } else {
         currentAuditState[field] = currentFormState[field].length > 0;
       }
@@ -68,7 +64,7 @@ const AddBudget = () => {
   }
 
   useEffect(() => {
-    if( populated ){
+    if (populated) {
       audit();
     }
   }, [formInput]);
@@ -78,21 +74,15 @@ const AddBudget = () => {
     if (auditState.pass) {
       setFormInput({
         ...formInput,
-        error: null,
       });
 
       // send to submit
       return processSumbit();
     }
-    // return error
-    setFormInput({
-      ...formInput,
-      error: "Failed form validation",
-    });
-    return console.log("failed");
+    return;
   }
 
-  const [processSumbit, { loading: createdLoading, error: createdError }] =
+  const [processSumbit, { loading: createdLoading }] =
     useMutation(CREATE_NEW_BUDGET, {
       variables: {
         input: {
@@ -108,52 +98,60 @@ const AddBudget = () => {
             return navigate(`/budget/${data.data.createBudget._id}`);
           }
         } catch (e) {
-          console.error(createdError);
+          setErrorState(err.message);
         }
+      },
+      onError: (err) => {
+        setErrorState(err.message);
       },
     });
 
   return (
     <section className="full-container">
       <Title text={`Create New Budget`} />
-      <form autoComplete="off">
-        <InlineTextInput
-          prop={"title"}
-          input={formInput}
-          setInput={setFormInput}
-          label={"Budget Title"}
-          auditState={auditState}
-        />
-        <InlineTextareaInput
-          prop={"desc"}
-          input={formInput}
-          setInput={setFormInput}
-          label={"Description"}
-          auditState={auditState}
-        />
-        <InlineListDisplay
-          input={formInput}
-          setInput={setFormInput}
-          label={"Owners"}
-        />
-        <InlineEmailInput
-          prop={"email"}
-          input={formInput}
-          setInput={setFormInput}
-          label={"Add More Owners"}
-          placeholder={"Type or paste email addresses and press `Enter`"}
-        />
-        {formInput.error && <InlineError text={formInput.error} />}
-      </form>
-      {createdLoading ? (
-        <InlineNotification text={"Submit processing"} />
+      {errorState ? (
+        <InlineError text={errorState} />
       ) : (
-        <ActionButton
-          action={sumbitForm}
-          text={"Submit"}
-          additionalClass={"large-button"}
-          disabled={!auditState.pass}
-        />
+        <>
+          <form autoComplete="off">
+            <InlineTextInput
+              prop={"title"}
+              input={formInput}
+              setInput={setFormInput}
+              label={"Budget Title"}
+              auditState={auditState}
+            />
+            <InlineTextareaInput
+              prop={"desc"}
+              input={formInput}
+              setInput={setFormInput}
+              label={"Description"}
+              auditState={auditState}
+            />
+            <InlineListDisplay
+              input={formInput}
+              setInput={setFormInput}
+              label={"Owners"}
+            />
+            <InlineEmailInput
+              prop={"email"}
+              input={formInput}
+              setInput={setFormInput}
+              label={"Add More Owners"}
+              placeholder={"Type or paste email addresses and press `Enter`"}
+            />
+          </form>
+          {createdLoading ? (
+            <InlineNotification text={"Submit processing"} />
+          ) : (
+            <ActionButton
+              action={sumbitForm}
+              text={"Submit"}
+              additionalClass={"large-button"}
+              disabled={!auditState.pass}
+            />
+          )}
+        </>
       )}
     </section>
   );

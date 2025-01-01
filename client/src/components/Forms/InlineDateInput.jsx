@@ -13,7 +13,7 @@ const InlineDateInput = ({
   const updateInput = (e) => {
     const { name, value } = e.target;
     if (value) {
-      return setInput({ ...input, [name]: dateAddTZ(value), error: null });
+      return setInput({ ...input, [name]: dateAddTZ(value) });
     }
   };
 

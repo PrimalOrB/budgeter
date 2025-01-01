@@ -4,7 +4,7 @@ const InlineUserInput = ( { prop, input, setInput, label, optionList, auditState
 
     function updateInput( e ){
         const { name, value } = e.target
-        setInput( { ...input, [name]: value, error: null } )
+        setInput( { ...input, [name]: value } )
     }
 
     return (

@@ -25,6 +25,10 @@ const InlineNumberInput = ({
 
   const updateInput = (e) => {
     const { name, value } = e.target;
+    if( !isNaN(Number(value)) ){
+      const decimalNumber = Math.round(Number(value) * 100) / 100
+      setInput({ ...input, [name]: decimalNumber });
+    }
     return setInputControl({ ...inputControl, [name]: value });
   };
 
@@ -32,7 +36,7 @@ const InlineNumberInput = ({
     const { name, value } = e.target;
     const decimalNumber = Math.round(Number(value) * 100) / 100,
     updateValue = isNaN(decimalNumber) ? value : decimalNumber
-    setInput({ ...input, [name]: updateValue, error: null });
+    setInput({ ...input, [name]: updateValue });
     return setInputControl({
       ...inputControl,
       [name]: `$${isNaN(decimalNumber) ? value : updateValue.toFixed(decimals)}`,

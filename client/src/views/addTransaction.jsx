@@ -31,30 +31,26 @@ const AddTransactionEntry = ({
     userID: state.currentUser._id,
     individualEntry: false,
   };
-
   const [formInput, setFormInput] = useState({ ...initialFormState });
- 
   const [auditState, setAuditState] = useState({ pass: false });
+  const [errorState, setErrorState] = useState();
 
-  function audit(){
+  function audit() {
     const currentAuditState = { ...auditState },
-    currentFormState = { ...formInput };
+      currentFormState = { ...formInput };
 
     const auditField = [];
 
-    const numberRequired = [
-      "value",
-      "createdAt"
-    ];
+    const numberRequired = ["value", "createdAt"];
     numberRequired.map((field) => {
       const fieldAsNumber = Number(currentFormState[field]),
-      isNumber = !isNaN(fieldAsNumber),
-      isNotZero = fieldAsNumber !== 0
-      currentAuditState[field] = isNumber && isNotZero
+        isNumber = !isNaN(fieldAsNumber),
+        isNotZero = fieldAsNumber !== 0;
+      currentAuditState[field] = isNumber && isNotZero;
       auditField.push(currentAuditState[field]);
     });
 
-    const textRequired = ["categoryID","title","userID"];
+    const textRequired = ["categoryID", "title", "userID"];
     textRequired.map((field) => {
       currentAuditState[field] = currentFormState[field].length > 0;
       auditField.push(currentAuditState[field]);
@@ -67,30 +63,24 @@ const AddTransactionEntry = ({
     return;
   }
 
-  useEffect(()=>{
-    audit()
-  },[formInput])
+  useEffect(() => {
+    audit();
+  }, [formInput]);
 
   function sumbitForm() {
     // if is valid, procees
     if (auditState.pass) {
       setFormInput({
         ...formInput,
-        error: null,
       });
 
       // send to submit
       return processSumbit();
     }
-    // return error
-    setFormInput({
-      ...formInput,
-      error: "Failed form validation",
-    });
-    return console.log("failed");
+    return;
   }
 
-  const [processSumbit, { loading: createdLoading, error: createdError }] =
+  const [processSumbit, { loading: createdLoading }] =
     useMutation(CREATE_NEW_TRANSACTION, {
       variables: {
         input: {
@@ -110,76 +100,84 @@ const AddTransactionEntry = ({
             return setPageState("dashboard");
           }
         } catch (e) {
-          console.error(createdError);
+          setErrorState(err.message);
         }
+      },
+      onError: (err) => {
+        setErrorState(err.message);
       },
     });
 
   return (
     <section className="full-container">
       <Title text={`Add ${categoryType}`} />
-      <form autoComplete="off">
-        <InlineSelectInput
-          prop={"categoryID"}
-          input={formInput}
-          setInput={setFormInput}
-          label={"Category"}
-          auditState={auditState}
-          optionList={budgetState.categories
-            .filter((category) => category.categoryType === categoryType)
-            .sort((a, b) => (b.countUse || 0) - (a.countUse || 0))}
-        />
-        <InlineTextareaInput
-          prop={"title"}
-          input={formInput}
-          setInput={setFormInput}
-          label={"Description"}
-          auditState={auditState}
-        />
-        <InlineNumberInput
-          prop={`value`}
-          input={formInput}
-          setInput={setFormInput}
-          label={"Value"}
-          auditState={auditState}
-        />
-        <InlineDateInput
-          prop={`createdAt`}
-          input={formInput}
-          setInput={setFormInput}
-          label={"Transaction Date"}
-          auditState={auditState}
-        />
-        <InlineUserInput
-          prop={"userID"}
-          input={formInput}
-          setInput={setFormInput}
-          label={"User"}
-          optionList={budgetState.ownerIDs}
-          auditState={auditState}
-        />
-        <InlineSwitchTwoWay
-          prop={`individualEntry`}
-          input={formInput}
-          setInput={setFormInput}
-          label={`${
-            formInput.individualEntry ? "Individual Entry" : "Shared Entry"
-          }`}
-          falseIcon={MdPeople}
-          trueIcon={MdPerson}
-          auditState={auditState}
-        />
-        {formInput.error && <InlineError text={formInput.error} />}
-      </form>
-      {createdLoading ? (
-        <InlineNotification text={"Submit processing"} />
+      {errorState ? (
+        <InlineError text={errorState} />
       ) : (
-        <ActionButton
-          action={sumbitForm}
-          text={"Submit"}
-          additionalClass={"large-button"}
-          disabled={!auditState.pass}
-        />
+        <>
+          <form autoComplete="off">
+            <InlineSelectInput
+              prop={"categoryID"}
+              input={formInput}
+              setInput={setFormInput}
+              label={"Category"}
+              auditState={auditState}
+              optionList={budgetState.categories
+                .filter((category) => category.categoryType === categoryType)
+                .sort((a, b) => (b.countUse || 0) - (a.countUse || 0))}
+            />
+            <InlineTextareaInput
+              prop={"title"}
+              input={formInput}
+              setInput={setFormInput}
+              label={"Description"}
+              auditState={auditState}
+            />
+            <InlineNumberInput
+              prop={`value`}
+              input={formInput}
+              setInput={setFormInput}
+              label={"Value"}
+              auditState={auditState}
+            />
+            <InlineDateInput
+              prop={`createdAt`}
+              input={formInput}
+              setInput={setFormInput}
+              label={"Transaction Date"}
+              auditState={auditState}
+            />
+            <InlineUserInput
+              prop={"userID"}
+              input={formInput}
+              setInput={setFormInput}
+              label={"User"}
+              optionList={budgetState.ownerIDs}
+              auditState={auditState}
+            />
+            <InlineSwitchTwoWay
+              prop={`individualEntry`}
+              input={formInput}
+              setInput={setFormInput}
+              label={`${
+                formInput.individualEntry ? "Individual Entry" : "Shared Entry"
+              }`}
+              falseIcon={MdPeople}
+              trueIcon={MdPerson}
+              auditState={auditState}
+            />
+          </form>
+          {createdLoading ? (
+            <InlineNotification text={"Submit processing"} />
+          ) : (
+            <ActionButton
+              action={sumbitForm}
+              text={"Submit"}
+              additionalClass={"large-button"}
+              disabled={!auditState.pass}
+            />
+          )}
+        </>
       )}
     </section>
   );

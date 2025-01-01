@@ -26,25 +26,27 @@ const EditTransferEntry = ({
   const [state] = useStoreContext();
   const { currentUser } = state;
 
-  const { data: entryData, loading } = useQuery(QUERY_SINGLE_TRANSFER, {
-    variables: {
-      entryID: editingID,
-      budgetID: _id,
-      userID: currentUser._id,
-    },
-  });
-
   const initialFormState = {
     value: 0,
     createdAt: null,
     userID: null,
     toUserID: null,
   };
-
   const [formInput, setFormInput] = useState({ ...initialFormState });
+  const [auditState, setAuditState] = useState({ pass: false });
+  const [errorState, setErrorState] = useState();
   const [populated, setPopulated] = useState(false);
 
-  const [auditState, setAuditState] = useState({ pass: false });
+  const { data: entryData, loading } = useQuery(QUERY_SINGLE_TRANSFER, {
+    variables: {
+      entryID: editingID,
+      budgetID: _id,
+      userID: currentUser._id,
+    },
+    onError: (err) => {
+      setErrorState(err.message);
+    },
+  });
 
   function audit() {
     const currentAuditState = { ...auditState },
@@ -68,11 +70,12 @@ const EditTransferEntry = ({
     });
 
     const cannotMatch = ["userID", "toUserID"];
-    if( currentFormState[cannotMatch[0]] && currentFormState[cannotMatch[1]] ){
-      const entriesMatch = currentFormState[cannotMatch[0]] === currentFormState[cannotMatch[1]]
-      if( entriesMatch ){
-        currentAuditState[cannotMatch[0]] = false
-        currentAuditState[cannotMatch[1]] = false
+    if (currentFormState[cannotMatch[0]] && currentFormState[cannotMatch[1]]) {
+      const entriesMatch =
+        currentFormState[cannotMatch[0]] === currentFormState[cannotMatch[1]];
+      if (entriesMatch) {
+        currentAuditState[cannotMatch[0]] = false;
+        currentAuditState[cannotMatch[1]] = false;
         auditField.push(currentAuditState[cannotMatch[0]]);
         auditField.push(currentAuditState[cannotMatch[1]]);
       }
@@ -84,7 +87,7 @@ const EditTransferEntry = ({
     setAuditState({ ...currentAuditState });
     return;
   }
-  
+
   useEffect(() => {
     if (populated) {
       audit();
@@ -110,21 +113,15 @@ const EditTransferEntry = ({
     if (auditState.pass) {
       setFormInput({
         ...formInput,
-        error: null,
       });
 
       // send to submit
       return processSumbit();
     }
-    // return error
-    setFormInput({
-      ...formInput,
-      error: "Failed form validation",
-    });
-    return console.log("failed");
+    return;
   }
 
-  const [processSumbit, { loading: createdLoading, error: createdError }] =
+  const [processSumbit, { loading: createdLoading }] =
     useMutation(EDIT_TRANSFER, {
       variables: {
         input: {
@@ -143,8 +140,11 @@ const EditTransferEntry = ({
             return setPageState("dashboard");
           }
         } catch (e) {
-          console.error(createdError);
+          setErrorState(err.message);
         }
+      },
+      onError: (err) => {
+        setErrorState(err.message);
       },
     });
 
@@ -157,48 +157,53 @@ const EditTransferEntry = ({
       ) : (
         <section className="full-container">
           <Title text={`Edit Transfer`} />
-          <form autoComplete="off">
-            <InlineUserInput
-              prop={"userID"}
-              input={formInput}
-              setInput={setFormInput}
-              label={"From User"}
-              auditState={auditState}
-              optionList={budgetState.ownerIDs}
-            />
-            <InlineNumberInput
-              prop={`value`}
-              input={formInput}
-              setInput={setFormInput}
-              label={"Value"}
-              auditState={auditState}
-            />
-            <InlineDateInput
-              prop={`createdAt`}
-              input={formInput}
-              setInput={setFormInput}
-              label={"Transaction Date"}
-              auditState={auditState}
-            />
-            <InlineUserInput
-              prop={"toUserID"}
-              input={formInput}
-              setInput={setFormInput}
-              label={"To User"}
-              auditState={auditState}
-              optionList={budgetState.ownerIDs}
-            />
-            {formInput.error && <InlineError text={formInput.error} />}
-          </form>
-          {createdLoading ? (
-            <InlineNotification text={"Submit processing"} />
+          {errorState ? (
+            <InlineError text={errorState} />
           ) : (
-            <ActionButton
-              action={sumbitForm}
-              text={"Submit"}
-              additionalClass={"large-button"}
-              disabled={!auditState.pass}
-            />
+            <>
+              <form autoComplete="off">
+                <InlineUserInput
+                  prop={"userID"}
+                  input={formInput}
+                  setInput={setFormInput}
+                  label={"From User"}
+                  auditState={auditState}
+                  optionList={budgetState.ownerIDs}
+                />
+                <InlineNumberInput
+                  prop={`value`}
+                  input={formInput}
+                  setInput={setFormInput}
+                  label={"Value"}
+                  auditState={auditState}
+                />
+                <InlineDateInput
+                  prop={`createdAt`}
+                  input={formInput}
+                  setInput={setFormInput}
+                  label={"Transaction Date"}
+                  auditState={auditState}
+                />
+                <InlineUserInput
+                  prop={"toUserID"}
+                  input={formInput}
+                  setInput={setFormInput}
+                  label={"To User"}
+                  auditState={auditState}
+                  optionList={budgetState.ownerIDs}
+                />
+              </form>
+              {createdLoading ? (
+                <InlineNotification text={"Submit processing"} />
+              ) : (
+                <ActionButton
+                  action={sumbitForm}
+                  text={"Submit"}
+                  additionalClass={"large-button"}
+                  disabled={!auditState.pass}
+                />
+              )}
+            </>
           )}
         </section>
       )}

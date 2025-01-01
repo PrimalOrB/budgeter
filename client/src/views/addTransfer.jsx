@@ -25,10 +25,9 @@ const AddTransferEntry = ({
     userID: state.currentUser._id,
     toUserID: "",
   };
-
   const [formInput, setFormInput] = useState({ ...initialFormState });
-
   const [auditState, setAuditState] = useState({ pass: false });
+  const [errorState, setErrorState] = useState();
 
   function audit() {
     const currentAuditState = { ...auditState },
@@ -79,22 +78,17 @@ const AddTransferEntry = ({
     if (auditState.pass) {
       setFormInput({
         ...formInput,
-        error: null,
       });
 
       // send to submit
       return processSumbit();
     }
-    // return error
-    setFormInput({
-      ...formInput,
-      error: "Failed form validation",
-    });
-    return console.log("failed");
+    return;
   }
 
-  const [processSumbit, { loading: createdLoading, error: createdError }] =
-    useMutation(CREATE_NEW_TRANSFER, {
+  const [processSumbit, { loading: createdLoading }] = useMutation(
+    CREATE_NEW_TRANSFER,
+    {
       variables: {
         input: {
           value: formInput.value,
@@ -111,56 +105,65 @@ const AddTransferEntry = ({
             return setPageState("dashboard");
           }
         } catch (e) {
-          console.error(createdError);
+          setErrorState(err.message);
         }
       },
-    });
+      onError: (err) => {
+        setErrorState(err.message);
+      },
+    }
+  );
 
   return (
     <section className="full-container">
       <Title text={`Add ${categoryType}`} />
-      <form autoComplete="off">
-        <InlineUserInput
-          prop={"userID"}
-          input={formInput}
-          setInput={setFormInput}
-          label={"From User"}
-          optionList={budgetState.ownerIDs}
-          auditState={auditState}
-        />
-        <InlineNumberInput
-          prop={`value`}
-          input={formInput}
-          setInput={setFormInput}
-          label={"Value"}
-          auditState={auditState}
-        />
-        <InlineDateInput
-          prop={`createdAt`}
-          input={formInput}
-          setInput={setFormInput}
-          label={"Transaction Date"}
-          auditState={auditState}
-        />
-        <InlineUserInput
-          prop={"toUserID"}
-          input={formInput}
-          setInput={setFormInput}
-          label={"To User"}
-          optionList={budgetState.ownerIDs}
-          auditState={auditState}
-        />
-        {formInput.error && <InlineError text={formInput.error} />}
-      </form>
-      {createdLoading ? (
-        <InlineNotification text={"Submit processing"} />
+      {errorState ? (
+        <InlineError text={errorState} />
       ) : (
-        <ActionButton
-          action={sumbitForm}
-          text={"Submit"}
-          additionalClass={"large-button"}
-          disabled={!auditState.pass}
-        />
+        <>
+          <form autoComplete="off">
+            <InlineUserInput
+              prop={"userID"}
+              input={formInput}
+              setInput={setFormInput}
+              label={"From User"}
+              optionList={budgetState.ownerIDs}
+              auditState={auditState}
+            />
+            <InlineNumberInput
+              prop={`value`}
+              input={formInput}
+              setInput={setFormInput}
+              label={"Value"}
+              auditState={auditState}
+            />
+            <InlineDateInput
+              prop={`createdAt`}
+              input={formInput}
+              setInput={setFormInput}
+              label={"Transaction Date"}
+              auditState={auditState}
+            />
+            <InlineUserInput
+              prop={"toUserID"}
+              input={formInput}
+              setInput={setFormInput}
+              label={"To User"}
+              optionList={budgetState.ownerIDs}
+              auditState={auditState}
+            />
+          </form>
+          {createdLoading ? (
+            <InlineNotification text={"Submit processing"} />
+          ) : (
+            <ActionButton
+              action={sumbitForm}
+              text={"Submit"}
+              additionalClass={"large-button"}
+              disabled={!auditState.pass}
+            />
+          )}
+        </>
       )}
     </section>
   );

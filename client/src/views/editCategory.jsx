@@ -10,15 +10,15 @@ import {
 import { Title } from "../components/Layout";
 
 const EditCategory = ({ refetch, setPageState, editingTransaction }) => {
-  const [formInput, setFormInput] = useState({
+  const initialFormState = {
     budgetID: null,
     title: "",
     categoryType: "",
-  });
-
-  const [populated, setPopulated] = useState(false);
-
+  };
+  const [formInput, setFormInput] = useState({ ...initialFormState });
   const [auditState, setAuditState] = useState({ pass: false });
+  const [errorState, setErrorState] = useState();
+  const [populated, setPopulated] = useState(false);
 
   function audit() {
     const currentAuditState = { ...auditState },
@@ -45,30 +45,27 @@ const EditCategory = ({ refetch, setPageState, editingTransaction }) => {
     }
   }, [formInput]);
 
-  const [errorState, setErrorState] = useState();
-
-  const [queryCategory, { loading: queryLoading, error: queryError }] =
-    useMutation(QUERY_BUDGET_CATEGORY, {
-      variables: {
-        input: {
-          _id: editingTransaction,
-        },
+  const [queryCategory] = useMutation(QUERY_BUDGET_CATEGORY, {
+    variables: {
+      input: {
+        _id: editingTransaction,
       },
-      update: (cache, data) => {
-        try {
-          if (data.data.queryCategory) {
-            let newState = { ...data.data.queryCategory };
-            setFormInput({ ...newState });
-            setPopulated(true);
-          }
-        } catch (e) {
-          console.log(e);
+    },
+    update: (cache, data) => {
+      try {
+        if (data.data.queryCategory) {
+          let newState = { ...data.data.queryCategory };
+          setFormInput({ ...newState });
+          setPopulated(true);
         }
-      },
-      onError: (err) => {
+      } catch (e) {
         setErrorState(err.message);
-      },
-    });
+      }
+    },
+    onError: (err) => {
+      setErrorState(err.message);
+    },
+  });
 
   useEffect(() => {
     if (editingTransaction) {
@@ -82,21 +79,15 @@ const EditCategory = ({ refetch, setPageState, editingTransaction }) => {
     if (auditState.pass) {
       setFormInput({
         ...formInput,
-        error: null,
       });
 
       // send to submit
       return processSumbit();
     }
-    // return error
-    setFormInput({
-      ...formInput,
-      error: "Failed form validation",
-    });
-    return console.log("failed");
+    return;
   }
 
-  const [processSumbit, { loading: createdLoading, error: createdError }] =
+  const [processSumbit, { loading: createdLoading }] =
     useMutation(UPDATE_BUDGET_CATEGORY, {
       variables: {
         input: {
@@ -111,8 +102,11 @@ const EditCategory = ({ refetch, setPageState, editingTransaction }) => {
             return setPageState("dashboard");
           }
         } catch (e) {
-          console.error(createdError);
+          setErrorState(err.message);
         }
+      },
+      onError: (err) => {
+        setErrorState(err.message);
       },
     });
 
