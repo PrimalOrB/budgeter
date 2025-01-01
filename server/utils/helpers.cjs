@@ -226,7 +226,7 @@ function parseMonthlyBalances(month) {
   month.userData.map((user, i) => {
     // Responsibility
     user.percentOfTotalIncome =
-      user.sharedIncomeTotal / month.sharedIncomeTotal;
+      isNaN(user.sharedIncomeTotal / month.sharedIncomeTotal) ? 0 : user.sharedIncomeTotal / month.sharedIncomeTotal
     user.responsibilityTotal = fixRounding(
       month.sharedExpenseTotal * user.percentOfTotalIncome,
       2
