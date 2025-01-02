@@ -181,7 +181,6 @@ const resolvers = {
       context
     ) => {
       if (context.token.headers.authorization !== undefined) {
-
         const user = await User.findOne({ _id: userID });
 
         if (!user) {
@@ -459,10 +458,11 @@ const resolvers = {
               if (entry.valueType === "transfer") {
                 const isFromUser = entry.userID._id.equals(userID),
                   isToUser = entry.toUserID._id.equals(userID);
-                  if (isFromUser === true || isToUser === true) {
+                if (isFromUser === true || isToUser === true) {
                   reportTotals.transferTotals = fixRounding(
-                    reportTotals.transferTotals + entry.value
-                  ,2);
+                    reportTotals.transferTotals + entry.value,
+                    2
+                  );
                   reportTotals.entries.push(entry);
                 }
               }
@@ -593,7 +593,8 @@ const resolvers = {
 
     createTransaction: async (parent, { input }, context) => {
       if (context.token.headers.authorization !== undefined) {
-        let { budgetID, categoryID, userID, individualEntry } = input;
+        let { budgetID, categoryID, userID, individualEntry, createdAt } =
+          input;
 
         individualEntry = individualEntry || false;
 
@@ -615,6 +616,7 @@ const resolvers = {
 
         const newEntry = await Entry.create({
           ...input,
+          monthString: dateToMonthStr(createdAt),
           userID: user._id,
           valueType: matchCategory.categoryType,
           individualEntry,
@@ -688,7 +690,7 @@ const resolvers = {
 
     createTransfer: async (parent, { input }, context) => {
       if (context.token.headers.authorization !== undefined) {
-        let { budgetID, userID, toUserID } = input;
+        let { budgetID, userID, toUserID, createdAt } = input;
 
         const user = await User.findOne({ _id: userID });
 
@@ -704,6 +706,7 @@ const resolvers = {
 
         const newEntry = await Entry.create({
           ...input,
+          monthString: dateToMonthStr(createdAt),
           userID: user._id,
           valueType: "transfer",
           title: `Transfer from ${user.userInitials} to ${userTo.userInitials}`,
@@ -851,7 +854,7 @@ const resolvers = {
 
     queryCategory: async (parent, { input }, context) => {
       if (context.token.headers.authorization !== undefined) {
-        console.log( input )
+        console.log(input);
         const matchCategory = await Category.findOne({ _id: input._id });
 
         if (!matchCategory) {
