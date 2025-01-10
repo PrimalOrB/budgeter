@@ -52,6 +52,7 @@ const InlineNumberInput = ({
         className={`${auditState[prop] ? "audit-pass" : "audit-fail"}`}
         name={prop}
         type="text"
+        pattern="\d*"
         value={inputControl[prop]}
         step="0.01"
         onChange={updateInput}
