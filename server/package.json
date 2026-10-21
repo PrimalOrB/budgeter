@@ -5,7 +5,7 @@
   "description": "",
   "main": "server.js",
   "engines": {
-    "node": "20.x"
+    "node": ">=26.12.1 <27"
   },
   "scripts": {
     "start": "node server.js",
@@ -24,7 +24,7 @@
     "express": "^4.17.1",
     "faker": "^4.1.0",
     "graphql": "^16.6.1",
-    "jsonwebtoken": "^9.0.2",
+    "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.8.3",
     "node-xlsx": "^0.4.0",
     "nodemailer": "^6.6.3",
