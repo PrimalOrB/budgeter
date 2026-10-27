@@ -166,6 +166,22 @@ const Budget = ({
       },
     });
 
+  // keep the months just before the chart window loaded: the chart draws
+  // its lines in from the previous month, and paging back is instant
+  useEffect(() => {
+    if (!budgetState.months?.length) {
+      return;
+    }
+    const loaded = new Set(budgetState.months.map((m) => m.label));
+    const previous = shiftMonthLabel(windowEndState, -CHART_MONTHS);
+    if (!loaded.has(previous)) {
+      fetchMonths(
+        monthWindow(previous, FETCH_BATCH).filter((label) => !loaded.has(label))
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [budgetState.months, windowEndState]);
+
   // onload run query, and again when the entry dialog changes data
   useEffect(() => {
     if (currentUser?._id) {

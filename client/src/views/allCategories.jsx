@@ -50,6 +50,7 @@ const CategoryList = ({ title, type, categories, averages, onSelect, onAdd }) =>
               <span className="f1 noselect">{category.title}</span>
               <span className="category-average noselect">
                 {toCurrency(averages[category._id] || 0)}
+                <span className="category-average-unit">/mo</span>
               </span>
             </li>
           ))

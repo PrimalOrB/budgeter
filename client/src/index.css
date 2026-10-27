@@ -818,7 +818,10 @@ svg {
   flex-direction: column;
 }
 
-.chart-full-section canvas {
+/* Chart.js sizes the canvas to its parent, so it needs a box of its own;
+   sizing the canvas itself with flex distorts the drawing */
+.chart-canvas {
+  position: relative;
   flex: 1;
   min-height: 0;
 }
@@ -836,9 +839,10 @@ svg {
   gap: 6px;
 }
 
+/* line-chart legend: short strokes */
 .legend-swatch {
-  width: 8px;
-  height: 8px;
+  width: 12px;
+  height: 3px;
   border-radius: 2px;
 }
 
@@ -847,6 +851,13 @@ svg {
 }
 .legend-expense {
   background: var(--expense);
+}
+
+/* dotted stroke for the shared-portion lines */
+.legend-shared {
+  height: 0;
+  border-top: 2px dashed var(--text-subtle);
+  border-radius: 0;
 }
 
 .month-picker {
@@ -2206,9 +2217,17 @@ form {
 }
 
 .category-average {
+  font-size: 0.85rem;
   font-weight: 400;
+  font-style: italic;
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
+}
+
+.category-average-unit {
+  margin-left: 1px;
+  font-size: 0.75rem;
+  color: var(--text-subtle);
 }
 
 .month-range {

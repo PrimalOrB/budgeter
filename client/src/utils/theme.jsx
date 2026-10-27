@@ -84,5 +84,6 @@ export function getChartColors() {
     muted: read("--text-muted"),
     surface: read("--surface"),
     border: read("--border"),
+    accent: read("--accent"),
   };
 }
