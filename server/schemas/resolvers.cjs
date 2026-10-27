@@ -770,14 +770,14 @@ const resolvers = {
         shares,
       };
 
-      const existing = budget.splitSettings.find(
-        (s) => s.effectiveMonth === input.effectiveMonth
-      );
-      if (existing) {
-        existing.set(setting);
-      } else {
-        budget.splitSettings.push(setting);
-      }
+      // a setting applies from its month onward, so it replaces any setting
+      // starting in the same month or later
+      budget.splitSettings = [
+        ...budget.splitSettings.filter(
+          (s) => s.effectiveMonth < input.effectiveMonth
+        ),
+        setting,
+      ];
       return budget.save();
     },
 

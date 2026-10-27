@@ -231,11 +231,14 @@ function dateToMonthKey(date) {
 }
 
 // the setting in force for a month: the latest one starting on or before it
+// months before the first setting use the first setting: it applies "from
+// the beginning", as the settings page shows
 function resolveSplitSetting(settings, monthKey) {
-  const applicable = [...(settings || [])]
-    .filter((setting) => setting.effectiveMonth <= monthKey)
-    .sort((a, b) => (a.effectiveMonth < b.effectiveMonth ? -1 : 1));
-  return applicable[applicable.length - 1] || DEFAULT_SPLIT_SETTING;
+  const sorted = [...(settings || [])].sort((a, b) =>
+    a.effectiveMonth < b.effectiveMonth ? -1 : 1
+  );
+  const applicable = sorted.filter((setting) => setting.effectiveMonth <= monthKey);
+  return applicable[applicable.length - 1] || sorted[0] || DEFAULT_SPLIT_SETTING;
 }
 
 // owners: populated budget owners, needed so a user with a fixed share but no

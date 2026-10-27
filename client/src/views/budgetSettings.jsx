@@ -65,7 +65,15 @@ const BudgetSettings = ({ budgetState, refetch }) => {
   const isValid =
     /^\d{4}-\d{2}$/.test(effectiveMonth) &&
     (method === "proportional" || total === 100);
-  const replacing = settings.find((s) => s.effectiveMonth === effectiveMonth);
+  // a new setting applies from its month onward, replacing any setting that
+  // starts in that month or later
+  const replacing = settings.filter((s) => s.effectiveMonth >= effectiveMonth);
+  const describe = (s) =>
+    `${format(monthKeyToDate(s.effectiveMonth), "MMM yyyy")} · ${
+      s.method === "percentage"
+        ? s.shares.map((share) => `${fixRounding(share.percent, 2)}%`).join(" / ")
+        : METHODS.proportional.label.toLowerCase()
+    }`;
 
   // shares are capped so the total can never pass 100%; with two people the
   // other share follows automatically
@@ -208,7 +216,7 @@ const BudgetSettings = ({ budgetState, refetch }) => {
       <section className="full-container settings-card">
         <Title
           text="Change split"
-          subtitle="Starts in the chosen month and stays in effect until a later setting."
+          subtitle="Applies from the chosen month onward. Any setting starting in that month or later is replaced."
         />
         {errorState && <InlineError text={errorState} />}
         <form autoComplete="off" onSubmit={(e) => e.preventDefault()}>
@@ -220,10 +228,14 @@ const BudgetSettings = ({ budgetState, refetch }) => {
               value={effectiveMonth}
               onChange={(e) => setEffectiveMonth(e.target.value)}
             />
-            {replacing && (
-              <span className="form-hint">
-                Replaces the existing setting for this month.
-              </span>
+            {replacing.length > 0 && (
+              <div className="replace-warning" role="status">
+                <strong>
+                  Replaces {replacing.length} setting
+                  {replacing.length === 1 ? "" : "s"}:
+                </strong>{" "}
+                {replacing.map(describe).join(", ")}
+              </div>
             )}
           </div>
 
@@ -301,7 +313,13 @@ const BudgetSettings = ({ budgetState, refetch }) => {
         </form>
         <ActionButton
           action={submit}
-          text={saving ? "Saving…" : replacing ? "Replace setting" : "Save setting"}
+          text={
+            saving
+              ? "Saving…"
+              : replacing.length
+              ? `Save and replace ${replacing.length}`
+              : "Save setting"
+          }
           additionalClass={"large-button"}
           disabled={!isValid || saving}
         />

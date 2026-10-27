@@ -2239,3 +2239,18 @@ form {
 .form-inline-date > input[type="month"] {
   text-align: left;
 }
+
+.replace-warning {
+  margin-top: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--danger-border);
+  background: var(--danger-bg);
+  color: var(--text);
+  font-size: 0.82rem;
+}
+
+.replace-warning strong {
+  color: var(--expense);
+  font-weight: 600;
+}
