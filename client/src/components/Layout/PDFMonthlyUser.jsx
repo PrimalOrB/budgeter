@@ -1,66 +1,14 @@
-import React, { useState } from "react";
-import { useLazyQuery } from "@apollo/client";
-import { FiDownload } from "react-icons/fi";
-import { REQUEST_MONTHLY_USER_REPORT_PDF } from "../../utils/queries";
+import React from "react";
+import StatementButton from "./StatementButton";
 
-const PDFMonthlyUser = ({
-  user,
-  // date,
-  month,
-  budget,
-}) => {
-  const [printReq, setPrintReq] = useState(false);
-  const [errorState, setErrorState] = useState(null);
-
-  let [getMonthlyReport] = useLazyQuery(REQUEST_MONTHLY_USER_REPORT_PDF, {
-    fetchPolicy: "network-only",
-    onCompleted: async (response) => {
-      const base64Response = await fetch(
-        `data:application/pdf;base64,${response.requestMonthlyUserReport.blob}`
-      );
-      const blob = await base64Response.blob();
-      var a = document.createElement("a"),
-        url = URL.createObjectURL(blob);
-      a.href = url;
-      a.download = `${user.userID.userInitials}_${month.label.replace("/", "-")}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(function () {
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-        setPrintReq(false);
-      }, 0);
-    },
-    onError: (err) => {
-      setErrorState(err.message);
-      setPrintReq(false);
-    },
-  });
-
-  function requestMonthlyReport() {
-    setPrintReq(true);
-    setErrorState(null);
-    getMonthlyReport({
-      variables: {
-        month: month.label,
-        user: user.userID._id,
-        budgetID: budget._id
-      },
-    });
-  }
-
-  return (
-    <button
-      type="button"
-      className="btn btn-secondary"
-      onClick={requestMonthlyReport}
-      disabled={printReq}
-      title={errorState || `Download ${month.label} report for ${user.userID.email}`}
-    >
-      {printReq ? <span className="spinner spinner-sm" /> : <FiDownload />}
-      {user.userID.userInitials} report
-    </button>
-  );
-};
+// one-month statement for a user, from the month summary
+const PDFMonthlyUser = ({ user, month, budget }) => (
+  <StatementButton
+    budgetID={budget._id}
+    user={user.userID}
+    startMonth={month.label}
+    endMonth={month.label}
+  />
+);
 
 export default PDFMonthlyUser;

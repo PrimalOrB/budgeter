@@ -26,7 +26,9 @@ const {
   dateToMonthKey,
   resolveSplitSetting,
 } = require("../utils/helpers.cjs");
-const build_PDF_MonthlyReport = require("../utils/build_PDF_monthlyReport.cjs");
+const { renderPdf } = require("../utils/pdf.cjs");
+const { buildStatement } = require("../reports/statement.cjs");
+const statementTemplate = require("../templates/statement.cjs");
 const {
   eachMonthOfInterval,
   isBefore,
@@ -178,6 +180,55 @@ function validateSplitSetting({ effectiveMonth, method, shares = [] }, owners) {
   }));
 }
 
+// month labels from start to end inclusive, oldest first
+function monthLabelsBetween(startMonth, endMonth) {
+  [startMonth, endMonth].forEach((label) => {
+    if (!MONTH_LABEL_PATTERN.test(label)) {
+      throw inputError(`Invalid month: ${label}`);
+    }
+  });
+  const toDate = (label) => {
+    const [month, year] = label.split("/").map(Number);
+    return new Date(2000 + year, month - 1, 1);
+  };
+  const start = toDate(startMonth);
+  const end = toDate(endMonth);
+  if (start > end) {
+    throw inputError("Start month must be before end month");
+  }
+  const labels = eachMonthOfInterval({ start, end }).map(dateToMonthStr);
+  if (labels.length > MAX_MONTHS_PER_REQUEST) {
+    throw inputError(`A statement can cover at most ${MAX_MONTHS_PER_REQUEST} months`);
+  }
+  return labels;
+}
+
+async function createStatementPdf({ budgetID, userID, startMonth, endMonth }, context) {
+  const authUser = requireUser(context);
+  const labels = monthLabelsBetween(startMonth, endMonth);
+  const { budget, owners } = await loadBudgetForUser(budgetID, authUser, [
+    "categories",
+    "ownerIDs",
+  ]);
+  assertOwner(owners, userID);
+
+  const months = await populateMonths(
+    budget,
+    labels.map((label, i) => createMonthObj(label, i))
+  );
+  const statement = buildStatement({ budget, months, userID });
+  const pdf = await renderPdf(statementTemplate(statement), {
+    footer: `${budget.title} · ${statement.user.email}`,
+  });
+
+  const slug = (label) => label.replace("/", "-");
+  const initials = statement.user.userInitials || "statement";
+  return {
+    blob: Buffer.from(pdf).toString("base64"),
+    filename: `${initials}_${slug(startMonth)}${startMonth === endMonth ? "" : `_to_${slug(endMonth)}`}.pdf`,
+  };
+}
+
 // fall back to createdAt for entries saved before effectiveDate existed
 const effectiveDateResolver = (entry) => entry.effectiveDate ?? entry.createdAt;
 
@@ -204,28 +255,14 @@ const resolvers = {
   },
 
   Query: {
-    requestMonthlyUserReport: async (
-      parent,
-      { month, user, budgetID },
-      context
-    ) => {
-      const authUser = requireUser(context);
-      const { budget, owners } = await loadBudgetForUser(budgetID, authUser, [
-        "categories",
-        "ownerIDs",
-      ]);
-      assertOwner(owners, user);
+    // kept for older clients: a one-month statement
+    requestMonthlyUserReport: (parent, { month, user, budgetID }, context) =>
+      createStatementPdf(
+        { budgetID, userID: user, startMonth: month, endMonth: month },
+        context
+      ),
 
-      const [balancedMonth] = await populateMonths(budget, [
-        createMonthObj(month, 0),
-      ]);
-
-      budget.months = [balancedMonth];
-
-      const report = await build_PDF_MonthlyReport(budget, user);
-
-      return { blob: Buffer.from(report).toString("base64") };
-    },
+    requestStatement: (parent, args, context) => createStatementPdf(args, context),
 
     requestSingleTransaction: async (
       parent,

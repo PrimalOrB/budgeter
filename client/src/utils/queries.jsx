@@ -1,10 +1,21 @@
 import { gql } from "@apollo/client";
 import { MONTH_FIELDS } from "./mutations";
 
-export const REQUEST_MONTHLY_USER_REPORT_PDF = gql`
-  query requestMonthlyUserReport($month: String!, $user: ID!, $budgetID: ID!) {
-    requestMonthlyUserReport(month: $month, user: $user, budgetID: $budgetID) {
+export const REQUEST_STATEMENT_PDF = gql`
+  query requestStatement(
+    $budgetID: ID!
+    $userID: ID!
+    $startMonth: String!
+    $endMonth: String!
+  ) {
+    requestStatement(
+      budgetID: $budgetID
+      userID: $userID
+      startMonth: $startMonth
+      endMonth: $endMonth
+    ) {
       blob
+      filename
     }
   }
 `;

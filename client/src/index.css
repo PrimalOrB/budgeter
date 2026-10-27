@@ -1434,10 +1434,8 @@ form {
   color: var(--text-muted);
 }
 
-/* invalid fields: quiet until the user has typed something */
-.audit-fail:not(:placeholder-shown):not(:focus) {
-  border-color: var(--danger-border);
-}
+/* incomplete fields aren't flagged; the disabled submit button shows the
+   form isn't ready yet */
 
 /* segmented control (shared / individual) */
 .segmented {
@@ -1972,4 +1970,221 @@ form {
 
 .modal-banner {
   margin-top: var(--space-4);
+}
+
+/* ==========================================================================
+   Compact phone layout - tighter spacing so more fits on small screens
+   ========================================================================== */
+@media (max-width: 640px) {
+  :root {
+    --header-height: 52px;
+  }
+
+  html {
+    font-size: 14px;
+  }
+
+  .app-main {
+    padding: var(--space-3) var(--space-2) var(--space-5);
+  }
+
+  .header-container {
+    padding: 0 var(--space-2);
+    gap: var(--space-2);
+  }
+
+  .brand {
+    margin-right: 0;
+  }
+
+  .nav-menu {
+    gap: 2px;
+  }
+
+  .page,
+  .dashboard-grid,
+  .settings-grid {
+    gap: var(--space-3);
+  }
+
+  .title-text {
+    font-size: 1.3rem;
+  }
+
+  .title-subtitle {
+    font-size: 0.85rem;
+  }
+
+  /* tabs: full width, icons evenly spread */
+  .tabs-container {
+    margin: calc(var(--space-1) * -1) calc(var(--space-2) * -1) 0;
+    padding: var(--space-1) var(--space-2);
+  }
+
+  .tabs {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .tab {
+    height: 30px;
+    padding: 0 var(--space-2);
+    gap: 6px;
+  }
+
+  /* cards */
+  .card-header {
+    min-height: 44px;
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .chart-full-section {
+    height: 210px;
+    padding: var(--space-2) var(--space-2) 0;
+  }
+
+  .month-picker {
+    padding: var(--space-1) 0 var(--space-2);
+  }
+
+  .month-chip {
+    padding: 4px 0;
+  }
+
+  /* entry rows */
+  .entry-row-button {
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .entry-row-compact .entry-row-button {
+    padding: 6px var(--space-3) 6px calc(var(--space-3) + 18px);
+  }
+
+  .entry-category {
+    font-size: 0.88rem;
+  }
+
+  .entry-title {
+    font-size: 0.8rem;
+  }
+
+  .entry-amount {
+    min-width: 0;
+  }
+
+  .initials-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  /* month summary groups */
+  .group-header-button,
+  .category-row-button {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .category-row-button {
+    padding-left: calc(var(--space-3) + 10px);
+  }
+
+  .monthly-group-detail > .container-flex {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .report-buttons {
+    padding: var(--space-2) var(--space-3) var(--space-3);
+  }
+
+  .empty-state {
+    padding: var(--space-5) var(--space-3);
+  }
+
+  /* forms */
+  .full-container {
+    padding: var(--space-4) var(--space-3);
+  }
+
+  .full-container > .title {
+    margin-bottom: var(--space-3);
+  }
+
+  form {
+    gap: var(--space-3);
+  }
+
+  .form-inline-text > input,
+  .form-inline-number > input,
+  .form-inline-date > input,
+  .form-inline-date-monthly > input,
+  .form-inline-select > select {
+    height: 38px;
+  }
+
+  .form-inline-number .amount-input > input,
+  .amount-sign {
+    height: 40px;
+  }
+
+  .amount-sign {
+    width: 40px;
+  }
+
+  .form-inline-text > textarea {
+    min-height: 60px;
+  }
+
+  .large-button {
+    margin-top: var(--space-4);
+    height: 42px;
+  }
+
+  /* dialog */
+  .modal-pane {
+    padding: var(--space-2);
+  }
+
+  .modal-window {
+    padding: var(--space-4);
+  }
+
+  .modal-amount {
+    font-size: 1.5rem;
+  }
+
+  .detail-list {
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+  }
+
+  .modal-actions {
+    margin-top: var(--space-4);
+  }
+
+  .hero {
+    margin-top: 8vh;
+  }
+}
+
+/* reports: period statement download */
+.statement-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.statement-hint {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--text-muted);
 }

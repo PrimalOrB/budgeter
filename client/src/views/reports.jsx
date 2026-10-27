@@ -5,9 +5,11 @@ import { useLazyQuery } from "@apollo/client";
 import { useStoreContext } from "../utils/GlobalState";
 import { QUERY_CUSTOM_REPORT } from "../utils/queries";
 import { sub, format } from "date-fns";
+import { dateToMonthStr } from "../utils/helpers";
 import { ActionButton } from "../components/Buttons";
 import { InlineUserInput, InlineDateInput } from "../components/Forms";
 import {
+  StatementButton,
   BudgetCategoryExpandableTitle,
   BudgetCategoryExpandableList,
   BudgetCategoryEntriesExpandableList,
@@ -42,6 +44,9 @@ const Reports = ({
   });
 
   const [auditState, setAuditState] = useState({ pass: false });
+  const statementUser = budgetState.ownerIDs.find(
+    (owner) => owner._id === formInput.userID
+  );
 
   function audit() {
     const currentAuditState = { ...auditState },
@@ -135,6 +140,23 @@ const Reports = ({
         additionalClass={"large-button"}
         disabled={!auditState.pass}
       />
+      {auditState.pass && statementUser && (
+        <div className="statement-row">
+          <span>
+            PDF statement for {statementUser.userInitials || statementUser.email},{" "}
+            {format(formInput.startDate, "MMM yyyy")} –{" "}
+            {format(formInput.endDate, "MMM yyyy")}
+            <span className="statement-hint">Statements cover whole months</span>
+          </span>
+          <StatementButton
+            budgetID={_id}
+            user={statementUser}
+            startMonth={dateToMonthStr(formInput.startDate)}
+            endMonth={dateToMonthStr(formInput.endDate)}
+            text={"Download"}
+          />
+        </div>
+      )}
       {reportData?.requestCustomReport ? (
         <>
           <section

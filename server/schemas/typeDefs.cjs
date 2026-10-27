@@ -203,7 +203,9 @@ const typeDefs = `
     }
 
     type PDF {
+        "base64-encoded PDF"
         blob: String
+        filename: String
     }
 
     type Auth {
@@ -212,6 +214,8 @@ const typeDefs = `
 
     type Query {
         requestMonthlyUserReport(month: String!, user: ID!, budgetID: ID!): PDF
+        "One person's statement for whole months startMonth..endMonth (M/yy labels)"
+        requestStatement(budgetID: ID!, userID: ID!, startMonth: String!, endMonth: String!): PDF
         requestSingleTransaction(entryID: ID!, userID: ID!, budgetID: ID!): Entry
         requestSingleTransfer(entryID: ID!, userID: ID!, budgetID: ID!): Entry
         requestCustomReport(budgetID: ID!, userID: ID!, startDate: Date!, endDate: Date!): ReportPeriod

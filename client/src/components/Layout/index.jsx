@@ -8,6 +8,7 @@ import BudgetCategoryEntriesExpandableList from "./BudgetCategoryEntriesExpandab
 import PDFMonthlyUser from "./PDFMonthlyUser";
 import EntryTimestamps from "./EntryTimestamps";
 import EntryRow from "./EntryRow";
+import StatementButton from "./StatementButton";
 
 export {
   Header,
@@ -20,4 +21,5 @@ export {
   PDFMonthlyUser,
   EntryTimestamps,
   EntryRow,
+  StatementButton,
 };
