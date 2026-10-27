@@ -9,5 +9,6 @@ import InlineDateInput from './InlineDateInput'
 import InlineSelectInput from './InlineSelectInput'
 import InlineUserInput from './InlineUserInput'
 import InlineSwitchTwoWay from './InlineSwitchTwoWay'
+import InlineMonthInput from './InlineMonthInput'
 
-export { BudgetValueRangeGroup, InlineTextInput, InlineTextareaInput, InlineListDisplay, InlineEmailInput, InlineNumberInput, InlineMonthlyDateInput, InlineDateInput, InlineSelectInput, InlineUserInput, InlineSwitchTwoWay };
+export { BudgetValueRangeGroup, InlineTextInput, InlineTextareaInput, InlineListDisplay, InlineEmailInput, InlineNumberInput, InlineMonthlyDateInput, InlineDateInput, InlineSelectInput, InlineUserInput, InlineSwitchTwoWay, InlineMonthInput };

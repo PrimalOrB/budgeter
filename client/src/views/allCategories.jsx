@@ -1,13 +1,73 @@
 import React from "react";
 import { Title } from "../components/Layout";
 import { ActionButton } from "../components/Buttons";
+import {
+  toCurrency,
+  dateToMonthStr,
+  monthWindow,
+} from "../utils/helpers";
+
+// averages use the same six months as the dashboard chart: this month and
+// the five before it, all people combined
+const AVERAGE_MONTHS = 6;
+
+function monthlyAverages(months = []) {
+  const labels = new Set(monthWindow(dateToMonthStr(new Date()), AVERAGE_MONTHS));
+  const totals = {};
+  months
+    .filter((month) => labels.has(month.label))
+    .forEach((month) => {
+      [...month.expenseCategories, ...month.incomeCategories].forEach(
+        ({ categoryID, total }) => {
+          totals[categoryID] = (totals[categoryID] || 0) + (total || 0);
+        }
+      );
+    });
+  return Object.fromEntries(
+    Object.entries(totals).map(([id, total]) => [id, total / AVERAGE_MONTHS])
+  );
+}
+
+const CategoryList = ({ title, type, categories, averages, onSelect, onAdd }) => {
+  const list = categories
+    .filter((category) => category.categoryType === type)
+    .sort((a, b) => (averages[b._id] || 0) - (averages[a._id] || 0));
+
+  return (
+    <>
+      <div className="category-list-head noselect">
+        <h4>{title}</h4>
+        <span>Avg / month · last {AVERAGE_MONTHS} months</span>
+      </div>
+      <ul className="section-list">
+        {list.length === 0 ? (
+          <li className="flex-center" onClick={onAdd}>
+            Click to add {type} categories
+          </li>
+        ) : (
+          list.map((category) => (
+            <li key={category._id} onClick={() => onSelect(category)}>
+              <span className="f1 noselect">{category.title}</span>
+              <span className="category-average noselect">
+                {toCurrency(averages[category._id] || 0)}
+              </span>
+            </li>
+          ))
+        )}
+      </ul>
+    </>
+  );
+};
 
 const AllCategories = ({
   categories,
+  months,
   setPageState,
   setEditingModal,
   setEditingTransaction,
 }) => {
+  const averages = monthlyAverages(months);
+
   const setAsEditing = (entry) => {
     setEditingModal(true);
     return setEditingTransaction(entry);
@@ -20,80 +80,22 @@ const AllCategories = ({
   return (
     <section className="full-container">
       <Title text={`Manage Categories`} />
-      <h4 className="sub-container-description section-list-title noselect">
-        Expense Categories
-      </h4>
-      <ul className="section-list">
-        {categories.filter((category) => category.categoryType === "expense")
-          .length === 0 ? (
-          <li
-            className={
-              "flex-transaction-line-sm border-bot-hightlight-1 f-valign flex-center"
-            }
-            onClick={() => setPageState("add-category")}
-          >
-            Click To Add Expense Categories
-          </li>
-        ) : (
-          categories
-            .filter((category) => category.categoryType === "expense")
-            .map((category, i) => {
-              return (
-                <li
-                  onClick={() => setAsEditing(category)}
-                  key={`exp_${category.title}_${i}`}
-                  className={`flex border-bot-hightlight-1`}
-                >
-                  <span className="f1 font-medium bold indent-1 noselect">
-                    {category.title}
-                  </span>
-                  {/* <span
-                    className="f0 font-medium bold endent-1 noselect"
-                    onClick={() =>
-                      setEdit({
-                        budget: category.budgetID,
-                        category: category._id,
-                      })
-                    }
-                  >
-                    {FaEdit()}
-                  </span> */}
-                </li>
-              );
-            })
-        )}
-      </ul>
-      <h4 className="sub-container-description section-list-title noselect">
-        Income Categories
-      </h4>
-      <ul className="section-list">
-        {categories.filter((category) => category.categoryType === "income")
-          .length === 0 && (
-          <li
-            className={
-              "flex-transaction-line-sm border-bot-hightlight-1 f-valign flex-center"
-            }
-            onClick={() => setPageState("add-category")}
-          >
-            Click To Add Income Categories
-          </li>
-        )}
-        {categories
-          .filter((category) => category.categoryType === "income")
-          .map((category) => {
-            return (
-              <li
-                onClick={() => setAsEditing(category)}
-                key={`exp_${category.title}`}
-                className={`flex border-bot-hightlight-1`}
-              >
-                <span className="f1 font-medium bold indent-1 noselect">
-                  {category.title}
-                </span>
-              </li>
-            );
-          })}
-      </ul>
+      <CategoryList
+        title="Expense categories"
+        type="expense"
+        categories={categories}
+        averages={averages}
+        onSelect={setAsEditing}
+        onAdd={setAdd}
+      />
+      <CategoryList
+        title="Income categories"
+        type="income"
+        categories={categories}
+        averages={averages}
+        onSelect={setAsEditing}
+        onAdd={setAdd}
+      />
       <ActionButton
         action={setAdd}
         text={"Add new category"}

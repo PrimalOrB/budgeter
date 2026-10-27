@@ -5,9 +5,8 @@ import { useLazyQuery } from "@apollo/client";
 import { useStoreContext } from "../utils/GlobalState";
 import { QUERY_CUSTOM_REPORT } from "../utils/queries";
 import { sub, format } from "date-fns";
-import { dateToMonthStr } from "../utils/helpers";
 import { ActionButton } from "../components/Buttons";
-import { InlineUserInput, InlineDateInput } from "../components/Forms";
+import { InlineUserInput, InlineMonthInput } from "../components/Forms";
 import {
   StatementButton,
   BudgetCategoryExpandableTitle,
@@ -15,6 +14,27 @@ import {
   BudgetCategoryEntriesExpandableList,
 } from "../components/Layout";
 import { InlineBarTotal } from "../components/Charts";
+
+// "yyyy-MM" month picker values -> the report's date range and labels.
+// Reports cover whole months: the 1st of the start month to the last day of
+// the end month (stored at 12:00 UTC like effective dates).
+const monthKeyParts = (key) => key.split("-").map(Number);
+const monthStart = (key) => {
+  const [year, month] = monthKeyParts(key);
+  return new Date(Date.UTC(year, month - 1, 1, 12));
+};
+const monthEnd = (key) => {
+  const [year, month] = monthKeyParts(key);
+  return new Date(Date.UTC(year, month, 0, 12));
+};
+const monthLabel = (key) => {
+  const [year, month] = monthKeyParts(key);
+  return `${month}/${String(year).slice(-2)}`;
+};
+const monthTitle = (key) => {
+  const [year, month] = monthKeyParts(key);
+  return format(new Date(year, month - 1, 1), "MMM yyyy");
+};
 
 const Reports = ({
   budgetState,
@@ -32,8 +52,8 @@ const Reports = ({
 
   const initialFormState = {
     userID: currentUser._id,
-    startDate: sub(new Date(), { months: 3 }),
-    endDate: new Date(),
+    startMonth: format(sub(new Date(), { months: 3 }), "yyyy-MM"),
+    endMonth: format(new Date(), "yyyy-MM"),
   };
   const [formInput, setFormInput] = useState({ ...initialFormState });
   const [expandedState, setExpandedState] = useState({
@@ -44,6 +64,8 @@ const Reports = ({
   });
 
   const [auditState, setAuditState] = useState({ pass: false });
+  // the months the shown report was run for (the pickers may have moved on)
+  const [reportRange, setReportRange] = useState(null);
   const statementUser = budgetState.ownerIDs.find(
     (owner) => owner._id === formInput.userID
   );
@@ -54,14 +76,18 @@ const Reports = ({
 
     const auditField = [];
 
-    const numberRequired = ["startDate", "endDate"];
-    numberRequired.map((field) => {
-      const fieldAsNumber = Number(currentFormState[field]),
-        isNumber = !isNaN(fieldAsNumber),
-        isNotZero = fieldAsNumber !== 0;
-      currentAuditState[field] = isNumber && isNotZero;
+    const monthRequired = ["startMonth", "endMonth"];
+    monthRequired.map((field) => {
+      currentAuditState[field] = /^\d{4}-\d{2}$/.test(currentFormState[field] || "");
       auditField.push(currentAuditState[field]);
     });
+    // start can't be after end
+    if (currentAuditState.startMonth && currentAuditState.endMonth &&
+        currentFormState.startMonth > currentFormState.endMonth) {
+      currentAuditState.startMonth = false;
+      currentAuditState.endMonth = false;
+      auditField.push(false);
+    }
 
     const textRequired = ["userID"];
     textRequired.map((field) => {
@@ -101,9 +127,10 @@ const Reports = ({
     const variables = {
       budgetID: _id,
       userID: formInput.userID,
-      startDate: formInput.startDate,
-      endDate: formInput.endDate,
+      startDate: monthStart(formInput.startMonth),
+      endDate: monthEnd(formInput.endMonth),
     };
+    setReportRange({ start: formInput.startMonth, end: formInput.endMonth });
     getCustomReport({ variables });
   }
 
@@ -119,20 +146,24 @@ const Reports = ({
           optionList={budgetState.ownerIDs}
           auditState={auditState}
         />
-        <InlineDateInput
-          prop={`startDate`}
-          input={formInput}
-          setInput={setFormInput}
-          label={"Start Date"}
-          auditState={auditState}
-        />
-        <InlineDateInput
-          prop={`endDate`}
-          input={formInput}
-          setInput={setFormInput}
-          label={"End Date"}
-          auditState={auditState}
-        />
+        <div className="month-range">
+          <InlineMonthInput
+            prop={"startMonth"}
+            input={formInput}
+            setInput={setFormInput}
+            label={"From"}
+            max={formInput.endMonth}
+            auditState={auditState}
+          />
+          <InlineMonthInput
+            prop={"endMonth"}
+            input={formInput}
+            setInput={setFormInput}
+            label={"To"}
+            min={formInput.startMonth}
+            auditState={auditState}
+          />
+        </div>
       </form>
       <ActionButton
         action={runGetCustomReport}
@@ -144,15 +175,15 @@ const Reports = ({
         <div className="statement-row">
           <span>
             PDF statement for {statementUser.userInitials || statementUser.email},{" "}
-            {format(formInput.startDate, "MMM yyyy")} –{" "}
-            {format(formInput.endDate, "MMM yyyy")}
-            <span className="statement-hint">Statements cover whole months</span>
+            {formInput.startMonth === formInput.endMonth
+              ? monthTitle(formInput.startMonth)
+              : `${monthTitle(formInput.startMonth)} – ${monthTitle(formInput.endMonth)}`}
           </span>
           <StatementButton
             budgetID={_id}
             user={statementUser}
-            startMonth={dateToMonthStr(formInput.startDate)}
-            endMonth={dateToMonthStr(formInput.endDate)}
+            startMonth={monthLabel(formInput.startMonth)}
+            endMonth={monthLabel(formInput.endMonth)}
             text={"Download"}
           />
         </div>
@@ -165,8 +196,10 @@ const Reports = ({
             className="card margin-top-full"
           >
             <h2 className="card-header card-title noselect">
-              {format(formInput.startDate, "MMM d, yyyy")} -{" "}
-              {format(formInput.endDate, "MMM d, yyyy")}
+              {reportRange &&
+                (reportRange.start === reportRange.end
+                  ? monthTitle(reportRange.start)
+                  : `${monthTitle(reportRange.start)} – ${monthTitle(reportRange.end)}`)}
             </h2>
             <ul className="monthly-group-detail border-b-l-rad-none border-b-r-rad-none border_b_none">
               <BudgetCategoryExpandableTitle

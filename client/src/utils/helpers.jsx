@@ -55,18 +55,14 @@ export function commaSeparatedNumberDisplay(value) {
 
 export function toCurrency(input) {
   if (isNaN(input)) {
-    return "$" + 0;
+    return "$0.00";
   }
   const isNegative = input < 0,
-    dollars = Math.floor(Math.abs(input)),
-    cents = (input - dollars).toFixed(2).split(".")[1];
-  return (
-    "$" +
-    (isNegative ? "-" : "") +
-    commaSeparatedNumberDisplay(dollars) +
-    "." +
-    cents
-  );}
+    cents = Math.round(Math.abs(input) * 100),
+    dollars = Math.floor(cents / 100);
+  const fraction = String(cents % 100).padStart(2, "0");
+  return `${isNegative && cents > 0 ? "-" : ""}$${commaSeparatedNumberDisplay(dollars)}.${fraction}`;
+}
 
 export function fixRounding(value, precision) {
   const roundingFactor = Math.pow(10, precision),

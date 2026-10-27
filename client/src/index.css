@@ -2182,9 +2182,41 @@ form {
   font-weight: 500;
 }
 
-.statement-hint {
-  display: block;
+
+/* categories tab */
+.category-list-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: var(--space-4) 0 var(--space-2);
+}
+
+.category-list-head h4 {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.category-list-head span {
   font-size: 0.78rem;
+  color: var(--text-subtle);
+}
+
+.category-average {
   font-weight: 400;
   color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.month-range {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.form-inline-date > input[type="month"] {
+  text-align: left;
 }

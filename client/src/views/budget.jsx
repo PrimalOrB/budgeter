@@ -324,6 +324,7 @@ const Budget = ({
             <>
               <AllCategories
                 categories={budgetState.categories}
+                months={budgetState.months}
                 setPageState={setPageState}
                 setEditingModal={setEditingModal}
                 setEditingTransaction={setEditingTransaction}
