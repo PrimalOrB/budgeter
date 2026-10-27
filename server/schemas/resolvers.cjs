@@ -7,6 +7,11 @@ const {
   inputError,
 } = require("../utils/auth.cjs");
 const dateScalar = require("./dateScalar.cjs");
+const { GraphQLError } = require("graphql");
+const {
+  verifyAuth0IdToken,
+  Auth0VerificationError,
+} = require("../utils/auth0.cjs");
 const {
   dateToMonthStr,
   createMonthLabelFromOffset,
@@ -436,17 +441,27 @@ const resolvers = {
   },
 
   Mutation: {
-    // TODO: verify the Auth0 access token here before trusting `email`
-    login: async (parent, { email }) => {
-      const normalizedEmail = String(email).trim().toLowerCase();
-      if (!normalizedEmail) {
-        throw inputError("Email required");
+    // the email comes from a verified Auth0 ID token, never from the client
+    login: async (parent, { idToken }) => {
+      let identity;
+      try {
+        identity = await verifyAuth0IdToken(idToken);
+      } catch (err) {
+        if (!(err instanceof Auth0VerificationError)) {
+          throw err;
+        }
+        console.warn(`Login rejected: ${err.message}`);
+        // not UNAUTHENTICATED: the client reloads on that code
+        throw new GraphQLError("Sign-in could not be verified", {
+          extensions: { code: "LOGIN_FAILED" },
+        });
       }
+      const { email } = identity;
 
+      // existing accounts may be stored with different letter case
       const user =
-        (await User.findOne({ email: normalizedEmail })) ||
-        (await User.findOne({ email })) ||
-        (await User.create({ email: normalizedEmail }));
+        (await User.findOne({ email }).collation({ locale: "en", strength: 2 })) ||
+        (await User.create({ email }));
 
       return { token: signToken({ email: user.email, _id: user._id }) };
     },

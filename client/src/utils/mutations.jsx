@@ -72,8 +72,8 @@ export const MONTH_FIELDS = gql`
 `;
 
 export const LOGIN_USER = gql`
-  mutation login($email: String! ) {
-    login(email: $email) {
+  mutation login($idToken: String! ) {
+    login(idToken: $idToken) {
       token
     }
   }

@@ -220,7 +220,8 @@ const typeDefs = `
     }
 
     type Mutation {
-        login(email: String! ): Auth
+        "Exchange the Auth0 ID token from sign-in for a server session token"
+        login(idToken: String! ): Auth
         createBudget( input: BudgetInput! ): Budget
         createCategory( input: CategoryInput! ): Budget
         updateCategory( input: CategoryUpdateInput! ): Category

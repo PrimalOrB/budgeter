@@ -14,7 +14,7 @@ const Header = () => {
   const [login, { error }] = useMutation(LOGIN_USER);
 
   // add user to global state
-  const { user } = useAuth0()
+  const { user, getAccessTokenSilently, getIdTokenClaims } = useAuth0()
   useEffect(() => {
     if (user) {
       tryLogin()
@@ -23,10 +23,18 @@ const Header = () => {
   }, [ user ]);
 
 
+  // the server verifies the Auth0 ID token and reads the email from it
   const tryLogin = async ()  => {
     try {
+      try {
+        // renews the Auth0 session so the ID token isn't expired
+        await getAccessTokenSilently()
+      } catch (e) {
+        console.warn('Could not refresh Auth0 session', e)
+      }
+      const claims = await getIdTokenClaims()
       const { data } = await login({
-        variables: { email: user.email }
+        variables: { idToken: claims?.__raw || '' }
       } );
       Auth.login(data.login.token);
       const userID = Auth.getProfile( data.login.token )
