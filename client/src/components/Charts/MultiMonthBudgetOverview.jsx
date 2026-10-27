@@ -1,7 +1,15 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useMemo } from "react";
 import "chart.js/auto";
 import { Chart } from "react-chartjs-2";
-import { toCurrency, fixRounding } from "../../utils/helpers";
+import { format } from "date-fns";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import {
+  toCurrency,
+  fixRounding,
+  monthWindow,
+  monthLabelToDate,
+} from "../../utils/helpers";
+import { getChartColors, useTheme } from "../../utils/theme";
 
 const determineBorderRadius = (context) => {
   const numDatasets = context.chart.data.datasets.length;
@@ -28,7 +36,6 @@ const determineBorderRadius = (context) => {
     return 0;
   }
 
-  let radius = 0;
   if (context.parsed.y > 0) {
     return {
       topLeft: 25 / 3.5,
@@ -40,135 +47,72 @@ const determineBorderRadius = (context) => {
       bottomRight: 25 / 3.5,
     };
   }
-  return radius / 3.5;
+  return 0;
 };
+
+const bar = (label, stack, backgroundColor) => ({
+  type: "bar",
+  label,
+  data: [],
+  backgroundColor,
+  borderWidth: 0,
+  stack,
+  barThickness: 25,
+  borderRadius: determineBorderRadius,
+});
 
 const MultiMonthBudgetOverview = ({
   budget,
+  windowEnd,
+  monthCount = 6,
   highlightMonthState,
   setHighlightMonthState,
+  onNavigate,
+  canGoForward,
+  loading,
 }) => {
-  const [graphDataState, setGraphDataState] = useState(null);
-  const [loadingState, setLoadingState] = useState(true);
-  const maxYAxis = useRef(0);
+  const { resolvedTheme } = useTheme();
 
-  let startIndex = 0,
-    displayLength = 6;
+  const labels = useMemo(
+    () => monthWindow(windowEnd, monthCount),
+    [windowEnd, monthCount]
+  );
 
-  const createGraphData = () => {
-    const labels = [];
+  const graphData = useMemo(() => {
+    const colors = getChartColors();
     const datasets = [
-      // {
-      //   type: "line",
-      //   label: "Balance",
-      //   data: new Array(displayLength).fill().map((x, i) => {
-      //     return 0;
-      //   }),
-      //   borderWidth: 8,
-      //   borderColor: "#71a9f7",
-      //   pointHoverBackgroundColor: "rgba( 255, 255, 255, 1)",
-      //   pointHitRadius: 5,
-      //   pointHoverRadius: 8,
-      //   pointHoverBorderWidth: 3,
-      //   tension: 0.25,
-      // },
-      {
-        type: "bar",
-        label: "Income",
-        data: new Array(displayLength).fill().map((x, i) => {
-          return 0;
-        }),
-        backgroundColor: "rgba(0, 128, 0, 0.5)",
-        borderColor: "rgba(0, 128, 0, 1)",
-        borderWidth: 2,
-        stack: "Stack 0",
-        barThickness: 25,
-        borderRadius: determineBorderRadius,
-      },
-      {
-        type: "bar",
-        label: "Expense",
-        data: new Array(displayLength).fill().map((x, i) => {
-          return 0;
-        }),
-        backgroundColor: "rgba(200, 0, 0, 0.5)",
-        borderColor: "rgba(200, 0, 0, 1)",
-        borderWidth: 2,
-        stack: "Stack 1",
-        barThickness: 25,
-        borderRadius: determineBorderRadius,
-      },
-      {
-        type: "bar",
-        label: "Income Shared",
-        data: new Array(displayLength).fill().map((x, i) => {
-          return 0;
-        }),
-        backgroundColor: "rgba(0, 128, 0, 1)",
-        stack: "Stack 0",
-        barThickness: 25,
-        borderRadius: determineBorderRadius,
-      },
-      {
-        type: "bar",
-        label: "Expense Shared",
-        data: new Array(displayLength).fill().map((x, i) => {
-          return 0;
-        }),
-        backgroundColor: "rgba(200, 0, 0, 1)",
-        stack: "Stack 1",
-        barThickness: 25,
-        borderRadius: determineBorderRadius,
-      },
+      bar("Income", "Stack 0", colors.incomeSoft),
+      bar("Expense", "Stack 1", colors.expenseSoft),
+      bar("Income Shared", "Stack 0", colors.income),
+      bar("Expense Shared", "Stack 1", colors.expense),
     ];
 
-    new Array(displayLength).fill().map((_, i) => {
-      const targetMonth = budget.months.find(
-        (month) => month.order === displayLength + startIndex - i - 1
-      );
-      labels.push(targetMonth.label);
-      datasets[0].data[i] =
-        targetMonth.incomeTotal - targetMonth.sharedIncomeTotal;
-      datasets[1].data[i] =
-        targetMonth.expenseTotal - targetMonth.sharedExpenseTotal;
-      datasets[2].data[i] = targetMonth.sharedIncomeTotal;
-      datasets[3].data[i] = targetMonth.sharedExpenseTotal;
-      //   datasets[0].data[i] += targetMonth.incomeTotal;
-      //   return (datasets[0].data[i] -= targetMonth.expenseTotal);
-      return;
+    // months still loading show as empty bars until they arrive
+    labels.forEach((label, i) => {
+      const month = budget.months.find((m) => m.label === label);
+      datasets[0].data[i] = month
+        ? month.incomeTotal - month.sharedIncomeTotal
+        : 0;
+      datasets[1].data[i] = month
+        ? month.expenseTotal - month.sharedExpenseTotal
+        : 0;
+      datasets[2].data[i] = month ? month.sharedIncomeTotal : 0;
+      datasets[3].data[i] = month ? month.sharedExpenseTotal : 0;
     });
 
-    const newState = {
-      labels,
-      datasets,
-    };
-
-    maxYAxis.current =
-      Math.ceil(
-        Math.max(
-          ...datasets.map((set) =>
-            Math.abs(
-              set.data.reduce(function (a, b) {
-                return Math.max(a, b);
-              }, -Infinity)
-            )
-          )
-        ) / 500
-      ) * 500;
-
-    setGraphDataState({
-      ...newState,
-    });
-
-    setLoadingState(false);
-  };
-
-  useEffect(() => {
-    createGraphData();
+    return { labels, datasets };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [labels, budget.months, resolvedTheme]);
 
   const options = {
+    onClick: (event, elements) => {
+      if (elements.length) {
+        setHighlightMonthState(labels[elements[0].index]);
+      }
+    },
+    onHover: (event, elements) => {
+      event.native.target.style.cursor = elements.length ? "pointer" : "default";
+    },
     plugins: {
       title: {
         display: false,
@@ -177,24 +121,23 @@ const MultiMonthBudgetOverview = ({
         display: false,
       },
       tooltip: {
+        padding: 10,
+        cornerRadius: 8,
+        bodyFont: { family: "Inter, system-ui, sans-serif" },
+        titleFont: { family: "Inter, system-ui, sans-serif" },
         callbacks: {
           title: function (context) {
-            const title = context[0].label + " Overview";
-            return title;
+            return format(monthLabelToDate(context[0].label), "MMMM yyyy");
           },
           label: function (context) {
             const label = [];
 
-            const sharedIncome =
-                graphDataState.datasets[2].data[context.dataIndex],
-              sharedExpense =
-                graphDataState.datasets[3].data[context.dataIndex],
+            const sharedIncome = graphData.datasets[2].data[context.dataIndex],
+              sharedExpense = graphData.datasets[3].data[context.dataIndex],
               totalIncome =
-                graphDataState.datasets[0].data[context.dataIndex] +
-                sharedIncome,
+                graphData.datasets[0].data[context.dataIndex] + sharedIncome,
               totalExpenses =
-                graphDataState.datasets[1].data[context.dataIndex] +
-                sharedExpense;
+                graphData.datasets[1].data[context.dataIndex] + sharedExpense;
 
             label.push(
               `Balance:      ${toCurrency(totalIncome - totalExpenses)}`
@@ -218,6 +161,7 @@ const MultiMonthBudgetOverview = ({
       },
     },
     responsive: true,
+    animation: { duration: 250 },
     scales: {
       x: {
         display: false,
@@ -226,7 +170,6 @@ const MultiMonthBudgetOverview = ({
         display: false,
         stacked: true,
         min: 0,
-        // max: maxYAxis.current,
         grid: {
           display: false,
         },
@@ -235,42 +178,85 @@ const MultiMonthBudgetOverview = ({
     maintainAspectRatio: false,
   };
 
+  const rangeLabel = `${format(monthLabelToDate(labels[0]), "MMM yyyy")} – ${format(
+    monthLabelToDate(labels[labels.length - 1]),
+    "MMM yyyy"
+  )}`;
+
   return (
-    <>
-      <section id="multi-month-overview">
-        <h4 className="sub-container-description section-list-title noselect">
-          6 Month Overview
-        </h4>
-        <div className="chart-full-section">
-          {!loadingState && (
-            <Chart
-              type="bar"
-              className="blanketChart"
-              data={graphDataState}
-              options={options}
-              height={2.5}
-              width={10}
-            />
-          )}
-          <div id="multi-month-menu" className={"container-flex nowrap"}>
-            {!loadingState &&
-              graphDataState.labels.map((month, i) => {
-                return (
-                  <span
-                    key={`select_month_${i}`}
-                    className={`nav-button ${
-                      month === highlightMonthState && "nav-button-active"
-                    } noselect`}
-                    onClick={() => setHighlightMonthState(month)}
-                  >
-                    {month}
-                  </span>
-                );
-              })}
-          </div>
+    <section id="multi-month-overview" className="card">
+      <div className="card-header chart-header">
+        <button
+          type="button"
+          className="icon-button icon-button-sm"
+          onClick={() => onNavigate(-1)}
+          aria-label="Previous month"
+          title="Previous month"
+        >
+          <FiChevronLeft />
+        </button>
+        <div className="chart-header-title">
+          <h2 className="card-title noselect">{monthCount} month overview</h2>
+          <span className="chart-range noselect">
+            {rangeLabel}
+            {loading && (
+              <span className="spinner spinner-sm" aria-label="Loading months" />
+            )}
+          </span>
         </div>
-      </section>
-    </>
+        <div className="chart-legend noselect" aria-hidden="true">
+          <span className="legend-item">
+            <span className="legend-swatch legend-income" /> Income
+          </span>
+          <span className="legend-item">
+            <span className="legend-swatch legend-expense" /> Expenses
+          </span>
+        </div>
+        <button
+          type="button"
+          className="icon-button icon-button-sm"
+          onClick={() => onNavigate(1)}
+          disabled={!canGoForward}
+          aria-label="Next month"
+          title="Next month"
+        >
+          <FiChevronRight />
+        </button>
+      </div>
+      <div className="chart-full-section">
+        <Chart
+          type="bar"
+          className="blanketChart"
+          data={graphData}
+          options={options}
+          height={2.5}
+          width={10}
+        />
+        <div id="multi-month-menu" className="month-picker">
+          {labels.map((month) => {
+            const [m, y] = month.split("/");
+            const isLoaded = budget.months.some((x) => x.label === month);
+            return (
+              <button
+                type="button"
+                key={`select_month_${month}`}
+                className={`month-chip${
+                  month === highlightMonthState ? " month-chip-active" : ""
+                } noselect`}
+                aria-pressed={month === highlightMonthState}
+                disabled={!isLoaded}
+                onClick={() => setHighlightMonthState(month)}
+              >
+                <span className="month-chip-name">
+                  {format(new Date(2000, Number(m) - 1, 1), "MMM")}
+                </span>
+                <span className="month-chip-year">'{y}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </section>
   );
 };
 

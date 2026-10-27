@@ -1,10 +1,13 @@
 const { User, Budget, Category, Entry } = require("../models/index.cjs");
-const { AuthenticationError, UserInputError } = require("@apollo/server");
 const mongoose = require("mongoose");
-const { signToken } = require("../utils/auth.cjs");
+const {
+  signToken,
+  requireUser,
+  forbiddenError,
+  inputError,
+} = require("../utils/auth.cjs");
 const dateScalar = require("./dateScalar.cjs");
 const {
-  extractPropAsStrToArr,
   dateToMonthStr,
   createMonthLabelFromOffset,
   createMonthObj,
@@ -13,6 +16,10 @@ const {
   parseMonthlyEntries,
   parseMonthlyBalances,
   fixRounding,
+  SPLIT_METHODS,
+  monthLabelToKey,
+  dateToMonthKey,
+  resolveSplitSetting,
 } = require("../utils/helpers.cjs");
 const build_PDF_MonthlyReport = require("../utils/build_PDF_monthlyReport.cjs");
 const {
@@ -23,8 +30,173 @@ const {
   startOfDay,
 } = require("date-fns");
 
+const CATEGORY_TYPES = ["income", "expense"];
+
+function assertObjectId(id, label) {
+  if (!mongoose.isValidObjectId(id)) {
+    throw inputError(`Invalid ${label}`);
+  }
+}
+
+function assertDescription(title) {
+  const trimmed = String(title ?? "").trim();
+  if (!trimmed) {
+    throw inputError("Description required");
+  }
+  return trimmed;
+}
+
+function assertValidDate(date, label = "date") {
+  if (!(date instanceof Date) || isNaN(date)) {
+    throw inputError(`Invalid ${label}`);
+  }
+}
+
+// load a budget and ensure the signed-in user is one of its owners
+async function loadBudgetForUser(budgetID, user, populate = []) {
+  assertObjectId(budgetID, "budget");
+
+  let query = Budget.findById(budgetID);
+  populate.forEach((path) => (query = query.populate(path)));
+  const budget = await query;
+
+  if (!budget) {
+    throw inputError("No Budget Found");
+  }
+
+  const owners = budget.ownerIDs.map((owner) => String(owner._id ?? owner));
+  if (!owners.includes(String(user._id))) {
+    throw forbiddenError("User Not Authorized");
+  }
+
+  return { budget, owners };
+}
+
+function assertOwner(owners, userID, label = "User") {
+  if (!owners.includes(String(userID))) {
+    throw inputError(`${label} is not a member of this budget`);
+  }
+}
+
+async function loadCategoryInBudget(categoryID, budgetID) {
+  assertObjectId(categoryID, "category");
+  const category = await Category.findById(categoryID);
+  if (!category || !category.budgetID.equals(budgetID)) {
+    throw inputError("Category does not belong to this budget");
+  }
+  return category;
+}
+
+async function loadEntryInBudget(entryID, budgetID) {
+  assertObjectId(entryID, "entry");
+  const entry = await Entry.findById(entryID)
+    .populate("userID")
+    .populate("toUserID");
+  if (!entry) {
+    throw inputError("No Entry Found");
+  }
+  if (!entry.budgetID.equals(budgetID)) {
+    throw forbiddenError("Budget Does Not Contain Entry");
+  }
+  return entry;
+}
+
+// fetch all entries for the given months in one query, then total them up
+// using the split setting in force for each month. budget.ownerIDs must be
+// populated.
+async function populateMonths(budget, months) {
+  const entries = await Entry.find({
+    budgetID: budget._id,
+    monthString: { $in: months.map((month) => month.label) },
+  })
+    .sort({ effectiveDate: 1 })
+    .populate("userID")
+    .populate("toUserID");
+
+  months.forEach((month) => {
+    month.entries = entries.filter(
+      (entry) => entry.monthString === month.label
+    );
+  });
+
+  return months
+    .sort((a, b) => a.order - b.order)
+    .map((month) =>
+      parseMonthlyBalances(
+        parseMonthlyEntries(month),
+        resolveSplitSetting(budget.splitSettings, monthLabelToKey(month.label)),
+        budget.ownerIDs
+      )
+    );
+}
+
+const MONTH_LABEL_PATTERN = /^(?:[1-9]|1[0-2])\/\d{2}$/;
+const MAX_MONTHS_PER_REQUEST = 24;
+const MONTH_KEY_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/;
+
+// validate a split setting; percentage shares must be owners and total 100%
+function validateSplitSetting({ effectiveMonth, method, shares = [] }, owners) {
+  if (!MONTH_KEY_PATTERN.test(effectiveMonth || "")) {
+    throw inputError("Effective month must be YYYY-MM");
+  }
+  if (!SPLIT_METHODS.includes(method)) {
+    throw inputError("Split method must be proportional or percentage");
+  }
+  if (method === "proportional") {
+    return [];
+  }
+
+  if (!shares.length) {
+    throw inputError("Percentage split needs at least one share");
+  }
+  const seen = new Set();
+  shares.forEach(({ userID, percent }) => {
+    assertOwner(owners, userID);
+    if (seen.has(String(userID))) {
+      throw inputError("Each user can only have one share");
+    }
+    seen.add(String(userID));
+    if (!(percent >= 0 && percent <= 100)) {
+      throw inputError("Each share must be between 0% and 100%");
+    }
+  });
+  const total = fixRounding(
+    shares.reduce((sum, share) => sum + share.percent, 0),
+    4
+  );
+  if (total !== 100) {
+    throw inputError(`Shares must total 100% (currently ${total}%)`);
+  }
+  return shares.map(({ userID, percent }) => ({
+    userID,
+    percent: fixRounding(percent, 4),
+  }));
+}
+
+// fall back to createdAt for entries saved before effectiveDate existed
+const effectiveDateResolver = (entry) => entry.effectiveDate ?? entry.createdAt;
+
 const resolvers = {
   Date: dateScalar,
+
+  Entry: {
+    effectiveDate: effectiveDateResolver,
+  },
+
+  ReportEntry: {
+    effectiveDate: effectiveDateResolver,
+  },
+
+  Budget: {
+    splitSettings: (budget) =>
+      [...(budget.splitSettings || [])].sort((a, b) =>
+        a.effectiveMonth < b.effectiveMonth ? -1 : 1
+      ),
+  },
+
+  SplitShare: {
+    userID: (share) => String(share.userID?._id ?? share.userID),
+  },
 
   Query: {
     requestMonthlyUserReport: async (
@@ -32,838 +204,540 @@ const resolvers = {
       { month, user, budgetID },
       context
     ) => {
-      if (context.token.headers.authorization !== undefined) {
-        // Create Month
-        const createdMonth = createMonthObj(month);
+      const authUser = requireUser(context);
+      const { budget, owners } = await loadBudgetForUser(budgetID, authUser, [
+        "categories",
+        "ownerIDs",
+      ]);
+      assertOwner(owners, user);
 
-        // Get budget data
-        const findBudget = await Budget.findOne({ _id: budgetID })
-          .populate("categories")
-          .populate("ownerIDs")
-          .populate("entries");
+      const [balancedMonth] = await populateMonths(budget, [
+        createMonthObj(month, 0),
+      ]);
 
-        if (!findBudget) {
-          return {};
-        }
+      budget.months = [balancedMonth];
 
-        // gather owner IDs
-        const owners = extractPropAsStrToArr(findBudget.ownerIDs, "_id");
+      const report = await build_PDF_MonthlyReport(budget, user);
 
-        // ensure user is authorized
-        const userMatch = owners.includes(user);
-        if (!userMatch) {
-          throw new UserInputError("Incorrect credentials");
-        }
-
-        // Get data for each monmth
-        const monthlyEntries = await Entry.find({
-          budgetID: findBudget._id,
-          monthString: createdMonth.label,
-        })
-          .populate("userID")
-          .populate("toUserID");
-
-        createdMonth.entries = [...monthlyEntries];
-
-        // Populate entries
-        const populatedMonth = parseMonthlyEntries(createdMonth);
-
-        // Balancing Calculations
-        const balancedMonth = parseMonthlyBalances(populatedMonth);
-
-        findBudget.months = [balancedMonth];
-
-        const report = await build_PDF_MonthlyReport(findBudget, user);
-
-        let bufferStr = Buffer.from(report, "utf8");
-
-        const base64 = bufferStr.toString("base64");
-
-        return { blob: base64 };
-      }
-      throw new AuthenticationError("Incorrect credentials");
+      return { blob: Buffer.from(report).toString("base64") };
     },
+
     requestSingleTransaction: async (
       parent,
-      { entryID, userID, budgetID },
+      { entryID, budgetID },
       context
     ) => {
-      if (context.token.headers.authorization !== undefined) {
-        const user = await User.findOne({ _id: userID });
-
-        if (!user) {
-          throw new AuthenticationError("Incorrect credentials");
-        }
-
-        const findEntry = await Entry.findOne({ _id: entryID })
-          .populate("userID")
-          .populate("toUserID");
-
-        if (!findEntry) {
-          throw new AuthenticationError("No Entry Found");
-        }
-
-        const findBudget = await Budget.findOne({ _id: budgetID });
-
-        if (!findBudget) {
-          throw new AuthenticationError("No Budget Found");
-        }
-
-        const entryMatchesBudget = findEntry.budgetID.equals(budgetID);
-
-        if (!entryMatchesBudget) {
-          throw new AuthenticationError("Budget Does Not Contain Entry");
-        }
-
-        // gather owner IDs
-        const owners = extractPropAsStrToArr(findBudget.ownerIDs, "_id");
-
-        // ensure user is authorized
-        const userMatch = owners.includes(userID);
-
-        if (!userMatch) {
-          throw new AuthenticationError("User Not Authorized");
-        }
-
-        return findEntry;
-      }
-      throw new AuthenticationError("Incorrect credentials");
+      const authUser = requireUser(context);
+      await loadBudgetForUser(budgetID, authUser);
+      return loadEntryInBudget(entryID, budgetID);
     },
-    requestSingleTransfer: async (
-      parent,
-      { entryID, userID, budgetID },
-      context
-    ) => {
-      if (context.token.headers.authorization !== undefined) {
-        const user = await User.findOne({ _id: userID });
 
-        if (!user) {
-          throw new AuthenticationError("Incorrect credentials");
-        }
-
-        const findEntry = await Entry.findOne({ _id: entryID })
-          .populate("userID")
-          .populate("toUserID");
-
-        if (!findEntry) {
-          throw new AuthenticationError("No Entry Found");
-        }
-
-        const findBudget = await Budget.findOne({ _id: budgetID });
-
-        if (!findBudget) {
-          throw new AuthenticationError("No Budget Found");
-        }
-
-        const entryMatchesBudget = findEntry.budgetID.equals(budgetID);
-
-        if (!entryMatchesBudget) {
-          throw new AuthenticationError("Budget Does Not Contain Entry");
-        }
-
-        // gather owner IDs
-        const owners = extractPropAsStrToArr(findBudget.ownerIDs, "_id");
-
-        // ensure user is authorized
-        const userMatch = owners.includes(userID);
-
-        if (!userMatch) {
-          throw new AuthenticationError("User Not Authorized");
-        }
-
-        return findEntry;
-      }
-      throw new AuthenticationError("Incorrect credentials");
+    requestSingleTransfer: async (parent, { entryID, budgetID }, context) => {
+      const authUser = requireUser(context);
+      await loadBudgetForUser(budgetID, authUser);
+      return loadEntryInBudget(entryID, budgetID);
     },
+
+    requestBudgetMonths: async (parent, { budgetID, months }, context) => {
+      const authUser = requireUser(context);
+      if (months.length > MAX_MONTHS_PER_REQUEST) {
+        throw inputError(`Request at most ${MAX_MONTHS_PER_REQUEST} months at a time`);
+      }
+      months.forEach((label) => {
+        if (!MONTH_LABEL_PATTERN.test(label)) {
+          throw inputError(`Invalid month: ${label}`);
+        }
+      });
+      const { budget } = await loadBudgetForUser(budgetID, authUser, [
+        "ownerIDs",
+      ]);
+
+      return populateMonths(
+        budget,
+        [...new Set(months)].map((label, i) => createMonthObj(label, i))
+      );
+    },
+
     requestCustomReport: async (
       parent,
       { budgetID, userID, startDate, endDate },
       context
     ) => {
-      if (context.token.headers.authorization !== undefined) {
-        const user = await User.findOne({ _id: userID });
+      const authUser = requireUser(context);
+      const { budget, owners } = await loadBudgetForUser(budgetID, authUser, [
+        "ownerIDs",
+      ]);
+      assertOwner(owners, userID);
+      assertValidDate(startDate, "start date");
+      assertValidDate(endDate, "end date");
 
-        if (!user) {
-          throw new AuthenticationError("Incorrect credentials");
-        }
-
-        const findBudget = await Budget.findOne({ _id: budgetID });
-
-        if (!findBudget) {
-          throw new AuthenticationError("No Budget Found");
-        }
-
-        // gather owner IDs
-        const owners = extractPropAsStrToArr(findBudget.ownerIDs, "_id");
-
-        // ensure user is authorized
-        const userMatch = owners.includes(userID);
-
-        if (!userMatch) {
-          throw new AuthenticationError("User Not Authorized");
-        }
-
-        const monthsBetweenDates = eachMonthOfInterval({
-            start: startDate,
-            end: endDate,
-          }),
-          createdMonths = [];
-        monthsBetweenDates
-          .sort((a, b) => b - a)
-          .map((date, i) => {
-            return createdMonths.push(createMonthObj(dateToMonthStr(date), i));
-          });
-
-        // Get data for each monmth
-        const newMonths = [];
-        const queryEachMonth = createdMonths.map(async (month) => {
-          const monthlyEntries = await Entry.find({
-            budgetID: findBudget._id,
-            monthString: month.label,
-          })
-            .populate("userID")
-            .populate("toUserID");
-          const findMonthInArr = createdMonths.find(
-            (findMonth) => findMonth.label === month.label
-          );
-          findMonthInArr.entries = [...monthlyEntries];
-          return newMonths.push(findMonthInArr);
-        });
-        await Promise.all(queryEachMonth);
-
-        const populatedMonths = [];
-        const populateMonths = newMonths
-          .sort((a, b) => a.order - b.order)
-          .map((month) => {
-            return populatedMonths.push(parseMonthlyEntries(month));
-          });
-        await Promise.all(populateMonths);
-
-        // Balancing Calculations
-        const balanedMonths = populatedMonths.map((month) => {
-          return parseMonthlyBalances(month);
-        });
-        await Promise.all(balanedMonths);
-
-        let reportTotals = {
-          label: "",
-          order: 1,
-          balance: 0,
-          incomeTotal: 0,
-          expenseTotal: 0,
-          balanceIndividual: 0,
-          incomeIndividual: 0,
-          expenseIndividual: 0,
-          transferTotals: 0,
-          sharedBalance: 0,
-          sharedIncomeTotal: 0,
-          sharedExpenseTotal: 0,
-          userData: [],
-          entries: [],
-          incomeCategories: [],
-          expenseCategories: [],
-          averageResponsibilityRate: 0,
-        };
-
-        const responsibilityRates = [];
-
-        // ADD TOTALS
-        populatedMonths.map((month) => {
-          const monthUser = month.userData.find((user) =>
-              user.userID._id.equals(userID)
-            ),
-            monthResponsibilityRate = monthUser.percentOfTotalIncome;
-          responsibilityRates.push(monthResponsibilityRate);
-
-          // MAP PER MONTH VALUES FOR USER
-          month.entries.map((entry, i) => {
-            const beforeOrEqualToEndDate =
-                isBefore(startOfDay(entry.createdAt), startOfDay(endDate)) ||
-                isEqual(startOfDay(entry.createdAt), startOfDay(endDate)),
-              afterOrEqualToStartDate =
-                isAfter(startOfDay(entry.createdAt), startOfDay(startDate)) ||
-                isEqual(startOfDay(entry.createdAt), startOfDay(startDate)),
-              isCurrentUserEntry = entry.userID._id.equals(userID);
-
-            if (!beforeOrEqualToEndDate || !afterOrEqualToStartDate) {
-              return entry;
-            } else {
-              // INCOME
-              if (entry.valueType === "income") {
-                // FIND INCOME CATEGORY
-                let indexOfCategory = reportTotals.incomeCategories.findIndex(
-                  (category) =>
-                    category.categoryID?._id.equals(entry.categoryID._id)
-                );
-
-                // IF CATEGORY DOES NOT EXIST, CREATE IT
-                if (indexOfCategory < 0) {
-                  const createdCategory = copyObject(
-                    createMonthlyCategoryObj()
-                  );
-                  createdCategory.categoryID = entry.categoryID;
-                  indexOfCategory = reportTotals.incomeCategories.length;
-                  reportTotals.incomeCategories[indexOfCategory] =
-                    createdCategory;
-                }
-
-                // ADD TOTALS
-                reportTotals.incomeTotal = fixRounding(
-                  reportTotals.incomeTotal + entry.value,
-                  2
-                );
-                // ADD ENTRY TO GENERALS
-                if (entry.individualEntry && isCurrentUserEntry) {
-                  // IS INDIVIDUAL & CURRENT USER - ADD TO INDIVIDUAL INCOME / ADD ENTRY
-                  entry.valueIndividual = fixRounding(entry.value, 2);
-                  reportTotals.incomeIndividual = fixRounding(
-                    reportTotals.incomeIndividual + entry.valueIndividual,
-                    2
-                  );
-                  // ADD TO MONTLY TOTALS
-                  reportTotals.incomeCategories[indexOfCategory].total =
-                    fixRounding(
-                      reportTotals.incomeCategories[indexOfCategory].total +
-                        entry.value,
-                      2
-                    );
-                  reportTotals.incomeCategories[
-                    indexOfCategory
-                  ].totalIndividual = fixRounding(
-                    reportTotals.incomeCategories[indexOfCategory]
-                      .totalIndividual + entry.valueIndividual,
-                    2
-                  );
-                  // ADD ENTRY
-                  reportTotals.entries.push(entry);
-                } else if (!entry.individualEntry) {
-                  // IS NOT INDIVIDUAL - ADD TO SHARED INCOME / ADD ENTRY
-                  entry.valueIndividual = fixRounding(
-                    entry.value * monthResponsibilityRate,
-                    2
-                  );
-                  reportTotals.incomeIndividual = fixRounding(
-                    reportTotals.incomeIndividual + entry.valueIndividual,
-                    2
-                  );
-                  reportTotals.sharedIncomeTotal = fixRounding(
-                    reportTotals.sharedIncomeTotal + entry.value,
-                    2
-                  );
-                  // ADD TO MONTLY TOTALS
-                  reportTotals.incomeCategories[indexOfCategory].total =
-                    fixRounding(
-                      reportTotals.incomeCategories[indexOfCategory].total +
-                        entry.value,
-                      2
-                    );
-                  reportTotals.incomeCategories[
-                    indexOfCategory
-                  ].totalIndividual = fixRounding(
-                    reportTotals.incomeCategories[indexOfCategory]
-                      .totalIndividual + entry.valueIndividual,
-                    2
-                  );
-                  // ADD ENTRY
-                  reportTotals.entries.push(entry);
-                } else if (entry.individualEntry && !isCurrentUserEntry) {
-                  // IS INDIVIDUAL & NOT CURRENT USER - DO NOT ADD TO INDIVIDUAL INCOME / DO NOT ADD ENTRY
-                }
-              }
-
-              // EXPENSE
-              if (entry.valueType === "expense") {
-                // FIND INCOME CATEGORY
-                let indexOfCategory = reportTotals.expenseCategories.findIndex(
-                  (category) =>
-                    category.categoryID?._id.equals(entry.categoryID._id)
-                );
-
-                // IF CATEGORY DOES NOT EXIST, CREATE IT
-                if (indexOfCategory < 0) {
-                  const createdCategory = copyObject(
-                    createMonthlyCategoryObj()
-                  );
-                  createdCategory.categoryID = entry.categoryID;
-                  indexOfCategory = reportTotals.expenseCategories.length;
-                  reportTotals.expenseCategories[indexOfCategory] =
-                    createdCategory;
-                }
-
-                // ADD TOTALS
-                reportTotals.expenseTotal = fixRounding(
-                  reportTotals.expenseTotal + entry.value,
-                  2
-                );
-                // ADD ENTRY TO GENERALS
-                if (entry.individualEntry && isCurrentUserEntry) {
-                  // IS INDIVIDUAL & CURRENT USER - ADD TO INDIVIDUAL EXPENSE / ADD ENTRY
-                  entry.valueIndividual = fixRounding(entry.value, 2);
-                  reportTotals.expenseIndividual = fixRounding(
-                    reportTotals.expenseIndividual + entry.valueIndividual,
-                    2
-                  );
-                  // ADD TO MONTLY TOTALS
-                  reportTotals.expenseCategories[indexOfCategory].total =
-                    fixRounding(
-                      reportTotals.expenseCategories[indexOfCategory].total +
-                        entry.value,
-                      2
-                    );
-                  reportTotals.expenseCategories[
-                    indexOfCategory
-                  ].totalIndividual = fixRounding(
-                    reportTotals.expenseCategories[indexOfCategory]
-                      .totalIndividual + entry.valueIndividual,
-                    2
-                  );
-                  // ADD ENTRY
-                  reportTotals.entries.push(entry);
-                } else if (!entry.individualEntry) {
-                  // IS NOT INDIVIDUAL - ADD TO SHARED EXPENSE / ADD ENTRY
-                  entry.valueIndividual = fixRounding(
-                    entry.value * monthResponsibilityRate,
-                    2
-                  );
-                  reportTotals.expenseIndividual = fixRounding(
-                    reportTotals.expenseIndividual + entry.valueIndividual,
-                    2
-                  );
-                  reportTotals.sharedExpenseTotal = fixRounding(
-                    reportTotals.sharedExpenseTotal + entry.value,
-                    2
-                  );
-                  // ADD TO MONTLY TOTALS
-                  reportTotals.expenseCategories[indexOfCategory].total =
-                    fixRounding(
-                      reportTotals.expenseCategories[indexOfCategory].total +
-                        entry.value,
-                      2
-                    );
-                  reportTotals.expenseCategories[
-                    indexOfCategory
-                  ].totalIndividual = fixRounding(
-                    reportTotals.expenseCategories[indexOfCategory]
-                      .totalIndividual + entry.valueIndividual,
-                    2
-                  );
-                  // ADD ENTRY
-                  reportTotals.entries.push(entry);
-                } else if (entry.individualEntry && !isCurrentUserEntry) {
-                  // IS INDIVIDUAL & NOT CURRENT USER - DO NOT ADD TO INDIVIDUAL INCOME / DO NOT ADD ENTRY
-                }
-              }
-
-              // TRANSFERS
-              if (entry.valueType === "transfer") {
-                const isFromUser = entry.userID._id.equals(userID),
-                  isToUser = entry.toUserID._id.equals(userID);
-                if (isFromUser === true || isToUser === true) {
-                  reportTotals.transferTotals = fixRounding(
-                    reportTotals.transferTotals + entry.value,
-                    2
-                  );
-                  reportTotals.entries.push(entry);
-                }
-              }
-            }
-          });
-        });
-
-        // BALANCES
-        reportTotals.balance = fixRounding(
-          reportTotals.incomeTotal - reportTotals.expenseTotal,
-          2
-        );
-        reportTotals.balanceIndividual = fixRounding(
-          reportTotals.incomeIndividual - reportTotals.expenseIndividual,
-          2
-        );
-        reportTotals.sharedBalance = fixRounding(
-          reportTotals.sharedIncomeTotal - reportTotals.sharedExpenseTotal,
-          2
-        );
-        reportTotals.averageResponsibilityRate =
-          responsibilityRates.reduce((a, b) => a + b) /
-          responsibilityRates.length;
-
-        // SORTING
-        reportTotals.entries.sort((a, b) => a.createdAt - b.createdAt);
-        reportTotals.incomeCategories.sort((a, b) => b.total - a.total);
-        reportTotals.expenseCategories.sort((a, b) => b.total - a.total);
-
-        return reportTotals;
+      if (isAfter(startOfDay(startDate), startOfDay(endDate))) {
+        throw inputError("Start date must be before end date");
       }
-      throw new AuthenticationError("Incorrect credentials");
+
+      const createdMonths = eachMonthOfInterval({
+        start: startDate,
+        end: endDate,
+      })
+        .sort((a, b) => b - a)
+        .map((date, i) => createMonthObj(dateToMonthStr(date), i));
+
+      const populatedMonths = await populateMonths(budget, createdMonths);
+
+      let reportTotals = {
+        label: "",
+        order: 1,
+        balance: 0,
+        incomeTotal: 0,
+        expenseTotal: 0,
+        balanceIndividual: 0,
+        incomeIndividual: 0,
+        expenseIndividual: 0,
+        transferTotals: 0,
+        sharedBalance: 0,
+        sharedIncomeTotal: 0,
+        sharedExpenseTotal: 0,
+        userData: [],
+        entries: [],
+        incomeCategories: [],
+        expenseCategories: [],
+        averageResponsibilityRate: 0,
+      };
+
+      const responsibilityRates = [];
+
+      // ADD TOTALS
+      populatedMonths.map((month) => {
+        // a user with no entries in a month has no share of it
+        const monthUser = month.userData.find((user) =>
+            user.userID._id.equals(userID)
+          ),
+          monthResponsibilityRate = monthUser?.percentOfTotalIncome ?? 0;
+        responsibilityRates.push(monthResponsibilityRate);
+
+        // MAP PER MONTH VALUES FOR USER
+        month.entries.map((entry) => {
+          const entryDate = startOfDay(effectiveDateResolver(entry)),
+            beforeOrEqualToEndDate =
+              isBefore(entryDate, startOfDay(endDate)) ||
+              isEqual(entryDate, startOfDay(endDate)),
+            afterOrEqualToStartDate =
+              isAfter(entryDate, startOfDay(startDate)) ||
+              isEqual(entryDate, startOfDay(startDate)),
+            isCurrentUserEntry = entry.userID._id.equals(userID);
+
+          if (!beforeOrEqualToEndDate || !afterOrEqualToStartDate) {
+            return entry;
+          }
+
+          // INCOME / EXPENSE
+          if (CATEGORY_TYPES.includes(entry.valueType)) {
+            const isIncome = entry.valueType === "income",
+              categoriesKey = isIncome ? "incomeCategories" : "expenseCategories",
+              totalKey = isIncome ? "incomeTotal" : "expenseTotal",
+              individualKey = isIncome ? "incomeIndividual" : "expenseIndividual",
+              sharedKey = isIncome ? "sharedIncomeTotal" : "sharedExpenseTotal";
+
+            // IS INDIVIDUAL & NOT CURRENT USER - DO NOT ADD ENTRY
+            if (entry.individualEntry && !isCurrentUserEntry) {
+              reportTotals[totalKey] = fixRounding(
+                reportTotals[totalKey] + entry.value,
+                2
+              );
+              return entry;
+            }
+
+            // FIND CATEGORY, IF CATEGORY DOES NOT EXIST, CREATE IT
+            let indexOfCategory = reportTotals[categoriesKey].findIndex(
+              (category) => category.categoryID?._id.equals(entry.categoryID._id)
+            );
+            if (indexOfCategory < 0) {
+              const createdCategory = copyObject(createMonthlyCategoryObj());
+              createdCategory.categoryID = entry.categoryID;
+              indexOfCategory = reportTotals[categoriesKey].length;
+              reportTotals[categoriesKey][indexOfCategory] = createdCategory;
+            }
+            const category = reportTotals[categoriesKey][indexOfCategory];
+
+            reportTotals[totalKey] = fixRounding(
+              reportTotals[totalKey] + entry.value,
+              2
+            );
+
+            // individual entries count fully, shared entries by responsibility
+            entry.valueIndividual = fixRounding(
+              entry.individualEntry
+                ? entry.value
+                : entry.value * monthResponsibilityRate,
+              2
+            );
+            reportTotals[individualKey] = fixRounding(
+              reportTotals[individualKey] + entry.valueIndividual,
+              2
+            );
+            if (!entry.individualEntry) {
+              reportTotals[sharedKey] = fixRounding(
+                reportTotals[sharedKey] + entry.value,
+                2
+              );
+            }
+
+            category.total = fixRounding(category.total + entry.value, 2);
+            category.totalIndividual = fixRounding(
+              category.totalIndividual + entry.valueIndividual,
+              2
+            );
+
+            reportTotals.entries.push(entry);
+          }
+
+          // TRANSFERS
+          if (entry.valueType === "transfer") {
+            const isFromUser = entry.userID._id.equals(userID),
+              isToUser = entry.toUserID._id.equals(userID);
+            if (isFromUser || isToUser) {
+              reportTotals.transferTotals = fixRounding(
+                reportTotals.transferTotals + entry.value,
+                2
+              );
+              reportTotals.entries.push(entry);
+            }
+          }
+        });
+      });
+
+      // BALANCES
+      reportTotals.balance = fixRounding(
+        reportTotals.incomeTotal - reportTotals.expenseTotal,
+        2
+      );
+      reportTotals.balanceIndividual = fixRounding(
+        reportTotals.incomeIndividual - reportTotals.expenseIndividual,
+        2
+      );
+      reportTotals.sharedBalance = fixRounding(
+        reportTotals.sharedIncomeTotal - reportTotals.sharedExpenseTotal,
+        2
+      );
+      reportTotals.averageResponsibilityRate = responsibilityRates.length
+        ? responsibilityRates.reduce((a, b) => a + b, 0) /
+          responsibilityRates.length
+        : 0;
+
+      // SORTING
+      reportTotals.entries.sort(
+        (a, b) => effectiveDateResolver(a) - effectiveDateResolver(b)
+      );
+      reportTotals.incomeCategories.sort((a, b) => b.total - a.total);
+      reportTotals.expenseCategories.sort((a, b) => b.total - a.total);
+
+      return reportTotals;
     },
   },
 
   Mutation: {
-    login: async (parent, { email }, context) => {
-      if (context.token.headers.authorization !== undefined) {
-        let _id;
-
-        // check for user
-        const checkUser = await User.findOne({ email: email });
-
-        // if user, assign _id
-        if (checkUser) {
-          _id = checkUser._id;
-        }
-
-        // if no user, create user
-        if (!checkUser) {
-          const createUser = await User.create({ email });
-          _id = createUser._id;
-        }
-
-        // once _id verified, sign token
-        if (_id) {
-          const token = signToken({ email, _id });
-          return { token };
-        }
-
-        throw new AuthenticationError("No User Account");
+    // TODO: verify the Auth0 access token here before trusting `email`
+    login: async (parent, { email }) => {
+      const normalizedEmail = String(email).trim().toLowerCase();
+      if (!normalizedEmail) {
+        throw inputError("Email required");
       }
-      throw new AuthenticationError("Incorrect credentials");
+
+      const user =
+        (await User.findOne({ email: normalizedEmail })) ||
+        (await User.findOne({ email })) ||
+        (await User.create({ email: normalizedEmail }));
+
+      return { token: signToken({ email: user.email, _id: user._id }) };
     },
 
-    createBudget: async (parent, data, context) => {
-      if (context.token.headers.authorization !== undefined) {
-        const ownerIDs = [];
-        const findOwner = await User.findOne({ email: data.input.owner });
-        if (findOwner) {
-          ownerIDs.push(findOwner._id);
-        }
+    createBudget: async (parent, { input }, context) => {
+      const authUser = requireUser(context);
 
-        for (let i = 0; i < data.input.emails.length; i++) {
-          const findAdditionalOwner = await User.findOne({
-            email: data.input.emails[i],
-          });
-          if (findAdditionalOwner) {
-            ownerIDs.push(findAdditionalOwner._id);
+      const ownerIDs = [authUser._id];
+      const emails = (input.emails || []).filter(Boolean);
+      if (emails.length) {
+        const additionalOwners = await User.find({ email: { $in: emails } });
+        additionalOwners.forEach((owner) => {
+          if (!owner._id.equals(authUser._id)) {
+            ownerIDs.push(owner._id);
           }
-        }
-
-        const newBudget = {
-          ownerIDs: [...ownerIDs],
-          title: data.input.title,
-          desc: data.input.desc,
-        };
-
-        // create budget
-        const createBudget = await Budget.create({ ...newBudget });
-
-        return createBudget;
+        });
       }
-      throw new AuthenticationError("Incorrect credentials");
+
+      return Budget.create({
+        ownerIDs,
+        title: input.title,
+        desc: input.desc,
+        splitSettings: [
+          { effectiveMonth: dateToMonthKey(new Date()), method: "proportional" },
+        ],
+      });
     },
 
     createCategory: async (parent, { input }, context) => {
-      if (context.token.headers.authorization !== undefined) {
-        const { budgetID } = input;
+      const authUser = requireUser(context);
+      const { budgetID, title, categoryType } = input;
+      await loadBudgetForUser(budgetID, authUser);
 
-        const createBudgetCategory = await Category.create(input);
-
-        const addedToBudget = await Budget.findOneAndUpdate(
-          { _id: budgetID },
-          { $push: { categories: createBudgetCategory._id } },
-          { new: true, runValidators: true }
-        );
-
-        return addedToBudget;
+      if (!CATEGORY_TYPES.includes(categoryType)) {
+        throw inputError("Category type must be income or expense");
       }
-      throw new AuthenticationError("Incorrect credentials");
+
+      const category = await Category.create({ budgetID, title, categoryType });
+
+      return Budget.findByIdAndUpdate(
+        budgetID,
+        { $push: { categories: category._id } },
+        { new: true, runValidators: true }
+      );
     },
 
     updateCategory: async (parent, { input }, context) => {
-      if (context.token.headers.authorization !== undefined) {
-        const { categoryID, title, budgetedValueRange } = input;
+      const authUser = requireUser(context);
+      const { categoryID, title } = input;
+      assertObjectId(categoryID, "category");
 
-        const updatedCategory = await Category.findOneAndUpdate(
-          { _id: categoryID },
-          { title, budgetedValueRange },
-          { new: true, runValidators: true }
-        );
-
-        return updatedCategory;
+      const category = await Category.findById(categoryID);
+      if (!category) {
+        throw inputError("No Category Found");
       }
-      throw new AuthenticationError("Incorrect credentials");
+      await loadBudgetForUser(category.budgetID, authUser);
+
+      category.title = title;
+      return category.save();
     },
 
     createTransaction: async (parent, { input }, context) => {
-      if (context.token.headers.authorization !== undefined) {
-        let { budgetID, categoryID, userID, individualEntry, createdAt } =
-          input;
+      const authUser = requireUser(context);
+      const { budgetID, categoryID, userID, value, effectiveDate } = input;
+      const title = assertDescription(input.title);
+      assertValidDate(effectiveDate, "effective date");
 
-        individualEntry = individualEntry || false;
+      const { budget, owners } = await loadBudgetForUser(budgetID, authUser);
+      assertOwner(owners, userID);
+      const category = await loadCategoryInBudget(categoryID, budget._id);
 
-        const user = await User.findOne({ _id: userID });
+      const newEntry = await Entry.create({
+        title,
+        value,
+        budgetID: budget._id,
+        categoryID: category._id,
+        userID,
+        effectiveDate,
+        monthString: dateToMonthStr(effectiveDate),
+        valueType: category.categoryType,
+        individualEntry: input.individualEntry || false,
+      });
 
-        if (!user) {
-          return {};
-        }
+      await Category.updateOne({ _id: category._id }, { $inc: { countUse: 1 } });
 
-        const matchCategory = await Category.findOneAndUpdate(
-          { _id: categoryID },
-          { $inc: { countUse: 1 } },
-          { new: true }
-        );
-
-        if (!matchCategory) {
-          return {};
-        }
-
-        const newEntry = await Entry.create({
-          ...input,
-          monthString: dateToMonthStr(createdAt),
-          userID: user._id,
-          valueType: matchCategory.categoryType,
-          individualEntry,
-        });
-
-        const budgetUpdate = await Budget.findOneAndUpdate(
-          { _id: budgetID },
-          { $push: { entries: newEntry._id } },
-          { new: true, runValidators: true }
-        );
-
-        if (!budgetUpdate) {
-          return {};
-        }
-
-        return budgetUpdate;
-      }
-      throw new AuthenticationError("Incorrect credentials");
+      return Budget.findByIdAndUpdate(
+        budget._id,
+        { $push: { entries: newEntry._id } },
+        { new: true }
+      );
     },
 
     editTransaction: async (parent, { input }, context) => {
-      if (context.token.headers.authorization !== undefined) {
-        let {
-          entryID,
+      const authUser = requireUser(context);
+      const { entryID, budgetID, categoryID, userID, value, effectiveDate } =
+        input;
+      const title = assertDescription(input.title);
+      assertValidDate(effectiveDate, "effective date");
+
+      const { budget, owners } = await loadBudgetForUser(budgetID, authUser);
+      assertOwner(owners, userID);
+      const entry = await loadEntryInBudget(entryID, budget._id);
+      if (entry.valueType === "transfer") {
+        throw inputError("Use editTransfer for transfers");
+      }
+      const category = await loadCategoryInBudget(categoryID, budget._id);
+
+      // keep category usage counts accurate when an entry is re-categorized
+      if (!entry.categoryID?.equals(category._id)) {
+        await Category.bulkWrite([
+          {
+            updateOne: {
+              filter: { _id: entry.categoryID },
+              update: { $inc: { countUse: -1 } },
+            },
+          },
+          {
+            updateOne: {
+              filter: { _id: category._id },
+              update: { $inc: { countUse: 1 } },
+            },
+          },
+        ]);
+      }
+
+      // createdAt is left untouched; only the effective date moves
+      return Entry.findByIdAndUpdate(
+        entry._id,
+        {
           title,
           value,
-          categoryID,
-          createdAt,
+          categoryID: category._id,
+          valueType: category.categoryType,
+          effectiveDate,
+          monthString: dateToMonthStr(effectiveDate),
           userID,
-          individualEntry,
-        } = input;
-
-        individualEntry = individualEntry || false;
-
-        const user = await User.findOne({ _id: userID });
-
-        if (!user) {
-          return {};
-        }
-
-        const matchCategory = await Category.findOne({ _id: categoryID });
-
-        if (!matchCategory) {
-          return {};
-        }
-
-        const monthString = dateToMonthStr(createdAt);
-
-        const entryUpdate = await Entry.findOneAndUpdate(
-          { _id: entryID },
-          {
-            title,
-            value,
-            categoryID,
-            createdAt,
-            monthString,
-            userID,
-            individualEntry,
-          },
-          { new: true, runValidators: true }
-        ).populate("userID");
-
-        if (!entryUpdate) {
-          return {};
-        }
-
-        return entryUpdate;
-      }
-      throw new AuthenticationError("Incorrect credentials");
+          individualEntry: input.individualEntry || false,
+        },
+        { new: true, runValidators: true }
+      )
+        .populate("userID")
+        .populate("toUserID");
     },
 
     createTransfer: async (parent, { input }, context) => {
-      if (context.token.headers.authorization !== undefined) {
-        let { budgetID, userID, toUserID, createdAt } = input;
+      const authUser = requireUser(context);
+      const { budgetID, userID, toUserID, value, effectiveDate } = input;
+      assertValidDate(effectiveDate, "effective date");
 
-        const user = await User.findOne({ _id: userID });
-
-        if (!user) {
-          return {};
-        }
-
-        const userTo = await User.findOne({ _id: toUserID });
-
-        if (!userTo) {
-          return {};
-        }
-
-        const newEntry = await Entry.create({
-          ...input,
-          monthString: dateToMonthStr(createdAt),
-          userID: user._id,
-          valueType: "transfer",
-          title: `Transfer from ${user.userInitials} to ${userTo.userInitials}`,
-        });
-
-        const budgetUpdate = await Budget.findOneAndUpdate(
-          { _id: budgetID },
-          { $push: { entries: newEntry._id } },
-          { new: true, runValidators: true }
-        );
-
-        if (!budgetUpdate) {
-          return {};
-        }
-
-        return budgetUpdate;
+      const { budget, owners } = await loadBudgetForUser(budgetID, authUser);
+      assertOwner(owners, userID, "From user");
+      assertOwner(owners, toUserID, "To user");
+      if (String(userID) === String(toUserID)) {
+        throw inputError("Cannot transfer to the same user");
       }
-      throw new AuthenticationError("Incorrect credentials");
+
+      const [user, userTo] = await Promise.all([
+        User.findById(userID),
+        User.findById(toUserID),
+      ]);
+
+      const newEntry = await Entry.create({
+        value,
+        budgetID: budget._id,
+        userID: user._id,
+        toUserID: userTo._id,
+        effectiveDate,
+        monthString: dateToMonthStr(effectiveDate),
+        valueType: "transfer",
+        title: input.note?.trim() || "",
+      });
+
+      return Budget.findByIdAndUpdate(
+        budget._id,
+        { $push: { entries: newEntry._id } },
+        { new: true }
+      );
     },
 
     editTransfer: async (parent, { input }, context) => {
-      if (context.token.headers.authorization !== undefined) {
-        let { entryID, value, createdAt, userID, toUserID } = input;
+      const authUser = requireUser(context);
+      const { entryID, budgetID, userID, toUserID, value, effectiveDate } =
+        input;
+      assertValidDate(effectiveDate, "effective date");
 
-        const user = await User.findOne({ _id: userID });
-
-        if (!user) {
-          return {};
-        }
-
-        const userTo = await User.findOne({ _id: toUserID });
-
-        if (!userTo) {
-          return {};
-        }
-
-        const monthString = dateToMonthStr(createdAt);
-
-        const updateEntry = await Entry.findOneAndUpdate(
-          { _id: entryID },
-          {
-            entryID,
-            value,
-            createdAt,
-            monthString,
-            userID,
-            toUserID,
-            title: `Transfer from ${user.userInitials} to ${userTo.userInitials}`,
-          },
-          { new: true, runValidators: true }
-        )
-          .populate("userID")
-          .populate("toUserID");
-
-        if (!updateEntry) {
-          return {};
-        }
-
-        return updateEntry;
+      const { budget, owners } = await loadBudgetForUser(budgetID, authUser);
+      assertOwner(owners, userID, "From user");
+      assertOwner(owners, toUserID, "To user");
+      if (String(userID) === String(toUserID)) {
+        throw inputError("Cannot transfer to the same user");
       }
-      throw new AuthenticationError("Incorrect credentials");
+      const entry = await loadEntryInBudget(entryID, budget._id);
+      if (entry.valueType !== "transfer") {
+        throw inputError("Entry is not a transfer");
+      }
+
+      const [user, userTo] = await Promise.all([
+        User.findById(userID),
+        User.findById(toUserID),
+      ]);
+
+      return Entry.findByIdAndUpdate(
+        entry._id,
+        {
+          value,
+          effectiveDate,
+          monthString: dateToMonthStr(effectiveDate),
+          userID: user._id,
+          toUserID: userTo._id,
+          title: input.note?.trim() || "",
+        },
+        { new: true, runValidators: true }
+      )
+        .populate("userID")
+        .populate("toUserID");
     },
 
     queryBudget: async (parent, { input }, context) => {
-      if (context.token.headers.authorization !== undefined) {
-        const lengthOfInitialQuery = 6;
+      const authUser = requireUser(context);
+      const lengthOfInitialQuery = 6;
 
-        // Create Filler Months
-        const createdMonths = [];
-        new Array(lengthOfInitialQuery).fill().map((_, offset) => {
-          const label = createMonthLabelFromOffset(offset);
-          return createdMonths.push(createMonthObj(label, offset));
-        });
-        // Get budget data
-        const findBudget = await Budget.findOne({ _id: input.budget })
-          .populate("categories")
-          .populate("ownerIDs")
-          .populate("entries");
+      const { budget } = await loadBudgetForUser(input.budget, authUser, [
+        "categories",
+        "ownerIDs",
+      ]);
 
-        // gather owner IDs
-        const owners = extractPropAsStrToArr(findBudget.ownerIDs, "_id");
+      const createdMonths = new Array(lengthOfInitialQuery)
+        .fill()
+        .map((_, offset) =>
+          createMonthObj(createMonthLabelFromOffset(offset), offset)
+        );
 
-        // ensure user is authorized
-        const userMatch = owners.includes(input.user);
-        if (!userMatch) {
-          throw new UserInputError("Incorrect credentials");
-        }
+      budget.months = await populateMonths(budget, createdMonths);
 
-        // Get data for each monmth
-        const newMonths = [];
-        const queryEachMonth = createdMonths.map(async (month) => {
-          const monthlyEntries = await Entry.find({
-            budgetID: findBudget._id,
-            monthString: month.label,
-          })
-            .populate("userID")
-            .populate("toUserID");
-          const findMonthInArr = createdMonths.find(
-            (findMonth) => findMonth.label === month.label
-          );
-          findMonthInArr.entries = [...monthlyEntries];
-          return newMonths.push(findMonthInArr);
-        });
-        await Promise.all(queryEachMonth);
-
-        const populatedMonths = [];
-        const populateMonths = newMonths
-          .sort((a, b) => a.order - b.order)
-          .map((month) => {
-            return populatedMonths.push(parseMonthlyEntries(month));
-          });
-        await Promise.all(populateMonths);
-
-        // Balancing Calculations
-        const balanedMonths = populatedMonths.map((month) => {
-          return parseMonthlyBalances(month);
-        });
-        await Promise.all(balanedMonths);
-
-        findBudget.months = populatedMonths;
-
-        if (!findBudget) {
-          return {};
-        }
-
-        return findBudget;
-      }
-      throw new AuthenticationError("Incorrect credentials");
+      return budget;
     },
 
-    queryUserBudgets: async (parent, { input }, context) => {
-      if (context.token.headers.authorization !== undefined) {
-        // find budget with ownerID containing userID
-        const findBudgets = await Budget.find({
-          ownerIDs: { $all: [input._id] },
-        });
-        if (findBudgets.length === 0) {
-          return [];
-        }
+    queryUserBudgets: async (parent, args, context) => {
+      const authUser = requireUser(context);
+      return Budget.find({ ownerIDs: authUser._id });
+    },
 
-        return findBudgets;
+    // add a split setting, or replace the one starting the same month
+    saveSplitSetting: async (parent, { input }, context) => {
+      const authUser = requireUser(context);
+      const { budget, owners } = await loadBudgetForUser(input.budgetID, authUser);
+
+      const shares = validateSplitSetting(input, owners);
+      const setting = {
+        effectiveMonth: input.effectiveMonth,
+        method: input.method,
+        shares,
+      };
+
+      const existing = budget.splitSettings.find(
+        (s) => s.effectiveMonth === input.effectiveMonth
+      );
+      if (existing) {
+        existing.set(setting);
+      } else {
+        budget.splitSettings.push(setting);
       }
-      throw new AuthenticationError("Incorrect credentials");
+      return budget.save();
+    },
+
+    deleteSplitSetting: async (parent, { budgetID, settingID }, context) => {
+      const authUser = requireUser(context);
+      const { budget } = await loadBudgetForUser(budgetID, authUser);
+
+      const setting = budget.splitSettings.id(settingID);
+      if (!setting) {
+        throw inputError("No Split Setting Found");
+      }
+      if (budget.splitSettings.length === 1) {
+        throw inputError("A budget needs at least one split setting");
+      }
+      setting.deleteOne();
+      return budget.save();
     },
 
     queryCategory: async (parent, { input }, context) => {
-      if (context.token.headers.authorization !== undefined) {
-        console.log(input);
-        const matchCategory = await Category.findOne({ _id: input._id });
+      const authUser = requireUser(context);
+      assertObjectId(input._id, "category");
 
-        if (!matchCategory) {
-          return {};
-        }
-
-        return matchCategory;
+      const category = await Category.findById(input._id);
+      if (!category) {
+        throw inputError("No Category Found");
       }
-      throw new AuthenticationError("Incorrect credentials");
+      await loadBudgetForUser(category.budgetID, authUser);
+
+      return category;
     },
   },
 };

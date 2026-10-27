@@ -1,6 +1,76 @@
   
 import { gql } from '@apollo/client';
 
+// everything the dashboard needs for one month
+export const MONTH_FIELDS = gql`
+  fragment MonthFields on Month {
+    label
+    order
+    splitMethod
+    splitShares {
+      userID
+      percent
+    }
+    incomeTotal
+    expenseTotal
+    sharedIncomeTotal
+    sharedExpenseTotal
+    transferTotals
+    userData {
+      userID {
+        _id
+        email
+        userInitials
+        userColor
+      }
+      incomeTotal
+      expenseTotal
+      balanceOfTransfer
+      individualIncomeTotal
+      individualExpenseTotal
+      sharedIncomeTotal
+      sharedExpenseTotal
+      percentOfTotalIncome
+      responsibilityTotal
+      responsibilityBalance
+      currentPersonalBalance
+      finalPersonalBalance
+    }
+    entries {
+      _id
+      createdAt
+      updatedAt
+      effectiveDate
+      title
+      value
+      valueType
+      budgetID
+      categoryID
+      userID {
+        _id
+        email
+        userInitials
+        userColor
+      }
+      toUserID {
+        _id
+        email
+        userInitials
+        userColor
+      }
+      individualEntry
+    }
+    incomeCategories {
+      categoryID
+      total
+    }
+    expenseCategories {
+      categoryID
+      total
+    }
+  }
+`;
+
 export const LOGIN_USER = gql`
   mutation login($email: String! ) {
     login(email: $email) {
@@ -46,6 +116,8 @@ export const EDIT_TRANSACTION = gql`
     editTransaction(input: $input) {
       _id
       createdAt
+      updatedAt
+      effectiveDate
       title
       value
       valueType
@@ -81,6 +153,8 @@ export const EDIT_TRANSFER = gql`
     editTransfer(input: $input) {
       _id
       createdAt
+      updatedAt
+      effectiveDate
       title
       value
       valueType
@@ -112,6 +186,17 @@ export const QUERY_CURRENT_BUDGET = gql`
       ownerIDs {
         _id
         email
+        userInitials
+        userColor
+      }
+      splitSettings {
+        _id
+        effectiveMonth
+        method
+        shares {
+          userID
+          percent
+        }
       }
       categories {
         _id
@@ -120,70 +205,12 @@ export const QUERY_CURRENT_BUDGET = gql`
         categoryType
         countUse
       }
-      entries {
-        _id
-      }
       months {
-        label
-        order
-        incomeTotal
-        expenseTotal
-        sharedIncomeTotal
-        sharedExpenseTotal      
-        transferTotals  
-        userData {
-          userID {
-            _id
-            email
-            userInitials
-            userColor
-          }
-          incomeTotal
-          expenseTotal
-          balanceOfTransfer
-          individualIncomeTotal
-          individualExpenseTotal
-          sharedIncomeTotal
-          sharedExpenseTotal
-          percentOfTotalIncome
-          responsibilityTotal
-          responsibilityBalance
-          currentPersonalBalance
-          finalPersonalBalance
-        }
-        entries {
-          _id
-          createdAt
-          title
-          value
-          valueType
-          budgetID
-          categoryID
-          userID {
-            _id
-            email
-            userInitials
-            userColor
-          }
-          toUserID {
-            _id
-            email
-            userInitials
-            userColor
-          }
-          individualEntry
-        }
-        incomeCategories {
-          categoryID
-          total
-        }
-        expenseCategories {
-          categoryID
-          total
-        }
+        ...MonthFields
       }
     }
   }
+  ${MONTH_FIELDS}
 `;
 
 export const QUERY_ALL_USER_BUDGETS = gql`
@@ -204,6 +231,35 @@ mutation queryCategory($input: CategoryIDInput! ) {
       budgetID
       categoryType
       countUse
+    }
+  }
+`;
+
+const SPLIT_SETTINGS_FIELDS = `
+  _id
+  splitSettings {
+    _id
+    effectiveMonth
+    method
+    shares {
+      userID
+      percent
+    }
+  }
+`;
+
+export const SAVE_SPLIT_SETTING = gql`
+  mutation saveSplitSetting($input: SplitSettingInput!) {
+    saveSplitSetting(input: $input) {
+      ${SPLIT_SETTINGS_FIELDS}
+    }
+  }
+`;
+
+export const DELETE_SPLIT_SETTING = gql`
+  mutation deleteSplitSetting($budgetID: ID!, $settingID: ID!) {
+    deleteSplitSetting(budgetID: $budgetID, settingID: $settingID) {
+      ${SPLIT_SETTINGS_FIELDS}
     }
   }
 `;

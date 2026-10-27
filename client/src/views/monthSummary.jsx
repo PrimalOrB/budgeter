@@ -37,11 +37,44 @@ const MonthSummary = ({
     (month) => month.label === highlightMonthState
   );
 
+  // older months are fetched on demand when paging back
+  if (!monthData) {
+    return (
+      <section id="month-summary" className="card">
+        <div className="card-header">
+          <h2 className="card-title noselect">{format(date, "MMMM yyyy")}</h2>
+        </div>
+        <div className="loader">
+          <span className="spinner" />
+        </div>
+      </section>
+    );
+  }
+
   return (
-    <section id="month-summary" key={`${date}_results`}>
-      <h4 className="sub-container-description section-list-title noselect">
-        {format(date, "MMMM yyyy")}
-      </h4>
+    <section id="month-summary" className="card" key={`${date}_results`}>
+      <div className="card-header">
+        <h2 className="card-title noselect">{format(date, "MMMM yyyy")}</h2>
+        <span
+          className="badge noselect"
+          title={
+            monthData.splitMethod === "percentage"
+              ? "Shared expenses split by fixed percentages"
+              : "Shared expenses split by share of shared income"
+          }
+        >
+          {monthData.splitMethod === "percentage"
+            ? `Fixed split ${monthData.splitShares
+                .map((share) => {
+                  const owner = budget.ownerIDs.find(
+                    (owner) => owner._id === share.userID
+                  );
+                  return `${owner?.userInitials || "?"} ${Math.round(share.percent * 100) / 100}%`;
+                })
+                .join(" · ")}`
+            : "Proportional split"}
+        </span>
+      </div>
 
       {/* balances section */}
       <ul className="monthly-group-detail border-b-l-rad-none border-b-r-rad-none border_b_none">
@@ -109,7 +142,7 @@ const MonthSummary = ({
                 <InlineBarPerUserBalance
                   key={`${highlightMonthState}_${user.userID._id}`}
                   inputData={user}
-                  title={`${user.userInitials} Balance`}
+                  title={`${user.userID.userInitials} Balance`}
                   valueProp={"balancedIncome"}
                   total={"balancedExpenses"}
                 />
@@ -142,7 +175,7 @@ const MonthSummary = ({
               const entries = monthData.entries
                 .filter((entry) => entry.valueType === "expense")
                 .filter((entry) => entry.categoryID === findCategory._id)
-                .sort((a, b) => a.createdAt - b.createdAt);
+                .sort((a, b) => a.effectiveDate - b.effectiveDate);
 
               if (entries.length === 0) {
                 return null;
@@ -186,7 +219,7 @@ const MonthSummary = ({
               const entries = monthData.entries
                 .filter((entry) => entry.valueType === "income")
                 .filter((entry) => entry.categoryID === findCategory._id)
-                .sort((a, b) => a.createdAt - b.createdAt);
+                .sort((a, b) => a.effectiveDate - b.effectiveDate);
 
               if (entries.length === 0) {
                 return null;
@@ -220,7 +253,7 @@ const MonthSummary = ({
         {expandedState.transfers &&
           [...monthData.entries]
             .filter((entry) => entry.valueType === "transfer")
-            .sort((a, b) => a.createdAt - b.createdAt)
+            .sort((a, b) => a.effectiveDate - b.effectiveDate)
             .map((transfer) => {
               return (
                 <BudgetCategoryEntriesExpandableList
@@ -244,7 +277,7 @@ const MonthSummary = ({
         />
         {expandedState.reports &&
           (monthData.userData ? (
-            <li className="flex nowrap flex-just-space-around f-full">
+            <li className="report-buttons">
               {monthData.userData.map((user) => {
                 return (
                   <PDFMonthlyUser
@@ -258,7 +291,7 @@ const MonthSummary = ({
               })}
             </li>
           ) : (
-            <li className="flex nowrap flex-just-space-around f-full">Empty</li>
+            <li className="report-buttons">Empty</li>
           ))}
       </ul>
     </section>

@@ -13,7 +13,7 @@ import {
 } from "../components/Forms";
 import { FullPageSpinLoader } from "../components";
 import { InlineError, InlineNotification } from "../components/Notifications";
-import { Title } from "../components/Layout";
+import { Title, EntryTimestamps } from "../components/Layout";
 import { useMutation } from "@apollo/client";
 import { EDIT_TRANSACTION } from "../utils/mutations";
 import { QUERY_SINGLE_TRANSACTION } from "../utils/queries";
@@ -34,7 +34,7 @@ const EditTransactionEntry = ({
     categoryID: "--",
     title: "--",
     value: 0,
-    createdAt: null,
+    effectiveDate: null,
     userID: "null",
     individualEntry: false,
   };
@@ -60,7 +60,7 @@ const EditTransactionEntry = ({
 
     const auditField = [];
 
-    const numberRequired = ["value", "createdAt"];
+    const numberRequired = ["value", "effectiveDate"];
     numberRequired.map((field) => {
       const fieldAsNumber = Number(currentFormState[field]),
         isNumber = !isNaN(fieldAsNumber),
@@ -90,13 +90,13 @@ const EditTransactionEntry = ({
 
   useEffect(() => {
     if (entryData?.requestSingleTransaction) {
-      const { categoryID, title, value, createdAt, userID, individualEntry } =
+      const { categoryID, title, value, effectiveDate, userID, individualEntry } =
         entryData.requestSingleTransaction;
       setFormInput({
         categoryID,
         title,
         value,
-        createdAt,
+        effectiveDate,
         userID: userID._id,
         individualEntry,
       });
@@ -126,7 +126,7 @@ const EditTransactionEntry = ({
           value: formInput.value,
           budgetID: budgetState._id,
           categoryID: formInput.categoryID,
-          createdAt: formInput.createdAt,
+          effectiveDate: formInput.effectiveDate,
           userID: formInput.userID,
           individualEntry: formInput.individualEntry,
         },
@@ -157,6 +157,7 @@ const EditTransactionEntry = ({
           <Title
             text={`Edit ${entryData.requestSingleTransaction.valueType}`}
           />
+          <EntryTimestamps entry={entryData.requestSingleTransaction} />
           {errorState ? (
             <InlineError text={errorState} />
           ) : (
@@ -189,10 +190,10 @@ const EditTransactionEntry = ({
                   auditState={auditState}
                 />
                 <InlineDateInput
-                  prop={`createdAt`}
+                  prop={`effectiveDate`}
                   input={formInput}
                   setInput={setFormInput}
-                  label={"Transaction Date"}
+                  label={"Effective date"}
                   auditState={auditState}
                 />
                 <InlineUserInput
@@ -207,11 +208,7 @@ const EditTransactionEntry = ({
                   prop={`individualEntry`}
                   input={formInput}
                   setInput={setFormInput}
-                  label={`${
-                    formInput.individualEntry
-                      ? "Individual Entry"
-                      : "Shared Entry"
-                  }`}
+                  label={"Split"}
                   falseIcon={MdPeople}
                   trueIcon={MdPerson}
                 />

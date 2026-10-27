@@ -13,6 +13,7 @@ import { Title } from "../components/Layout";
 import { useMutation } from "@apollo/client";
 import { CREATE_NEW_TRANSACTION } from "../utils/mutations";
 import { useStoreContext } from "../utils/GlobalState";
+import { toEffectiveDate } from "../utils/helpers";
 import { MdPerson, MdPeople } from "react-icons/md";
 
 const AddTransactionEntry = ({
@@ -27,7 +28,7 @@ const AddTransactionEntry = ({
     categoryID: "",
     title: "",
     value: 0,
-    createdAt: new Date(),
+    effectiveDate: toEffectiveDate(new Date()),
     userID: state.currentUser._id,
     individualEntry: false,
   };
@@ -41,7 +42,7 @@ const AddTransactionEntry = ({
 
     const auditField = [];
 
-    const numberRequired = ["value", "createdAt"];
+    const numberRequired = ["value", "effectiveDate"];
     numberRequired.map((field) => {
       const fieldAsNumber = Number(currentFormState[field]),
         isNumber = !isNaN(fieldAsNumber),
@@ -88,7 +89,7 @@ const AddTransactionEntry = ({
           value: formInput.value,
           budgetID: budgetState._id,
           categoryID: formInput.categoryID,
-          createdAt: formInput.createdAt,
+          effectiveDate: formInput.effectiveDate,
           userID: formInput.userID,
           individualEntry: formInput.individualEntry,
         },
@@ -141,10 +142,10 @@ const AddTransactionEntry = ({
               auditState={auditState}
             />
             <InlineDateInput
-              prop={`createdAt`}
+              prop={`effectiveDate`}
               input={formInput}
               setInput={setFormInput}
-              label={"Transaction Date"}
+              label={"Effective date"}
               auditState={auditState}
             />
             <InlineUserInput
@@ -159,9 +160,7 @@ const AddTransactionEntry = ({
               prop={`individualEntry`}
               input={formInput}
               setInput={setFormInput}
-              label={`${
-                formInput.individualEntry ? "Individual Entry" : "Shared Entry"
-              }`}
+              label={"Split"}
               falseIcon={MdPeople}
               trueIcon={MdPerson}
               auditState={auditState}

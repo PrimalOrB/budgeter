@@ -1,4 +1,5 @@
 import { gql } from "@apollo/client";
+import { MONTH_FIELDS } from "./mutations";
 
 export const REQUEST_MONTHLY_USER_REPORT_PDF = gql`
   query requestMonthlyUserReport($month: String!, $user: ID!, $budgetID: ID!) {
@@ -17,6 +18,8 @@ export const QUERY_SINGLE_TRANSACTION = gql`
     ) {
       _id
       createdAt
+      updatedAt
+      effectiveDate
       title
       value
       valueType
@@ -48,6 +51,9 @@ export const QUERY_SINGLE_TRANSFER = gql`
     ) {
       _id
       createdAt
+      updatedAt
+      effectiveDate
+      title
       value
       budgetID
       userID {
@@ -93,6 +99,8 @@ export const QUERY_CUSTOM_REPORT = gql`
       entries {
         _id
         createdAt
+        updatedAt
+        effectiveDate
         title
         value
         valueIndividual
@@ -125,4 +133,13 @@ export const QUERY_CUSTOM_REPORT = gql`
       }
     }
   }
+`;
+
+export const REQUEST_BUDGET_MONTHS = gql`
+  query requestBudgetMonths($budgetID: ID!, $months: [String!]!) {
+    requestBudgetMonths(budgetID: $budgetID, months: $months) {
+      ...MonthFields
+    }
+  }
+  ${MONTH_FIELDS}
 `;

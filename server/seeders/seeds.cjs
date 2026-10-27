@@ -11,7 +11,7 @@ db.once("open", async () => {
   console.log("Adding Month String To Entries:");
   const addMonthStr = allEntries.map(async (entry, i) => {
 
-    const dateStr = dateToMonthStr(entry.createdAt);
+    const dateStr = dateToMonthStr(entry.effectiveDate);
     console.log("- set " + i + ": " + dateStr);
 
     entry.monthString = dateStr;

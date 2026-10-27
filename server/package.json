@@ -10,15 +10,16 @@
   "scripts": {
     "start": "node server.js",
     "watch": "nodemon",
-    "seed": "node seeders/seeds.cjs"
+    "seed": "node seeders/seeds.cjs",
+    "migrate": "node seeders/migrate.cjs"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "22": "^0.0.0",
     "@apollo/server": "^4.10.2",
     "bcrypt": "^5.1.1",
+    "cors": "^2.8.6",
     "date-fns": "^4.1.0",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",

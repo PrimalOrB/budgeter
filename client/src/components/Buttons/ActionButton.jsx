@@ -1,27 +1,16 @@
 import React from "react";
 
-const ActionButton = ({ action, text, additionalClass, disabled }) => {
+const ActionButton = ({ action, text, additionalClass, disabled, icon }) => {
   return (
-    <>
-      {disabled ? (
-        <span
-          className={`nav-button ${
-            additionalClass ? ` ${additionalClass}` : ""
-          } noselect nav-button-disabled`}
-        >
-          {text}
-        </span>
-      ) : (
-        <span
-          onClick={() => action()}
-          className={`nav-button ${
-            additionalClass ? ` ${additionalClass}` : ""
-          } noselect`}
-        >
-          {text}
-        </span>
-      )}
-    </>
+    <button
+      type="button"
+      onClick={() => action()}
+      disabled={disabled}
+      className={`btn${additionalClass ? ` ${additionalClass}` : ""} noselect`}
+    >
+      {icon && icon()}
+      {text}
+    </button>
   );
 };
 

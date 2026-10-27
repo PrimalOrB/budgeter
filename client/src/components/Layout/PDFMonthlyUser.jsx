@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useLazyQuery } from "@apollo/client";
+import { FiDownload } from "react-icons/fi";
 import { REQUEST_MONTHLY_USER_REPORT_PDF } from "../../utils/queries";
 
 const PDFMonthlyUser = ({
@@ -9,6 +10,7 @@ const PDFMonthlyUser = ({
   budget,
 }) => {
   const [printReq, setPrintReq] = useState(false);
+  const [errorState, setErrorState] = useState(null);
 
   let [getMonthlyReport] = useLazyQuery(REQUEST_MONTHLY_USER_REPORT_PDF, {
     fetchPolicy: "network-only",
@@ -20,7 +22,7 @@ const PDFMonthlyUser = ({
       var a = document.createElement("a"),
         url = URL.createObjectURL(blob);
       a.href = url;
-      a.download = `${user.userID.userInitials}_${month.label}.pdf`;
+      a.download = `${user.userID.userInitials}_${month.label.replace("/", "-")}.pdf`;
       document.body.appendChild(a);
       a.click();
       setTimeout(function () {
@@ -31,11 +33,13 @@ const PDFMonthlyUser = ({
     },
     onError: (err) => {
       setErrorState(err.message);
+      setPrintReq(false);
     },
   });
 
   function requestMonthlyReport() {
     setPrintReq(true);
+    setErrorState(null);
     getMonthlyReport({
       variables: {
         month: month.label,
@@ -46,11 +50,16 @@ const PDFMonthlyUser = ({
   }
 
   return (
-    <>
-      <button className="primary-button" onClick={requestMonthlyReport}>
-        {user.userID.userInitials}
-      </button>
-    </>
+    <button
+      type="button"
+      className="btn btn-secondary"
+      onClick={requestMonthlyReport}
+      disabled={printReq}
+      title={errorState || `Download ${month.label} report for ${user.userID.email}`}
+    >
+      {printReq ? <span className="spinner spinner-sm" /> : <FiDownload />}
+      {user.userID.userInitials} report
+    </button>
   );
 };
 

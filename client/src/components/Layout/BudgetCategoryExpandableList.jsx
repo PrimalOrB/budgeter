@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { FaCaretDown, FaCaretUp } from "react-icons/fa";
-import { MdSubdirectoryArrowRight } from "react-icons/md";
+import { FiChevronDown } from "react-icons/fi";
 import { BudgetCategoryEntriesExpandableList } from ".";
 import { toCurrency } from "../../utils/helpers";
 
@@ -14,39 +13,43 @@ const BudgetCategoryExpandableList = ({
 
   return (
     <>
-      <li
-        className="flex nowrap flex-just-space-around f-full"
-        onClick={() => setExpandedState(!expandedState)}
-      >
-        <span className="f0 margin-right-half">
-          {MdSubdirectoryArrowRight()}
-        </span>
-        <span className="f0 margin-right-half">
-          {expandedState ? FaCaretUp() : FaCaretDown()}
-        </span>
-        <span className="f1 bold noselect">{category.title}</span>
-        {category?.totalIndividual ? (
-          <span className="f1 italic noselect right margin-right-full personal-cost">
-            {toCurrency(category.totalIndividual)}
+      <li className="category-row">
+        <button
+          type="button"
+          className="category-row-button"
+          aria-expanded={expandedState}
+          onClick={() => setExpandedState(!expandedState)}
+        >
+          <FiChevronDown
+            className={`chevron${expandedState ? " chevron-open" : ""}`}
+            aria-hidden="true"
+          />
+          <span className="category-title noselect">{category.title}</span>
+          <span className="category-count noselect">{data.length}</span>
+          {category?.totalIndividual ? (
+            <span className="personal-cost noselect" title="Your share">
+              {toCurrency(category.totalIndividual)}
+            </span>
+          ) : null}
+          <span className="category-total noselect">
+            {toCurrency(category.total)}
           </span>
-        ) : (
-          <></>
-        )}
-        <span className="f0 italic noselect right margin-right-full">
-          {toCurrency(category.total)}
-        </span>
+        </button>
       </li>
-      {expandedState &&
-        data.map((entry) => {
-          return (
-            <BudgetCategoryEntriesExpandableList
-              key={entry._id}
-              entry={entry}
-              setEditingModal={setEditingModal}
-              setEditingTransaction={setEditingTransaction}
-            />
-          );
-        })}
+      {expandedState && (
+        <li className="category-entries">
+          <ul className="entry-list">
+            {data.map((entry) => (
+              <BudgetCategoryEntriesExpandableList
+                key={entry._id}
+                entry={entry}
+                setEditingModal={setEditingModal}
+                setEditingTransaction={setEditingTransaction}
+              />
+            ))}
+          </ul>
+        </li>
+      )}
     </>
   );
 };

@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { toCurrency } from "../../utils/helpers";
+import { getChartColors, useTheme } from "../../utils/theme";
 import { Bar } from "react-chartjs-2";
 
 const InlineBarPerUserBalance = ({ inputData, title }) => {
+  const { resolvedTheme } = useTheme();
   const [dataStateCurrent, setDataStateCurrent] = useState(false);
   const [dataStateAfter, setDataStateAfter] = useState(false);
   const [loadingState, setLoadingState] = useState(true);
 
   function processData() {
+    const colors = getChartColors();
     setLoadingState(true);
 
     const current = {
@@ -16,14 +19,14 @@ const InlineBarPerUserBalance = ({ inputData, title }) => {
           {
             label: "Income",
             data: [],
-            backgroundColor: `rgba(0, 128, 0, 1)`,
+            backgroundColor: colors.income,
             barPercentage: 1.0,
             categoryPercentage: 1.0,
           },
           {
             label: "Expenses",
             data: [],
-            backgroundColor: `rgba(200, 0, 0, 1)`,
+            backgroundColor: colors.expense,
             barPercentage: 1.0,
             categoryPercentage: 1.0,
           },
@@ -43,14 +46,14 @@ const InlineBarPerUserBalance = ({ inputData, title }) => {
           {
             label: "Income",
             data: [],
-            backgroundColor: `rgba(0, 128, 0, 1)`,
+            backgroundColor: colors.income,
             barPercentage: 1.0,
             categoryPercentage: 1.0,
           },
           {
             label: "Expenses",
             data: [],
-            backgroundColor: `rgba(200, 0, 0, 1)`,
+            backgroundColor: colors.expense,
             barPercentage: 1.0,
             categoryPercentage: 1.0,
           },
@@ -161,7 +164,7 @@ const InlineBarPerUserBalance = ({ inputData, title }) => {
   useEffect(() => {
     processData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [resolvedTheme]);
 
   return (
     <>
@@ -175,7 +178,7 @@ const InlineBarPerUserBalance = ({ inputData, title }) => {
                 style={{
                   backgroundColor: dataStateCurrent.userData.userColor
                     ? `#${dataStateCurrent.userData.userColor}`
-                    : "#BBBBBB",
+                    : undefined,
                 }}
               >
                 {dataStateCurrent.userData.userInitials}

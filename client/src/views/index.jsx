@@ -12,6 +12,7 @@ import RecentTransactions from './recentTransactions'
 import AllCategories from './allCategories'
 import MonthSummary from './monthSummary'
 import Reports from './reports'
+import BudgetSettings from './budgetSettings'
 
 export { 
     Home,
@@ -27,5 +28,6 @@ export {
     RecentTransactions,
     AllCategories,
     MonthSummary,
-    Reports
+    Reports,
+    BudgetSettings
  };

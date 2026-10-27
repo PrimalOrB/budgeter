@@ -4,12 +4,13 @@ import { useQuery } from "@apollo/client";
 import { useStoreContext } from "../utils/GlobalState";
 import { ActionButton } from "../components/Buttons";
 import {
+  InlineTextareaInput,
   InlineNumberInput,
   InlineDateInput,
   InlineUserInput,
 } from "../components/Forms";
 import { InlineError, InlineNotification } from "../components/Notifications";
-import { Title } from "../components/Layout";
+import { Title, EntryTimestamps } from "../components/Layout";
 import { useMutation } from "@apollo/client";
 import { EDIT_TRANSFER } from "../utils/mutations";
 import { QUERY_SINGLE_TRANSFER } from "../utils/queries";
@@ -28,9 +29,10 @@ const EditTransferEntry = ({
 
   const initialFormState = {
     value: 0,
-    createdAt: null,
+    effectiveDate: null,
     userID: null,
     toUserID: null,
+    note: "",
   };
   const [formInput, setFormInput] = useState({ ...initialFormState });
   const [auditState, setAuditState] = useState({ pass: false });
@@ -54,7 +56,7 @@ const EditTransferEntry = ({
 
     const auditField = [];
 
-    const numberRequired = ["value", "createdAt"];
+    const numberRequired = ["value", "effectiveDate"];
     numberRequired.map((field) => {
       const fieldAsNumber = Number(currentFormState[field]),
         isNumber = !isNaN(fieldAsNumber),
@@ -96,13 +98,14 @@ const EditTransferEntry = ({
 
   useEffect(() => {
     if (entryData?.requestSingleTransfer) {
-      const { value, createdAt, toUserID, userID } =
+      const { value, effectiveDate, toUserID, userID, title } =
         entryData.requestSingleTransfer;
       setFormInput({
         value,
-        createdAt,
+        effectiveDate,
         userID: userID._id,
         toUserID: toUserID._id,
+        note: title || "",
       });
       setPopulated(true);
     }
@@ -128,9 +131,10 @@ const EditTransferEntry = ({
           entryID: editingID,
           value: formInput.value,
           budgetID: budgetState._id,
-          createdAt: formInput.createdAt,
+          effectiveDate: formInput.effectiveDate,
           userID: formInput.userID,
           toUserID: formInput.toUserID,
+          note: formInput.note,
         },
       },
       update: (cache, data) => {
@@ -157,6 +161,7 @@ const EditTransferEntry = ({
       ) : (
         <section className="full-container">
           <Title text={`Edit Transfer`} />
+          <EntryTimestamps entry={entryData.requestSingleTransfer} />
           {errorState ? (
             <InlineError text={errorState} />
           ) : (
@@ -178,10 +183,10 @@ const EditTransferEntry = ({
                   auditState={auditState}
                 />
                 <InlineDateInput
-                  prop={`createdAt`}
+                  prop={`effectiveDate`}
                   input={formInput}
                   setInput={setFormInput}
-                  label={"Transaction Date"}
+                  label={"Effective date"}
                   auditState={auditState}
                 />
                 <InlineUserInput
@@ -191,6 +196,15 @@ const EditTransferEntry = ({
                   label={"To User"}
                   auditState={auditState}
                   optionList={budgetState.ownerIDs}
+                />
+                <InlineTextareaInput
+                  prop={"note"}
+                  input={formInput}
+                  setInput={setFormInput}
+                  label={"Note"}
+                  placeholder={"Optional — what was this transfer for?"}
+                  rows={2}
+                  auditState={{ note: true }}
                 />
               </form>
               {createdLoading ? (

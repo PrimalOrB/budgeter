@@ -6,7 +6,6 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { useMutation } from '@apollo/client';
 import { LOGIN_USER } from '../../utils/mutations'
 import Auth from '../../utils/auth';
-import { SpinLoader } from '..'
 
 const Header = () => {
 
@@ -42,14 +41,17 @@ const Header = () => {
 
   return (
     <>
-    { error ? <SpinLoader /> :
-      <header>
+      <header className="app-header">
         <div className="header-container">
           <MainNav />
           <AuthNav />
         </div>
       </header>
-    }
+      { error &&
+        <div className="banner banner-error" role="alert">
+          Could not sign in to the budget server. Try refreshing the page.
+        </div>
+      }
     </>
   );
 };

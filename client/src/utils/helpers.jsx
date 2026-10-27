@@ -1,4 +1,51 @@
-import { sub, format, startOfMonth } from "date-fns";
+import { sub, add, format, startOfMonth } from "date-fns";
+
+// month labels are "M/yy", matching the server's monthString
+export function monthLabelToDate(label) {
+  const [month, year] = label.split("/").map(Number);
+  return new Date(2000 + year, month - 1, 1);
+}
+
+export function shiftMonthLabel(label, months) {
+  return format(add(monthLabelToDate(label), { months }), "M/yy");
+}
+
+export function compareMonthLabels(a, b) {
+  return monthLabelToDate(a) - monthLabelToDate(b);
+}
+
+// labels for `length` months ending at `endLabel`, oldest first
+export function monthWindow(endLabel, length) {
+  return new Array(length)
+    .fill()
+    .map((_, i) => shiftMonthLabel(endLabel, i - (length - 1)));
+}
+
+// add or replace months by label
+export function mergeMonths(existing = [], incoming = []) {
+  const byLabel = new Map(existing.map((month) => [month.label, month]));
+  incoming.forEach((month) => byLabel.set(month.label, month));
+  return [...byLabel.values()];
+}
+
+// effective dates are calendar days, stored at 12:00 UTC so the same day
+// shows up in any timezone (and on the server) without shifting
+export function toEffectiveDate(date) {
+  const local = new Date(date);
+  return new Date(
+    Date.UTC(local.getFullYear(), local.getMonth(), local.getDate(), 12)
+  );
+}
+
+export function dateInputToEffectiveDate(value) {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day, 12));
+}
+
+export function formatEntryDate(date, pattern = "MMM d, yyyy") {
+  return date ? format(new Date(date), pattern) : "";
+}
+
 
 export function commaSeparatedNumberDisplay(value) {
   return Math.floor(value)
@@ -115,9 +162,8 @@ export function parseBudgetData({ budget, date, duration }) {
   months = months.reverse();
 
   budget.entries.map((entry) => {
-    console.log(entry.createdAt);
     let matchedMonth = months.filter(
-      (month) => month.label === format(entry.createdAt, "M/yy")
+      (month) => month.label === format(entry.effectiveDate, "M/yy")
     );
     if (matchedMonth.length === 1) {
       if (entry.valueType === "income") {

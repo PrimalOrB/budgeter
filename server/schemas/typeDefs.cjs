@@ -30,7 +30,7 @@ const typeDefs = `
         value: Float!
         budgetID: ID!
         categoryID: ID!
-        createdAt: Date!
+        effectiveDate: Date!
         userID: ID!
         individualEntry: Boolean
     }
@@ -39,9 +39,25 @@ const typeDefs = `
         entryID: ID
         value: Float!
         budgetID: ID!
-        createdAt: Date!
+        effectiveDate: Date!
         userID: ID!
         toUserID: ID!
+        "Optional note explaining the transfer"
+        note: String
+    }
+
+    input SplitShareInput {
+        userID: ID!
+        percent: Float!
+    }
+
+    input SplitSettingInput {
+        budgetID: ID!
+        "First month the setting applies to, as YYYY-MM"
+        effectiveMonth: String!
+        "proportional (by shared income) or percentage (fixed shares)"
+        method: String!
+        shares: [ SplitShareInput ]
     }
 
     input UserIDInput {
@@ -70,7 +86,12 @@ const typeDefs = `
 
     type Entry {
         _id: ID!
-        createdAt: Date!
+        "When the record was created. Never changes."
+        createdAt: Date
+        "When the record was last edited."
+        updatedAt: Date
+        "The date the entry applies to. Editable."
+        effectiveDate: Date!
         monthString: String
         title: String!
         value: Float!
@@ -84,7 +105,12 @@ const typeDefs = `
 
     type ReportEntry {
         _id: ID!
-        createdAt: Date!
+        "When the record was created. Never changes."
+        createdAt: Date
+        "When the record was last edited."
+        updatedAt: Date
+        "The date the entry applies to. Editable."
+        effectiveDate: Date!
         monthString: String
         title: String!
         value: Float!
@@ -113,8 +139,22 @@ const typeDefs = `
         finalPersonalBalance: Float
     }
 
+    type SplitShare {
+        userID: ID!
+        percent: Float!
+    }
+
+    type SplitSetting {
+        _id: ID!
+        effectiveMonth: String!
+        method: String!
+        shares: [ SplitShare ]
+    }
+
     type Month {
         label: String
+        splitMethod: String
+        splitShares: [ SplitShare ]
         order: Int
         incomeTotal: Float
         expenseTotal: Float
@@ -123,8 +163,8 @@ const typeDefs = `
         sharedExpenseTotal: Float
         userData: [ MonthUser ]
         entries: [ Entry ]
-        incomeCategories: [ cateogryGroup ]
-        expenseCategories: [ cateogryGroup ]
+        incomeCategories: [ categoryGroup ]
+        expenseCategories: [ categoryGroup ]
     }
 
     type ReportPeriod {
@@ -141,11 +181,11 @@ const typeDefs = `
         averageResponsibilityRate: Float
         userData: [ MonthUser ]
         entries: [ ReportEntry ]  
-        incomeCategories: [ cateogryGroup ]
-        expenseCategories: [ cateogryGroup ]
+        incomeCategories: [ categoryGroup ]
+        expenseCategories: [ categoryGroup ]
     }
 
-    type cateogryGroup {        
+    type categoryGroup {        
         categoryID: ID
         total: Float
         totalIndividual: Float
@@ -159,6 +199,7 @@ const typeDefs = `
         categories: [ Category ]
         entries: [ Entry ]
         months: [ Month ]
+        splitSettings: [ SplitSetting ]
     }
 
     type PDF {
@@ -174,6 +215,8 @@ const typeDefs = `
         requestSingleTransaction(entryID: ID!, userID: ID!, budgetID: ID!): Entry
         requestSingleTransfer(entryID: ID!, userID: ID!, budgetID: ID!): Entry
         requestCustomReport(budgetID: ID!, userID: ID!, startDate: Date!, endDate: Date!): ReportPeriod
+        "Monthly summaries for the given month labels (M/yy), e.g. to page back past the initial 6 months"
+        requestBudgetMonths(budgetID: ID!, months: [ String! ]!): [ Month ]
     }
 
     type Mutation {
@@ -188,6 +231,8 @@ const typeDefs = `
         queryBudget( input: BudgetQueryInput! ): Budget
         queryUserBudgets( input: UserIDInput! ): [ Budget ]
         queryCategory( input: CategoryIDInput! ): Category
+        saveSplitSetting( input: SplitSettingInput! ): Budget
+        deleteSplitSetting( budgetID: ID!, settingID: ID! ): Budget
     }
     
 `;

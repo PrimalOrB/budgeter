@@ -64,7 +64,7 @@ function createMonthObj(label, offset) {
 }
 
 function createMonthlyUserObj() {
-  return (defaultUser = {
+  return {
     userID: {},
     incomeTotal: 0,
     expenseTotal: 0,
@@ -78,15 +78,15 @@ function createMonthlyUserObj() {
     responsibilityBalance: 0,
     currentPersonalBalance: 0,
     finalPersonalBalance: 0,
-  });
+  };
 }
 
 function createMonthlyCategoryObj() {
-  return (defaultUser = {
+  return {
     categoryID: {},
     total: 0,
     totalIndividual: 0,
-  });
+  };
 }
 
 function parseMonthlyEntries(month) {
@@ -222,11 +222,65 @@ function parseMonthlyEntries(month) {
   return monthData;
 }
 
-function parseMonthlyBalances(month) {
+const SPLIT_METHODS = ["proportional", "percentage"];
+const DEFAULT_SPLIT_SETTING = { method: "proportional", shares: [] };
+
+// "5/26" (monthString) -> "2026-05" (split setting key)
+function monthLabelToKey(label) {
+  const [month, year] = String(label).split("/");
+  return `20${year.padStart(2, "0")}-${month.padStart(2, "0")}`;
+}
+
+function dateToMonthKey(date) {
+  return format(date, "yyyy-MM");
+}
+
+// the setting in force for a month: the latest one starting on or before it
+function resolveSplitSetting(settings, monthKey) {
+  const applicable = [...(settings || [])]
+    .filter((setting) => setting.effectiveMonth <= monthKey)
+    .sort((a, b) => (a.effectiveMonth < b.effectiveMonth ? -1 : 1));
+  return applicable[applicable.length - 1] || DEFAULT_SPLIT_SETTING;
+}
+
+// owners: populated budget owners, needed so a user with a fixed share but no
+// entries that month still carries their part of the shared expenses
+function parseMonthlyBalances(month, splitSetting = DEFAULT_SPLIT_SETTING, owners = []) {
+  const isPercentage = splitSetting.method === "percentage";
+
+  if (isPercentage) {
+    splitSetting.shares.forEach((share) => {
+      const exists = month.userData.some((user) =>
+        user.userID?._id.equals(share.userID)
+      );
+      const owner = owners.find((owner) => owner._id.equals(share.userID));
+      if (!exists && owner) {
+        const createdUser = copyObject(createMonthlyUserObj());
+        createdUser.userID = owner;
+        month.userData.push(createdUser);
+      }
+    });
+  }
+
+  month.splitMethod = splitSetting.method;
+  month.splitShares = isPercentage
+    ? splitSetting.shares.map((share) => ({
+        userID: String(share.userID),
+        percent: share.percent,
+      }))
+    : [];
+
   month.userData.map((user, i) => {
-    // Responsibility
-    user.percentOfTotalIncome =
-      isNaN(user.sharedIncomeTotal / month.sharedIncomeTotal) ? 0 : user.sharedIncomeTotal / month.sharedIncomeTotal
+    // Responsibility - share of shared expenses, by income or by fixed split
+    if (isPercentage) {
+      const share = splitSetting.shares.find((share) =>
+        user.userID._id.equals(share.userID)
+      );
+      user.percentOfTotalIncome = share ? share.percent / 100 : 0;
+    } else {
+      user.percentOfTotalIncome =
+        isNaN(user.sharedIncomeTotal / month.sharedIncomeTotal) ? 0 : user.sharedIncomeTotal / month.sharedIncomeTotal
+    }
     user.responsibilityTotal = fixRounding(
       month.sharedExpenseTotal * user.percentOfTotalIncome,
       2
@@ -258,15 +312,29 @@ function copyObject(obj) {
   return JSON.parse(JSON.stringify(obj));
 }
 
+function escapeHtml(input) {
+  return String(input ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 module.exports = {
   toCurrency,
   extractPropAsStrToArr,
   dateToMonthStr,
   fixRounding,
   copyObject,
+  escapeHtml,
   createMonthLabelFromOffset,
   createMonthObj,
   createMonthlyCategoryObj,
   parseMonthlyEntries,
+  SPLIT_METHODS,
+  monthLabelToKey,
+  dateToMonthKey,
+  resolveSplitSetting,
   parseMonthlyBalances,
 };

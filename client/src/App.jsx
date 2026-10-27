@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import { setContext } from "@apollo/client/link/context";
+import { onError } from "@apollo/client/link/error";
 import { useAuth0 } from "@auth0/auth0-react";
 import {
   ApolloProvider,
@@ -31,8 +32,25 @@ export const authLink = setContext((_, { headers }) => {
   };
 });
 
+// the server token expires; drop it and reload so Header signs in again
+const RELOAD_GUARD_KEY = "auth_reload_at";
+const errorLink = onError(({ graphQLErrors }) => {
+  const unauthenticated = graphQLErrors?.some(
+    (err) => err.extensions?.code === "UNAUTHENTICATED"
+  );
+  if (!unauthenticated) {
+    return;
+  }
+  const lastReload = Number(sessionStorage.getItem(RELOAD_GUARD_KEY) || 0);
+  if (Date.now() - lastReload > 60 * 1000) {
+    sessionStorage.setItem(RELOAD_GUARD_KEY, String(Date.now()));
+    localStorage.removeItem("id_token");
+    window.location.reload();
+  }
+});
+
 const client = new ApolloClient({
-  link: authLink.concat(httpLink),
+  link: errorLink.concat(authLink).concat(httpLink),
   cache: new InMemoryCache(),
 });
 
@@ -59,7 +77,7 @@ const App = () => {
             editingTransaction={editingTransaction}
             setEditingTransaction={setEditingTransaction}
           />
-          <main>
+          <main className="app-main">
             <Routes>
               <Route element={<Home />} path="/" />
               <Route element={<CallbackPage />} path="/callback" />

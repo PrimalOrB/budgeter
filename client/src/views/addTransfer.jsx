@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ActionButton } from "../components/Buttons";
 import {
+  InlineTextareaInput,
   InlineNumberInput,
   InlineDateInput,
   InlineUserInput,
@@ -10,6 +11,7 @@ import { Title } from "../components/Layout";
 import { useMutation } from "@apollo/client";
 import { CREATE_NEW_TRANSFER } from "../utils/mutations";
 import { useStoreContext } from "../utils/GlobalState";
+import { toEffectiveDate } from "../utils/helpers";
 
 const AddTransferEntry = ({
   categoryType,
@@ -21,9 +23,10 @@ const AddTransferEntry = ({
 
   const initialFormState = {
     value: 0,
-    createdAt: new Date(),
+    effectiveDate: toEffectiveDate(new Date()),
     userID: state.currentUser._id,
     toUserID: "",
+    note: "",
   };
   const [formInput, setFormInput] = useState({ ...initialFormState });
   const [auditState, setAuditState] = useState({ pass: false });
@@ -35,7 +38,7 @@ const AddTransferEntry = ({
 
     const auditField = [];
 
-    const numberRequired = ["value", "createdAt"];
+    const numberRequired = ["value", "effectiveDate"];
     numberRequired.map((field) => {
       const fieldAsNumber = Number(currentFormState[field]),
         isNumber = !isNaN(fieldAsNumber),
@@ -93,9 +96,10 @@ const AddTransferEntry = ({
         input: {
           value: formInput.value,
           budgetID: budgetState._id,
-          createdAt: formInput.createdAt,
+          effectiveDate: formInput.effectiveDate,
           userID: formInput.userID,
           toUserID: formInput.toUserID,
+          note: formInput.note,
         },
       },
       update: (cache, data) => {
@@ -138,10 +142,10 @@ const AddTransferEntry = ({
               auditState={auditState}
             />
             <InlineDateInput
-              prop={`createdAt`}
+              prop={`effectiveDate`}
               input={formInput}
               setInput={setFormInput}
-              label={"Transaction Date"}
+              label={"Effective date"}
               auditState={auditState}
             />
             <InlineUserInput
@@ -151,6 +155,15 @@ const AddTransferEntry = ({
               label={"To User"}
               optionList={budgetState.ownerIDs}
               auditState={auditState}
+            />
+            <InlineTextareaInput
+              prop={"note"}
+              input={formInput}
+              setInput={setFormInput}
+              label={"Note"}
+              placeholder={"Optional — what was this transfer for?"}
+              rows={2}
+              auditState={{ note: true }}
             />
           </form>
           {createdLoading ? (

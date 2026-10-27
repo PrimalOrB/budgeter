@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { toCurrency } from "../../utils/helpers";
+import { useTheme } from "../../utils/theme";
 import { Bar } from "react-chartjs-2";
 
 const InlineBarBalance = ({ inputData, title, valueProp }) => {
+  const { resolvedTheme } = useTheme();
   const [dataState, setDataState] = useState(false);
   const [loadingState, setLoadingState] = useState(true);
   const [hoverData, setHoverData] = useState("");
@@ -107,7 +109,7 @@ const InlineBarBalance = ({ inputData, title, valueProp }) => {
   useEffect(() => {
     processData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [resolvedTheme]);
 
   return (
     <>
@@ -121,7 +123,7 @@ const InlineBarBalance = ({ inputData, title, valueProp }) => {
                 style={{
                   backgroundColor: hoverData.userID.userColor
                     ? `#${hoverData.userID.userColor}`
-                    : "#BBBBBB",
+                    : undefined,
                 }}
               >
                 {hoverData.userID.userInitials}

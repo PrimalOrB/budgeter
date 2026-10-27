@@ -1,13 +1,14 @@
 import React from "react";
 
-const Title = ( { text, additionalClass, id } ) => {
+const Title = ( { text, additionalClass, id, subtitle } ) => {
 
   id = id || ''
 
   return (
-    <span id={ id } className={ `title grad-bg ${ additionalClass ? additionalClass : '' } noselect` }>
-      { text }
-    </span>
+    <div id={ id } className={ `title ${ additionalClass ? additionalClass : '' }` }>
+      <h1 className="title-text">{ text }</h1>
+      { subtitle && <p className="title-subtitle">{ subtitle }</p> }
+    </div>
   )
 };
 

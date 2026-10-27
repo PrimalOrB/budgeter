@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { toCurrency } from "../../utils/helpers";
+import { getChartColors, useTheme } from "../../utils/theme";
 import { Bar } from "react-chartjs-2";
 
 const InlineBarTotal = ({ inputData, title, valueProp }) => {
+  const { resolvedTheme } = useTheme();
   const [dataState, setDataState] = useState(false);
   const [loadingState, setLoadingState] = useState(true);
 
   function processData() {
+    const colors = getChartColors();
     setLoadingState(true);
 
     const entry1 = inputData[`${valueProp[0]}`],
@@ -20,7 +23,7 @@ const InlineBarTotal = ({ inputData, title, valueProp }) => {
           label: title[1],
           data: [],
           hoverData: 0,
-          backgroundColor: `rgba( 0, 128, 0, 1 )`,
+          backgroundColor: colors.income,
           barPercentage: 1.0,
           categoryPercentage: 1.0,
         },
@@ -28,7 +31,7 @@ const InlineBarTotal = ({ inputData, title, valueProp }) => {
           label: title[2],
           data: [],
           hoverData: 0,
-          backgroundColor: `rgba( 200, 0, 0, 1 )`,
+          backgroundColor: colors.expense,
           barPercentage: 1.0,
           categoryPercentage: 1.0,
         },
@@ -119,7 +122,7 @@ const InlineBarTotal = ({ inputData, title, valueProp }) => {
   useEffect(() => {
     processData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [resolvedTheme]);
 
   return (
     <>

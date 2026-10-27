@@ -1,24 +1,22 @@
 import React from "react";
 import AuthenticationButton from "../authentication-button";
+import ThemeToggle from "./ThemeToggle";
 import { useStoreContext } from "../../utils/GlobalState";
 
 const AuthNav = () => {
 
     const [ state ] = useStoreContext();
-    const { currentUser } = state;
-
-    if( currentUser ){
-        const { email } = currentUser;
-        return (        
-            <div className="nav-menu">
-                <span className="username-block noselect">{ email }</span>
-                <AuthenticationButton />
-            </div>
-        )
-    }
+    const { email } = state.currentUser || {};
 
     return (
         <div className="nav-menu">
+            <ThemeToggle />
+            { email &&
+                <span className="username-block noselect" title={ email }>
+                    <span className="username-avatar" aria-hidden="true">{ email[0].toUpperCase() }</span>
+                    <span className="username-email mobile-hide">{ email }</span>
+                </span>
+            }
             <AuthenticationButton />
         </div>
     )

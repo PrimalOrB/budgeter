@@ -1,8 +1,12 @@
 import React from "react";
-import { format } from "date-fns";
-import { toCurrency } from "../utils/helpers";
-import { MdPerson, MdPeople } from "react-icons/md";
-import { FaCaretLeft, FaCaretRight } from "react-icons/fa";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { EntryRow } from "../components/Layout";
+import useMediaQuery, { DESKTOP_QUERY } from "../utils/useMediaQuery";
+
+// mobile shows a short page; desktop scrolls within the card, which is
+// stretched to the height of the chart + month summary column
+const PAGE_SIZE_MOBILE = 10;
+const PAGE_SIZE_DESKTOP = 25;
 
 const RecentTransactions = ({
   budget,
@@ -12,27 +16,21 @@ const RecentTransactions = ({
   setEditingModal,
   setEditingTransaction,
 }) => {
-  function incrementPage() {
-    setPaginateState({
-      ...paginateState,
-      offset: paginateState.offset + paginateState.limit,
-      page: paginateState.page + 1,
-    });
-  }
+  const isDesktop = useMediaQuery(DESKTOP_QUERY);
+  const limit = isDesktop ? PAGE_SIZE_DESKTOP : PAGE_SIZE_MOBILE;
 
-  function decrementPage() {
-    setPaginateState({
-      ...paginateState,
-      offset: paginateState.offset - paginateState.limit,
-      page: paginateState.page - 1,
-    });
-  }
+  const setPage = (page) => setPaginateState({ ...paginateState, page });
 
-  let transactions = [];
-  budget.months.map((month) => {
-    transactions = [...transactions, ...month.entries];
-  });
-  transactions.sort((a, b) => b.createdAt - a.createdAt);
+  const transactions = budget.months
+    .flatMap((month) => month.entries)
+    .sort((a, b) => b.effectiveDate - a.effectiveDate || b.createdAt - a.createdAt);
+
+  const pageCount = Math.max(1, Math.ceil(transactions.length / limit)),
+    // stay in range when the page size changes or months are merged in
+    page = Math.min(paginateState.page, pageCount - 1),
+    offset = page * limit,
+    isFirstPage = page === 0,
+    isLastPage = page >= pageCount - 1;
 
   const setAsEditing = (entry) => {
     setEditingModal(true);
@@ -40,127 +38,49 @@ const RecentTransactions = ({
   };
 
   return (
-    <section id="recent-transactions">
-      <div className="sub-container-description section-list-title">
-        {paginateState.page === 0 ? (
-          <span className="margin-width-auto svg-sq-1-5 svg-fill-secondary">
-            {FaCaretLeft()}
+    <section id="recent-transactions" className="card">
+      <div className="card-header">
+        <h2 className="card-title noselect">Recent transactions</h2>
+        <div className="pager">
+          <span className="pager-label noselect">
+            {page + 1} / {pageCount}
           </span>
-        ) : (
-          <span
-            className="margin-width-auto svg-sq-1-5 svg-fill-highlight"
-            onClick={decrementPage}
+          <button
+            type="button"
+            className="icon-button icon-button-sm"
+            onClick={() => setPage(page - 1)}
+            disabled={isFirstPage}
+            aria-label="Newer transactions"
           >
-            {FaCaretLeft()}
-          </span>
-        )}
-        <h4 className="padding-0-3 noselect">Recent Transactions</h4>
-        {paginateState.page + paginateState.offset > paginateState.length ? (
-          <span className="margin-width-auto svg-sq-1-5 svg-fill-secondary">
-            {FaCaretRight()}
-          </span>
-        ) : (
-          <span
-            className="margin-width-auto svg-sq-1-5 svg-fill-highlight"
-            onClick={incrementPage}
+            <FiChevronLeft />
+          </button>
+          <button
+            type="button"
+            className="icon-button icon-button-sm"
+            onClick={() => setPage(page + 1)}
+            disabled={isLastPage}
+            aria-label="Older transactions"
           >
-            {FaCaretRight()}
-          </span>
-        )}
+            <FiChevronRight />
+          </button>
+        </div>
       </div>
-      <ul className="section-list">
+      <ul className="entry-list">
         {transactions.length === 0 && (
-          <li
-            className={
-              "flex-transaction-line-sm border-bot-hightlight-1 f-valign"
-            }
-          >
-            No Recent Transactions
-          </li>
+          <li className="empty-state">No recent transactions</li>
         )}
         {transactions
-          .slice(
-            paginateState.offset,
-            paginateState.limit + paginateState.offset
-          )
-          .map((entry) => {
-            let type;
-            if (entry.valueType === "income" && entry.value > 0) {
-              type = 1;
-            }
-            if (entry.valueType === "income" && entry.value < 0) {
-              type = 3;
-            }
-            if (entry.valueType === "expense" && entry.value > 0) {
-              type = 0;
-            }
-            if (entry.valueType === "expense" && entry.value < 0) {
-              type = 2;
-            }
-            if (entry.valueType === "transfer") {
-              type = 4;
-            }
-
-            return (
-              <li
-                onClick={() => setAsEditing(entry)}
-                key={`recent_${entry._id}`}
-                className={
-                  "flex-transaction-line-sm border-bot-hightlight-1 f-valign"
-                }
-              >
-                <div className="flex f1 wrap padding-top-sm">
-                  {entry.valueType === "transfer" ? (
-                    <span className="margin-right-half colon bold f0 font-medium noselect">
-                      Transfer
-                    </span>
-                  ) : (
-                    <span className="margin-right-half colon bold f0 font-medium noselect">
-                      {
-                        categories.filter(
-                          (category) => category._id === entry.categoryID
-                        )[0].title
-                      }
-                    </span>
-                  )}
-                  <span className="f1 font-medium margin-left-half margin-right-half ellipsis noselect">
-                    {entry.title}
-                  </span>
-                  <span className="indent-1 italic font-small f-full padding-bottom-sm noselect">
-                    {format(entry.createdAt, "M/dd/yy")}
-                  </span>
-                </div>
-                <span
-                  className={`bold noselect f0${type === 0 ? " negative" : ""}${
-                    type === 1 ? " positive" : ""
-                  }${type === 2 ? " credit" : ""}${
-                    type === 3 ? " reverse" : ""
-                  }${type === 4 ? " transfer-text" : ""}`}
-                >
-                  {toCurrency(Math.abs(entry.value))}
-                </span>
-                <span
-                  className="f0 initials-icon noselect"
-                  style={{
-                    backgroundColor: entry.userID.userColor
-                      ? `#${entry.userID.userColor}`
-                      : "#BBBBBB",
-                  }}
-                  title={entry.userID.email}
-                >
-                  {entry.userID.userInitials
-                    ? entry.userID.userInitials.toUpperCase()
-                    : entry.userID.email[0].toUpperCase()}
-                </span>
-                <span
-                  className="f0 individual-icon margin-left-half noselect"
-                  title={entry.individualEntry ? "Individual" : "Shared"}
-                >
-                  {entry.individualEntry ? MdPerson() : MdPeople()}
-                </span>
-              </li>
-            );
-          })}
+          .slice(offset, offset + limit)
+          .map((entry) => (
+            <EntryRow
+              key={`recent_${entry._id}`}
+              entry={entry}
+              category={categories.find(
+                (category) => category._id === entry.categoryID
+              )}
+              onSelect={setAsEditing}
+            />
+          ))}
       </ul>
     </section>
   );

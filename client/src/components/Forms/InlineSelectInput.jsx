@@ -11,7 +11,7 @@ const InlineSelectInput = ( { prop, input, setInput, label, optionList, auditSta
     return (
         <div className={ 'form-inline-select' } >
             <label className={ 'noselect' } htmlFor={ prop }>{ label }</label>
-            <select className={ `${auditState[prop] ? 'audit-pass': 'audit-fail' }` } name={ prop } type="number" value={ input[prop] } onChange={ updateInput }>
+            <select id={ prop } className={ `${auditState[prop] ? 'audit-pass': 'audit-fail' }` } name={ prop } type="number" value={ input[prop] } onChange={ updateInput }>
                 <option disabled></option>
                 { optionList.map( option => {
                     if( option.email ){

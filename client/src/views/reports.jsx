@@ -140,12 +140,12 @@ const Reports = ({
           <section
             id="month-summary"
             key={`results`}
-            className="margin-top-full"
+            className="card margin-top-full"
           >
-            <h4 className="sub-container-description section-list-title noselect">
+            <h2 className="card-header card-title noselect">
               {format(formInput.startDate, "MMM d, yyyy")} -{" "}
               {format(formInput.endDate, "MMM d, yyyy")}
-            </h4>
+            </h2>
             <ul className="monthly-group-detail border-b-l-rad-none border-b-r-rad-none border_b_none">
               <BudgetCategoryExpandableTitle
                 data={reportData.requestCustomReport}

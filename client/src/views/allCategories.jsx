@@ -75,7 +75,7 @@ const AllCategories = ({
             }
             onClick={() => setPageState("add-category")}
           >
-            Click To Add Expense Categories
+            Click To Add Income Categories
           </li>
         )}
         {categories
@@ -96,7 +96,7 @@ const AllCategories = ({
       </ul>
       <ActionButton
         action={setAdd}
-        text={"Add New Cateogry"}
+        text={"Add new category"}
         additionalClass={"large-button"}
       />
     </section>

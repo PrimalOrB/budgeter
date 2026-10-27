@@ -1,6 +1,19 @@
 const css = require("./css.cjs");
-const { fixRounding, copyObject, toCurrency } = require("../utils/helpers.cjs");
+const {
+  fixRounding,
+  copyObject,
+  toCurrency,
+  escapeHtml,
+} = require("../utils/helpers.cjs");
 const { format } = require("date-fns");
+
+// "AO → EL" plus the optional note
+function transferLabel(entry) {
+  const direction = `${escapeHtml(entry.userID.userInitials)} &rarr; ${escapeHtml(
+    entry.toUserID.userInitials
+  )}`;
+  return entry.title ? `${direction} &middot; ${escapeHtml(entry.title)}` : direction;
+}
 
 function monthlyUserReportTemplate(data, user) {
   const matchedUserData = data.months[0].userData.find((users) =>
@@ -68,21 +81,21 @@ function monthlyUserReportTemplate(data, user) {
   sharedExpenseRows.map((category) => {
     const categoryStr = [
       `<tr class="category">
-        <td class="w-4 ml-1-r">${category.categoryTitle}</td>
+        <td class="w-4 ml-1-r">${escapeHtml(category.categoryTitle)}</td>
         <td class="w-1 c">${toCurrency(category.valueIndividual)}</td>
         <td class="w-1 c">${toCurrency(category.valueTotal)}</td>
       </tr>`,
     ];
     category.entries
-      .sort((a, b) => a.createdAt - b.createdAt)
+      .sort((a, b) => new Date(a.effectiveDate) - new Date(b.effectiveDate))
       .map((entry, i) => {
         categoryStr.push(
           `<tr class="entry ${i % 2 === 0 ? "alternate-e" : "alternate-o"}">
             <td class="w-4 flex w-10">
               <span class="w-6-r c date">${new Date(
-                entry.createdAt
+                entry.effectiveDate
               ).toLocaleDateString()}</span>
-              <span class="w-8">${entry.title}</span>
+              <span class="w-8">${escapeHtml(entry.title)}</span>
             </td>
             <td class="w-1 c ${entry.valueIndividual < 0 ? "negative" : ""}">${toCurrency(entry.valueIndividual)}</td>
             <td class="w-1 c ${entry.value < 0 ? "negative" : ""}">${toCurrency(
@@ -159,20 +172,20 @@ function monthlyUserReportTemplate(data, user) {
   individualExpenseRows.map((category) => {
     const categoryStr = [
       `<tr class="category">
-        <td class="w-5 ml-1-r">${category.categoryTitle}</td>
+        <td class="w-5 ml-1-r">${escapeHtml(category.categoryTitle)}</td>
         <td class="w-1 c">${toCurrency(category.valueTotal)}</td>
       </tr>`,
     ];
     category.entries
-      .sort((a, b) => a.createdAt - b.createdAt)
+      .sort((a, b) => new Date(a.effectiveDate) - new Date(b.effectiveDate))
       .map((entry, i) => {
         categoryStr.push(
           `<tr class="entry ${i % 2 === 0 ? "alternate-e" : "alternate-o"}">
           <td class="w-4 flex w-10">
             <span class="w-6-r c date">${new Date(
-              entry.createdAt
+              entry.effectiveDate
             ).toLocaleDateString()}</span>
-            <span class="w-8">${entry.title}</span>
+            <span class="w-8">${escapeHtml(entry.title)}</span>
           </td>
           <td class="w-1 c ${entry.value < 0 ? "negative" : ""}">${toCurrency(
             entry.value
@@ -252,21 +265,21 @@ function monthlyUserReportTemplate(data, user) {
   sharedIncomeRows.map((category) => {
     const categoryStr = [
       `<tr class="category">
-        <td class="w-4 ml-1-r">${category.categoryTitle}</td>
+        <td class="w-4 ml-1-r">${escapeHtml(category.categoryTitle)}</td>
         <td class="w-1 c">${toCurrency(category.valueIndividual)}</td>
         <td class="w-1 c">${toCurrency(category.valueTotal)}</td>
       </tr>`,
     ];
     category.entries
-      .sort((a, b) => a.createdAt - b.createdAt)
+      .sort((a, b) => new Date(a.effectiveDate) - new Date(b.effectiveDate))
       .map((entry, i) => {
         categoryStr.push(
           `<tr class="entry ${i % 2 === 0 ? "alternate-e" : "alternate-o"}">
           <td class="w-4 flex w-10">
             <span class="w-6-r c date">${new Date(
-              entry.createdAt
+              entry.effectiveDate
             ).toLocaleDateString()}</span>
-            <span class="w-8">${entry.title}</span>
+            <span class="w-8">${escapeHtml(entry.title)}</span>
           </td>
           <td class="w-1 c ${entry.valueIndividual < 0 ? "negative" : ""}">${entry.valueIndividual > 0 ? toCurrency(entry.valueIndividual) : ''}</td>
           <td class="w-1 c ${entry.value < 0 ? "negative" : ""}">${toCurrency(
@@ -343,20 +356,20 @@ function monthlyUserReportTemplate(data, user) {
   individualIncomeRows.map((category) => {
     const categoryStr = [
       `<tr class="category">
-        <td class="w-5 ml-1-r">${category.categoryTitle}</td>
+        <td class="w-5 ml-1-r">${escapeHtml(category.categoryTitle)}</td>
         <td class="w-1 c">${toCurrency(category.valueTotal)}</td>
       </tr>`,
     ];
     category.entries
-      .sort((a, b) => a.createdAt - b.createdAt)
+      .sort((a, b) => new Date(a.effectiveDate) - new Date(b.effectiveDate))
       .map((entry, i) => {
         categoryStr.push(
           `<tr class="entry ${i % 2 === 0 ? "alternate-e" : "alternate-o"}">
             <td class="w-4 flex w-10">
               <span class="w-6-r c date">${new Date(
-                entry.createdAt
+                entry.effectiveDate
               ).toLocaleDateString()}</span>
-              <span class="w-8">${entry.title}</span>
+              <span class="w-8">${escapeHtml(entry.title)}</span>
             </td>
             <td class="w-1 c ${entry.value < 0 ? "negative" : ""}">${toCurrency(
             entry.value
@@ -402,9 +415,9 @@ function monthlyUserReportTemplate(data, user) {
           `<tr class="entry ${i % 2 === 0 ? "alternate-e" : "alternate-o"}">
             <td class="w-4 flex w-10">
               <span class="w-6-r c date">${new Date(
-                entry.createdAt
+                entry.effectiveDate
               ).toLocaleDateString()}</span>
-              <span class="w-8">${entry.title}</span>
+              <span class="w-8">${transferLabel(entry)}</span>
             </td>
             <td class="w-1 c negative">${toCurrency(entry.value * -1)}</td>
           </tr>`
@@ -416,9 +429,9 @@ function monthlyUserReportTemplate(data, user) {
           `<tr class="entry ${i % 2 === 0 ? "alternate-e" : "alternate-o"}">
             <td class="w-4 flex w-10">
               <span class="w-6-r c date">${new Date(
-                entry.createdAt
+                entry.effectiveDate
               ).toLocaleDateString()}</span>
-              <span class="w-8">${entry.title}</span>
+              <span class="w-8">${transferLabel(entry)}</span>
             </td>
             <td class="w-1 c">${toCurrency(entry.value)}</td>
           </tr>`

@@ -43,6 +43,11 @@ class AuthService {
     //   window.location.assign('/');
     }
   
+    // clear token from localStorage without navigating
+    clearToken() {
+      localStorage.removeItem('id_token');
+    }
+
     // clear token from localStorage and force logout with reload
     logout() {
       // Clear user token and profile data from localStorage
