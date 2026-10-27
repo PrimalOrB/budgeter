@@ -232,6 +232,8 @@ const typeDefs = `
         queryBudget( input: BudgetQueryInput! ): Budget
         queryUserBudgets( input: UserIDInput! ): [ Budget ]
         queryCategory( input: CategoryIDInput! ): Category
+        "Permanently delete a transaction or transfer; returns its ID"
+        deleteEntry( budgetID: ID!, entryID: ID! ): ID
         saveSplitSetting( input: SplitSettingInput! ): Budget
         deleteSplitSetting( budgetID: ID!, settingID: ID! ): Budget
     }

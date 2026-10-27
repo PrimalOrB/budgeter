@@ -51,6 +51,7 @@ const Budget = ({
   setEditingModal,
   editingTransaction,
   setEditingTransaction,
+  dataVersion,
 }) => {
   const { id: _id } = useParams();
 
@@ -165,13 +166,13 @@ const Budget = ({
       },
     });
 
-  // onload run query
+  // onload run query, and again when the entry dialog changes data
   useEffect(() => {
     if (currentUser?._id) {
       queryBudget();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentUser]);
+  }, [currentUser, dataVersion]);
 
   if (errorState) {
     return (

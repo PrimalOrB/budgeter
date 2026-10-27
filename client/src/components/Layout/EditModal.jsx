@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { FiEdit2, FiX } from "react-icons/fi";
+import { useMutation } from "@apollo/client";
+import { FiEdit2, FiX, FiTrash2 } from "react-icons/fi";
+import { DELETE_ENTRY } from "../../utils/mutations";
 import { ActionButton } from "../Buttons";
 import { titleCaseString, toCurrency, formatEntryDate } from "../../utils/helpers";
 import { entryAmountClass, TransferDirection } from "./EntryRow";
@@ -10,8 +12,21 @@ const EditModal = ({
   setEditingModal,
   editingTransaction,
   setEditingTransaction,
+  onDataChanged,
 }) => {
   const [editingType, setEditingType] = useState("");
+  // deleting takes a second click to confirm
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
+
+  const [deleteEntry, { loading: deleting }] = useMutation(DELETE_ENTRY, {
+    onCompleted: () => {
+      cancelEditing();
+      setPageState("dashboard");
+      onDataChanged?.();
+    },
+    onError: (err) => setDeleteError(err.message),
+  });
 
   useEffect(() => {
     if (editingTransaction?.__typename) {
@@ -46,8 +61,18 @@ const EditModal = ({
   const cancelEditing = () => {
     setEditingTransaction(null);
     setEditingType("");
+    setConfirmingDelete(false);
+    setDeleteError(null);
     return setEditingModal(false);
   };
+
+  const confirmDelete = () =>
+    deleteEntry({
+      variables: {
+        budgetID: editingTransaction.budgetID,
+        entryID: editingTransaction._id,
+      },
+    });
 
   // close on Escape
   useEffect(() => {
@@ -128,19 +153,57 @@ const EditModal = ({
         ) : (
           <h2 className="modal-title">{entry?.title}</h2>
         )}
-        <div className="modal-actions">
-          <ActionButton
-            action={cancelEditing}
-            text={"Cancel"}
-            additionalClass={"btn-secondary"}
-          />
-          <ActionButton
-            action={setEditing}
-            icon={FiEdit2}
-            text={`Edit ${editingType}`}
-            additionalClass={"btn-primary"}
-          />
-        </div>
+        {deleteError && (
+          <div className="banner banner-error modal-banner" role="alert">
+            {deleteError}
+          </div>
+        )}
+        {confirmingDelete ? (
+          <div className="modal-confirm">
+            <p>
+              Delete this {editingType} permanently? This can't be undone.
+            </p>
+            <div className="modal-actions">
+              <ActionButton
+                action={() => setConfirmingDelete(false)}
+                text={"Keep it"}
+                additionalClass={"btn-secondary"}
+                disabled={deleting}
+              />
+              <ActionButton
+                action={confirmDelete}
+                icon={FiTrash2}
+                text={deleting ? "Deleting…" : "Delete"}
+                additionalClass={"btn-danger"}
+                disabled={deleting}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="modal-actions">
+            <ActionButton
+              action={cancelEditing}
+              text={"Cancel"}
+              additionalClass={"btn-secondary"}
+            />
+            <ActionButton
+              action={setEditing}
+              icon={FiEdit2}
+              text={`Edit ${editingType}`}
+              additionalClass={"btn-primary"}
+            />
+          </div>
+        )}
+        {isEntry && !confirmingDelete && (
+          <button
+            type="button"
+            className="modal-delete"
+            onClick={() => setConfirmingDelete(true)}
+          >
+            <FiTrash2 aria-hidden="true" />
+            Delete {editingType}
+          </button>
+        )}
       </div>
     </div>
   );

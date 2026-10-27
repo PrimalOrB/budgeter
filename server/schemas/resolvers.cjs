@@ -704,6 +704,23 @@ const resolvers = {
       return Budget.find({ ownerIDs: authUser._id });
     },
 
+    deleteEntry: async (parent, { budgetID, entryID }, context) => {
+      const authUser = requireUser(context);
+      const { budget } = await loadBudgetForUser(budgetID, authUser);
+      const entry = await loadEntryInBudget(entryID, budget._id);
+
+      await Entry.deleteOne({ _id: entry._id });
+      await Budget.updateOne({ _id: budget._id }, { $pull: { entries: entry._id } });
+      if (entry.categoryID) {
+        await Category.updateOne(
+          { _id: entry.categoryID, countUse: { $gt: 0 } },
+          { $inc: { countUse: -1 } }
+        );
+      }
+
+      return entry._id;
+    },
+
     // add a split setting, or replace the one starting the same month
     saveSplitSetting: async (parent, { input }, context) => {
       const authUser = requireUser(context);

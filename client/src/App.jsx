@@ -60,6 +60,8 @@ const App = () => {
   const [editingModal, setEditingModal] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [pageState, setPageState] = useState("dashboard");
+  // bumped when the modal changes data, so the budget view refetches
+  const [dataVersion, setDataVersion] = useState(0);
 
   if (isLoading) {
     return <FullPageSpinLoader />;
@@ -76,6 +78,7 @@ const App = () => {
             setEditingModal={setEditingModal}
             editingTransaction={editingTransaction}
             setEditingTransaction={setEditingTransaction}
+            onDataChanged={() => setDataVersion((version) => version + 1)}
           />
           <main className="app-main">
             <Routes>
@@ -91,6 +94,7 @@ const App = () => {
                     setEditingModal={setEditingModal}
                     editingTransaction={editingTransaction}
                     setEditingTransaction={setEditingTransaction}
+                    dataVersion={dataVersion}
                   />
                 }
                 path="/budget/:id/:tab?/:cat?"

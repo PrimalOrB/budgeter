@@ -263,3 +263,9 @@ export const DELETE_SPLIT_SETTING = gql`
     }
   }
 `;
+
+export const DELETE_ENTRY = gql`
+  mutation deleteEntry($budgetID: ID!, $entryID: ID!) {
+    deleteEntry(budgetID: $budgetID, entryID: $entryID)
+  }
+`;

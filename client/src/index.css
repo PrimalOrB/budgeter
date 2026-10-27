@@ -1920,3 +1920,56 @@ form {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+
+/* destructive actions */
+.btn-danger {
+  background: var(--expense);
+  border-color: var(--expense);
+  color: #fff;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--expense) 85%, #000);
+  border-color: color-mix(in srgb, var(--expense) 85%, #000);
+}
+
+.modal-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: var(--space-3);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-transform: capitalize;
+  transition: color 0.15s var(--ease), background 0.15s var(--ease);
+}
+
+.modal-delete:hover {
+  color: var(--expense);
+  background: var(--danger-bg);
+}
+
+.modal-confirm {
+  margin-top: var(--space-5);
+  padding: var(--space-4);
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius);
+  background: var(--danger-bg);
+}
+
+.modal-confirm p {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.modal-confirm .modal-actions {
+  margin-top: var(--space-3);
+}
+
+.modal-banner {
+  margin-top: var(--space-4);
+}
