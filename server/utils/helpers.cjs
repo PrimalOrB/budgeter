@@ -310,22 +310,12 @@ function copyObject(obj) {
   return JSON.parse(JSON.stringify(obj));
 }
 
-function escapeHtml(input) {
-  return String(input ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
 module.exports = {
   toCurrency,
   extractPropAsStrToArr,
   dateToMonthStr,
   fixRounding,
   copyObject,
-  escapeHtml,
   createMonthLabelFromOffset,
   createMonthObj,
   createMonthlyCategoryObj,

@@ -1,4 +1,3 @@
-const faker = require("faker");
 const db = require("../config/connection.cjs");
 const { Entry } = require("../models/index.cjs");
 const { dateToMonthStr } = require("../utils/helpers.cjs");

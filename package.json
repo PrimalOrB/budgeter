@@ -27,10 +27,5 @@
   "homepage": "https://github.com/PrimalOrB/budgeter#readme",
   "devDependencies": {
     "concurrently": "^6.2.0"
-  },
-  "dependencies": {
-    "dotenv": "^10.0.0",
-    "init": "^0.1.2",
-    "vite": "^5.2.8"
   }
 }

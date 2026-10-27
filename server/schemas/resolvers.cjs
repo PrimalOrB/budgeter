@@ -28,7 +28,7 @@ const {
 } = require("../utils/helpers.cjs");
 const { renderPdf } = require("../utils/pdf.cjs");
 const { buildStatement } = require("../reports/statement.cjs");
-const statementTemplate = require("../templates/statement.cjs");
+const statementDocument = require("../templates/statement.cjs");
 const {
   eachMonthOfInterval,
   isBefore,
@@ -217,9 +217,11 @@ async function createStatementPdf({ budgetID, userID, startMonth, endMonth }, co
     labels.map((label, i) => createMonthObj(label, i))
   );
   const statement = buildStatement({ budget, months, userID });
-  const pdf = await renderPdf(statementTemplate(statement), {
-    footer: `${budget.title} · ${statement.user.email}`,
-  });
+  const pdf = await renderPdf(
+    statementDocument(statement, {
+      footer: `${budget.title} · ${statement.user.email}`,
+    })
+  );
 
   const slug = (label) => label.replace("/", "-");
   const initials = statement.user.userInitials || "statement";
