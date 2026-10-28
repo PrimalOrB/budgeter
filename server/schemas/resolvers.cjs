@@ -38,6 +38,88 @@ const {
 } = require("date-fns");
 
 const CATEGORY_TYPES = ["income", "expense"];
+// extra data a category's entries can carry
+const META_TYPES = ["mileage"];
+const MILEAGE_FIELDS = ["pricePerLitre", "litres", "distance"];
+
+// "" / null clear the meta type; anything else must be a known type
+function cleanMetaType(metaType) {
+  if (metaType === null || metaType === undefined || metaType === "") {
+    return undefined;
+  }
+  if (!META_TYPES.includes(metaType)) {
+    throw inputError("Unknown tracking type");
+  }
+  return metaType;
+}
+
+const vehicleName = (vehicle) =>
+  [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ");
+
+// distance and fill-up count per vehicle, from every entry logged against it
+async function vehicleTotals(budgetID) {
+  const rows = await Entry.aggregate([
+    { $match: { budgetID, "mileage.vehicleID": { $exists: true } } },
+    {
+      $group: {
+        _id: "$mileage.vehicleID",
+        totalDistance: { $sum: { $ifNull: ["$mileage.distance", 0] } },
+        fillCount: { $sum: 1 },
+      },
+    },
+  ]);
+  return new Map(rows.map((row) => [String(row._id), row]));
+}
+
+function presentVehicle(vehicle, totals) {
+  const total = totals.get(String(vehicle._id)) || {};
+  const totalDistance = fixRounding(total.totalDistance || 0, 1);
+  return {
+    _id: vehicle._id,
+    make: vehicle.make,
+    model: vehicle.model,
+    year: vehicle.year,
+    plate: vehicle.plate,
+    color: vehicle.color,
+    name: vehicleName(vehicle),
+    totalDistance,
+    fillCount: total.fillCount || 0,
+    odometer: fixRounding((vehicle.odometerOffset || 0) + totalDistance, 1),
+    defaultFor: (vehicle.defaultFor || []).map(String),
+  };
+}
+
+function loadVehicle(budget, vehicleID) {
+  assertObjectId(vehicleID, "vehicle");
+  const vehicle = budget.vehicles.id(vehicleID);
+  if (!vehicle) {
+    throw inputError("Vehicle isn't in this budget");
+  }
+  return vehicle;
+}
+
+// fuel details for a transaction, or null when none were given
+function cleanMileage(mileage, budget, category) {
+  if (!mileage) {
+    return null;
+  }
+  if (category.metaType !== "mileage") {
+    throw inputError("This category doesn't track mileage");
+  }
+  loadVehicle(budget, mileage.vehicleID);
+  const cleaned = { vehicleID: mileage.vehicleID };
+  MILEAGE_FIELDS.forEach((field) => {
+    const value = mileage[field];
+    if (value === null || value === undefined) {
+      return;
+    }
+    if (!(Number.isFinite(value) && value >= 0)) {
+      throw inputError(`${field} must be zero or more`);
+    }
+    cleaned[field] = value;
+  });
+  return cleaned;
+}
 
 function assertObjectId(id, label) {
   if (!mongoose.isValidObjectId(id)) {
@@ -246,6 +328,13 @@ const resolvers = {
   },
 
   Budget: {
+    vehicles: async (budget) => {
+      if (!budget.vehicles?.length) {
+        return [];
+      }
+      const totals = await vehicleTotals(budget._id);
+      return budget.vehicles.map((vehicle) => presentVehicle(vehicle, totals));
+    },
     splitSettings: (budget) =>
       [...(budget.splitSettings || [])].sort((a, b) =>
         a.effectiveMonth < b.effectiveMonth ? -1 : 1
@@ -300,6 +389,34 @@ const resolvers = {
         budget,
         [...new Set(months)].map((label, i) => createMonthObj(label, i))
       );
+    },
+
+    vehicleLog: async (parent, { budgetID, vehicleID }, context) => {
+      const authUser = requireUser(context);
+      const { budget } = await loadBudgetForUser(budgetID, authUser);
+      const vehicle = loadVehicle(budget, vehicleID);
+
+      const entries = await Entry.find({
+        budgetID: budget._id,
+        "mileage.vehicleID": vehicle._id,
+      })
+        .sort({ effectiveDate: 1, createdAt: 1 })
+        .populate("userID");
+
+      let odometer = vehicle.odometerOffset || 0;
+      const fills = entries.map((entry) => {
+        const { litres, distance } = entry.mileage;
+        odometer += distance || 0;
+        return {
+          entry,
+          odometer: fixRounding(odometer, 1),
+          litresPer100km:
+            litres > 0 && distance > 0 ? (litres / distance) * 100 : null,
+        };
+      });
+
+      const totals = await vehicleTotals(budget._id);
+      return { vehicle: presentVehicle(vehicle, totals), fills };
     },
 
     requestCustomReport: async (
@@ -538,7 +655,12 @@ const resolvers = {
         throw inputError("Category type must be income or expense");
       }
 
-      const category = await Category.create({ budgetID, title, categoryType });
+      const category = await Category.create({
+        budgetID,
+        title,
+        categoryType,
+        metaType: cleanMetaType(input.metaType),
+      });
 
       return Budget.findByIdAndUpdate(
         budgetID,
@@ -559,6 +681,10 @@ const resolvers = {
       await loadBudgetForUser(category.budgetID, authUser);
 
       category.title = title;
+      // only change the tracking type when the client sends the field
+      if ("metaType" in input) {
+        category.metaType = cleanMetaType(input.metaType);
+      }
       return category.save();
     },
 
@@ -571,6 +697,7 @@ const resolvers = {
       const { budget, owners } = await loadBudgetForUser(budgetID, authUser);
       assertOwner(owners, userID);
       const category = await loadCategoryInBudget(categoryID, budget._id);
+      const mileage = cleanMileage(input.mileage, budget, category);
 
       const newEntry = await Entry.create({
         title,
@@ -582,6 +709,7 @@ const resolvers = {
         monthString: dateToMonthStr(effectiveDate),
         valueType: category.categoryType,
         individualEntry: input.individualEntry || false,
+        mileage: mileage || undefined,
       });
 
       await Category.updateOne({ _id: category._id }, { $inc: { countUse: 1 } });
@@ -607,6 +735,7 @@ const resolvers = {
         throw inputError("Use editTransfer for transfers");
       }
       const category = await loadCategoryInBudget(categoryID, budget._id);
+      const mileage = cleanMileage(input.mileage, budget, category);
 
       // keep category usage counts accurate when an entry is re-categorized
       if (!entry.categoryID?.equals(category._id)) {
@@ -638,6 +767,8 @@ const resolvers = {
           monthString: dateToMonthStr(effectiveDate),
           userID,
           individualEntry: input.individualEntry || false,
+          // fuel details are replaced, or removed when none are sent
+          ...(mileage ? { mileage } : { $unset: { mileage: 1 } }),
         },
         { new: true, runValidators: true }
       )
@@ -758,6 +889,78 @@ const resolvers = {
       }
 
       return entry._id;
+    },
+
+    saveVehicle: async (parent, { input }, context) => {
+      const authUser = requireUser(context);
+      const { budget } = await loadBudgetForUser(input.budgetID, authUser);
+
+      const fields = {
+        make: String(input.make || "").trim(),
+        model: String(input.model || "").trim(),
+        year: input.year ?? undefined,
+        plate: String(input.plate || "").trim(),
+        color: String(input.color || "").trim(),
+      };
+      if (!fields.make || !fields.model) {
+        throw inputError("Make and model are required");
+      }
+      if (fields.year !== undefined && !(fields.year >= 1900 && fields.year <= 2100)) {
+        throw inputError("Year must be between 1900 and 2100");
+      }
+
+      if (input.vehicleID) {
+        loadVehicle(budget, input.vehicleID).set(fields);
+      } else {
+        budget.vehicles.push(fields);
+      }
+      return budget.save();
+    },
+
+    deleteVehicle: async (parent, { budgetID, vehicleID }, context) => {
+      const authUser = requireUser(context);
+      const { budget } = await loadBudgetForUser(budgetID, authUser);
+      const vehicle = loadVehicle(budget, vehicleID);
+
+      const fills = await Entry.countDocuments({
+        budgetID: budget._id,
+        "mileage.vehicleID": vehicle._id,
+      });
+      if (fills > 0) {
+        throw inputError(
+          `${vehicleName(vehicle)} has ${fills} fill-up${fills === 1 ? "" : "s"} logged and can't be deleted`
+        );
+      }
+      vehicle.deleteOne();
+      return budget.save();
+    },
+
+    setDefaultVehicle: async (parent, { budgetID, vehicleID }, context) => {
+      const authUser = requireUser(context);
+      const { budget } = await loadBudgetForUser(budgetID, authUser);
+      const chosen = vehicleID ? loadVehicle(budget, vehicleID) : null;
+
+      // one default per person
+      budget.vehicles.forEach((vehicle) => vehicle.defaultFor.pull(authUser._id));
+      if (chosen) {
+        chosen.defaultFor.push(authUser._id);
+      }
+      return budget.save();
+    },
+
+    setVehicleOdometer: async (parent, { budgetID, vehicleID, odometer }, context) => {
+      const authUser = requireUser(context);
+      const { budget } = await loadBudgetForUser(budgetID, authUser);
+      const vehicle = loadVehicle(budget, vehicleID);
+      if (!(Number.isFinite(odometer) && odometer >= 0)) {
+        throw inputError("Odometer must be zero or more");
+      }
+
+      // keep logged distances; shift the starting point so the total matches
+      const totals = await vehicleTotals(budget._id);
+      const logged = totals.get(String(vehicle._id))?.totalDistance || 0;
+      vehicle.odometerOffset = fixRounding(odometer - logged, 1);
+      return budget.save();
     },
 
     // add a split setting, or replace the one starting the same month

@@ -24,6 +24,12 @@ const categorySchema = new Schema(
       type: Number,
       default: 0 
     },
+    // optional extra data entries in this category can carry, e.g.
+    // "mileage" lets fuel purchases record vehicle, litres and distance
+    metaType: {
+      type: String,
+      enum: [ 'mileage' ],
+    },
   },
 )
 

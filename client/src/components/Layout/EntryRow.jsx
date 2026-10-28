@@ -2,6 +2,7 @@ import React from "react";
 import { MdPerson, MdPeople } from "react-icons/md";
 import { FiArrowRight } from "react-icons/fi";
 import { toCurrency, formatEntryDate } from "../../utils/helpers";
+import { useMetaLink, entryMetaStat } from "../../utils/metaLinks";
 
 // amount style: income/expense, negative values are refunds/reversals
 export function entryAmountClass(entry) {
@@ -38,11 +39,28 @@ export const TransferDirection = ({ entry }) => (
   </span>
 );
 
+// sits inside the row button, so it's a span that stops the row's click;
+// keyboard users reach the same link from the entry dialog
+const MetaLinkIcon = ({ link }) => (
+  <span
+    className="entry-meta-link"
+    title={link.label}
+    onClick={(e) => {
+      e.stopPropagation();
+      link.open();
+    }}
+  >
+    <link.icon aria-hidden="true" />
+  </span>
+);
+
 const EntryRow = ({ entry, category, onSelect, compact }) => {
   const isTransfer = entry.valueType === "transfer";
   const label = isTransfer ? "Transfer" : category?.title || "—";
   // a transfer's title is an optional note
   const text = isTransfer && compact ? entry.title || "Transfer" : entry.title;
+  const metaLink = useMetaLink(entry);
+  const metaStat = entryMetaStat(entry);
 
   return (
     <li className={`entry-row${compact ? " entry-row-compact" : ""}`}>
@@ -52,8 +70,19 @@ const EntryRow = ({ entry, category, onSelect, compact }) => {
         onClick={() => onSelect(entry)}
       >
         <span className="entry-main">
-          {!compact && <span className="entry-category">{label}</span>}
-          {text && <span className="entry-title">{text}</span>}
+          {!compact && (
+            <span className="entry-category">
+              {label}
+              {metaLink && <MetaLinkIcon link={metaLink} />}
+            </span>
+          )}
+          {text && (
+            <span className="entry-title">
+              {text}
+              {metaStat && <span className="entry-meta-stat">{metaStat}</span>}
+              {compact && metaLink && <MetaLinkIcon link={metaLink} />}
+            </span>
+          )}
         </span>
         <span className="entry-date">
           {formatEntryDate(entry.effectiveDate, "MMM d")}

@@ -1,10 +1,36 @@
 import React, { useState, useEffect } from "react";
 import { useMutation } from "@apollo/client";
+import { useMetaLink, useVehicleName } from "../../utils/metaLinks";
 import { FiEdit2, FiX, FiTrash2 } from "react-icons/fi";
 import { DELETE_ENTRY } from "../../utils/mutations";
 import { ActionButton } from "../Buttons";
 import { titleCaseString, toCurrency, formatEntryDate } from "../../utils/helpers";
 import { entryAmountClass, TransferDirection } from "./EntryRow";
+
+const FuelSummary = ({ entry }) => {
+  const vehicleName = useVehicleName(entry.mileage.vehicleID);
+  const metaLink = useMetaLink(entry);
+  const { pricePerLitre, litres, distance } = entry.mileage;
+  const parts = [
+    vehicleName,
+    litres != null && `${litres} L`,
+    pricePerLitre != null && `$${pricePerLitre.toFixed(3)}/L`,
+    distance != null && `${distance} km`,
+    litres && distance && `${((litres / distance) * 100).toFixed(1)} L/100 km`,
+  ].filter(Boolean);
+  return (
+    <div className="modal-fuel">
+      {parts.map((part) => (
+        <span key={part}>{part}</span>
+      ))}
+      {metaLink && (
+        <button type="button" className="modal-fuel-link" onClick={metaLink.open}>
+          <metaLink.icon aria-hidden="true" /> Fuel log
+        </button>
+      )}
+    </div>
+  );
+};
 
 const EditModal = ({
   setPageState,
@@ -127,6 +153,7 @@ const EditModal = ({
             {entry.valueType === "transfer" && entry.title && (
               <p className="modal-note">{entry.title}</p>
             )}
+            {entry.mileage && <FuelSummary entry={entry} />}
             <dl className="detail-list">
               <dt>Effective date</dt>
               <dd>{formatEntryDate(entry.effectiveDate)}</dd>

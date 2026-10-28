@@ -2254,3 +2254,603 @@ form {
   color: var(--expense);
   font-weight: 600;
 }
+
+/* ==========================================================================
+   Fuel details (mileage-tracking categories)
+   ========================================================================== */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.fuel-panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  transition: border-color 0.15s var(--ease), background 0.15s var(--ease);
+}
+
+.fuel-panel-open {
+  background: var(--surface);
+  border-color: var(--border-strong);
+}
+
+.fuel-panel-empty {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.fuel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  min-height: 44px;
+}
+
+.fuel-title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.85rem;
+  font-weight: 550;
+}
+
+.fuel-title svg {
+  color: var(--accent);
+}
+
+.fuel-optional {
+  color: var(--text-subtle);
+  font-weight: 400;
+  font-size: 0.8rem;
+}
+
+.switch {
+  position: relative;
+  flex: none;
+  width: 38px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  background: var(--border-strong);
+  transition: background 0.15s var(--ease);
+}
+
+.switch:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--focus);
+}
+
+.switch-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  transition: transform 0.15s var(--ease);
+}
+
+.switch-on {
+  background: var(--accent);
+}
+
+.switch-on .switch-knob {
+  transform: translateX(16px);
+}
+
+.fuel-body {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+  padding: var(--space-1) var(--space-3) var(--space-3);
+}
+
+.fuel-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.fuel-field-wide {
+  grid-column: 1 / -1;
+}
+
+.fuel-field select,
+.fuel-input {
+  width: 100%;
+  height: 38px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 0.95rem;
+  transition: border-color 0.15s var(--ease), box-shadow 0.15s var(--ease);
+}
+
+.fuel-field select {
+  padding: 0 var(--space-3);
+  outline: none;
+}
+
+.fuel-input {
+  display: flex;
+  align-items: center;
+}
+
+.fuel-input input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 0 0 var(--space-3);
+  border: 0;
+  background: transparent;
+  outline: none;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 550;
+}
+
+.fuel-suffix {
+  padding: 0 var(--space-3) 0 6px;
+  color: var(--text-subtle);
+  font-size: 0.8rem;
+}
+
+.fuel-field select:focus,
+.fuel-input:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--focus);
+}
+
+.fuel-summary {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.fuel-summary strong {
+  color: var(--text);
+}
+
+.fuel-use-total {
+  margin-left: var(--space-2);
+  color: var(--accent);
+  font-weight: 550;
+}
+
+.fuel-use-total:hover {
+  text-decoration: underline;
+}
+
+.fuel-efficiency {
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 550;
+  font-size: 0.8rem;
+}
+
+/* ==========================================================================
+   Vehicles (settings)
+   ========================================================================== */
+.vehicles-card {
+  grid-column: 1 / -1;
+}
+
+.vehicles-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.vehicle-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.vehicle-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--border);
+}
+
+.vehicle-item:first-child {
+  border-top: 0;
+}
+
+.vehicle-item-editing {
+  display: block;
+}
+
+.vehicle-swatch {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--text-subtle);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+
+.vehicle-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.vehicle-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 600;
+}
+
+.vehicle-meta {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.vehicle-actions {
+  display: flex;
+  gap: 2px;
+}
+
+.icon-button-active {
+  color: var(--transfer);
+}
+
+.icon-button-active svg {
+  fill: currentColor;
+}
+
+.vehicle-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.vehicle-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.vehicle-form-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.vehicle-form-grid input {
+  height: 38px;
+  padding: 0 var(--space-3);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.vehicle-form-grid input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--focus);
+}
+
+.vehicle-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+/* ==========================================================================
+   Vehicle log page
+   ========================================================================== */
+.vehicle-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.vehicle-page-head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.vehicle-page-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.vehicle-page-title .vehicle-swatch {
+  width: 22px;
+  height: 22px;
+}
+
+.vehicle-stats {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.vehicle-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface);
+}
+
+.vehicle-stat-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.vehicle-stat-value {
+  font-size: 1.05rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+
+.vehicle-chart-head {
+  flex-wrap: wrap;
+}
+
+.vehicle-chart-head .segmented {
+  display: inline-flex;
+  max-width: 100%;
+}
+
+.vehicle-chart-head .segmented-option {
+  flex: none;
+  height: 30px;
+  padding: 0 var(--space-3);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.segmented-scroll {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.vehicle-chart {
+  position: relative;
+  height: 300px;
+  padding: var(--space-4) var(--space-3) 0;
+}
+
+.vehicle-chart-legend {
+  display: flex;
+  gap: var(--space-4);
+  padding: var(--space-2) var(--space-4) var(--space-3);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.legend-accent {
+  background: var(--accent);
+}
+
+.legend-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  opacity: 0.45;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.fuel-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.fuel-table th {
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 550;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.fuel-table td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.fuel-table tbody tr {
+  cursor: pointer;
+  transition: background 0.1s var(--ease);
+}
+
+.fuel-table tbody tr:hover,
+.fuel-table tbody tr:focus-visible {
+  background: var(--surface-hover);
+  outline: none;
+}
+
+.fuel-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.fuel-table .num {
+  text-align: right;
+}
+
+.fuel-table .strong {
+  font-weight: 600;
+}
+
+.fuel-table .muted {
+  color: var(--text-muted);
+}
+
+/* fuel details in the entry dialog */
+.modal-fuel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.modal-fuel span {
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 960px) {
+  .vehicle-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .fuel-body,
+  .vehicle-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .fuel-body .fuel-field:nth-child(4) {
+    grid-column: 1 / -1;
+  }
+
+  .vehicle-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .vehicle-stat {
+    padding: var(--space-2) var(--space-3);
+  }
+
+
+  .vehicle-chart {
+    height: 240px;
+    padding: var(--space-3) var(--space-2) 0;
+  }
+
+  .fuel-table th,
+  .fuel-table td {
+    padding: var(--space-2);
+  }
+
+  .fuel-table .hide-sm {
+    display: none;
+  }
+}
+
+.card-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* entries with linked data (e.g. fuel details) link to it beside the label */
+.entry-meta-link {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  margin: -3px 0 -3px 6px;
+  vertical-align: middle;
+  border-radius: var(--radius-sm);
+  color: var(--text-subtle);
+  cursor: pointer;
+  transition: background 0.12s var(--ease), color 0.12s var(--ease);
+}
+
+.entry-meta-link svg {
+  width: 14px;
+  height: 14px;
+}
+
+.entry-meta-link:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.modal-fuel-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 550;
+}
+
+.modal-fuel-link:hover {
+  text-decoration: underline;
+}
+
+/* a figure from the linked data after the title, e.g. L/100 km */
+.entry-meta-stat {
+  margin-left: 6px;
+  color: var(--text-subtle);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}

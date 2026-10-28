@@ -61,7 +61,21 @@ const entrySchema = new Schema(
     individualEntry: {
       type: Boolean,
       default: false
-    }
+    },
+    // optional fuel details for categories with metaType "mileage"
+    mileage: {
+      type: new Schema(
+        {
+          vehicleID: { type: Schema.Types.ObjectId, required: true },
+          pricePerLitre: { type: Number, min: 0 },
+          litres: { type: Number, min: 0 },
+          // km driven since the previous fill-up
+          distance: { type: Number, min: 0 },
+        },
+        { _id: false }
+      ),
+      default: undefined,
+    },
   },
   {
     // createdAt (immutable, when the record was made) + updatedAt
@@ -71,6 +85,7 @@ const entrySchema = new Schema(
 
 entrySchema.index({ budgetID: 1, monthString: 1 });
 entrySchema.index({ budgetID: 1, effectiveDate: -1 });
+entrySchema.index({ budgetID: 1, "mileage.vehicleID": 1 }, { sparse: true });
 
 const Entry = model( 'Entry', entrySchema );
 

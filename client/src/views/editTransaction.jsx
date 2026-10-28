@@ -10,6 +10,10 @@ import {
   InlineDateInput,
   InlineUserInput,
   InlineSwitchTwoWay,
+  FuelDetailsInput,
+  emptyFuel,
+  fuelFromEntry,
+  fuelForSubmit,
 } from "../components/Forms";
 import { FullPageSpinLoader } from "../components";
 import { InlineError, InlineNotification } from "../components/Notifications";
@@ -37,8 +41,13 @@ const EditTransactionEntry = ({
     effectiveDate: null,
     userID: "null",
     individualEntry: false,
+    fuel: emptyFuel,
   };
   const [formInput, setFormInput] = useState({ ...initialFormState });
+  // categories that track mileage offer optional fuel details
+  const tracksMileage =
+    budgetState.categories.find((c) => c._id === formInput.categoryID)?.metaType ===
+    "mileage";
   const [auditState, setAuditState] = useState({ pass: false });
   const [errorState, setErrorState] = useState();
   const [populated, setPopulated] = useState(false);
@@ -90,7 +99,7 @@ const EditTransactionEntry = ({
 
   useEffect(() => {
     if (entryData?.requestSingleTransaction) {
-      const { categoryID, title, value, effectiveDate, userID, individualEntry } =
+      const { categoryID, title, value, effectiveDate, userID, individualEntry, mileage } =
         entryData.requestSingleTransaction;
       setFormInput({
         categoryID,
@@ -99,6 +108,7 @@ const EditTransactionEntry = ({
         effectiveDate,
         userID: userID._id,
         individualEntry,
+        fuel: fuelFromEntry(mileage),
       });
       setPopulated(true);
     }
@@ -129,6 +139,7 @@ const EditTransactionEntry = ({
           effectiveDate: formInput.effectiveDate,
           userID: formInput.userID,
           individualEntry: formInput.individualEntry,
+          mileage: tracksMileage ? fuelForSubmit(formInput.fuel) : null,
         },
       },
       update: (cache, data) => {
@@ -189,6 +200,13 @@ const EditTransactionEntry = ({
                   label={"Value"}
                   auditState={auditState}
                 />
+                {tracksMileage && (
+                  <FuelDetailsInput
+                    input={formInput}
+                    setInput={setFormInput}
+                    vehicles={budgetState.vehicles}
+                  />
+                )}
                 <InlineDateInput
                   prop={`effectiveDate`}
                   input={formInput}

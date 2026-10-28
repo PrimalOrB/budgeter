@@ -7,6 +7,9 @@ import {
   InlineDateInput,
   InlineUserInput,
   InlineSwitchTwoWay,
+  FuelDetailsInput,
+  emptyFuel,
+  fuelForSubmit,
 } from "../components/Forms";
 import { InlineError, InlineNotification } from "../components/Notifications";
 import { Title } from "../components/Layout";
@@ -31,8 +34,13 @@ const AddTransactionEntry = ({
     effectiveDate: toEffectiveDate(new Date()),
     userID: state.currentUser._id,
     individualEntry: false,
+    fuel: emptyFuel,
   };
   const [formInput, setFormInput] = useState({ ...initialFormState });
+  // categories that track mileage offer optional fuel details
+  const tracksMileage =
+    budgetState.categories.find((c) => c._id === formInput.categoryID)?.metaType ===
+    "mileage";
   const [auditState, setAuditState] = useState({ pass: false });
   const [errorState, setErrorState] = useState();
 
@@ -92,6 +100,7 @@ const AddTransactionEntry = ({
           effectiveDate: formInput.effectiveDate,
           userID: formInput.userID,
           individualEntry: formInput.individualEntry,
+          mileage: tracksMileage ? fuelForSubmit(formInput.fuel) : null,
         },
       },
       update: (cache, data) => {
@@ -141,6 +150,13 @@ const AddTransactionEntry = ({
               label={"Value"}
               auditState={auditState}
             />
+            {tracksMileage && (
+              <FuelDetailsInput
+                input={formInput}
+                setInput={setFormInput}
+                vehicles={budgetState.vehicles}
+              />
+            )}
             <InlineDateInput
               prop={`effectiveDate`}
               input={formInput}

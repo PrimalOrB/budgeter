@@ -1,5 +1,5 @@
 import { gql } from "@apollo/client";
-import { MONTH_FIELDS } from "./mutations";
+import { MONTH_FIELDS, VEHICLE_FIELDS } from "./mutations";
 
 export const REQUEST_STATEMENT_PDF = gql`
   query requestStatement(
@@ -49,6 +49,12 @@ export const QUERY_SINGLE_TRANSACTION = gql`
         userColor
       }
       individualEntry
+      mileage {
+        vehicleID
+        pricePerLitre
+        litres
+        distance
+      }
     }
   }
 `;
@@ -131,6 +137,12 @@ export const QUERY_CUSTOM_REPORT = gql`
           userColor
         }
         individualEntry
+        mileage {
+          vehicleID
+          pricePerLitre
+          litres
+          distance
+        }
       }   
       incomeCategories {
         categoryID
@@ -153,4 +165,43 @@ export const REQUEST_BUDGET_MONTHS = gql`
     }
   }
   ${MONTH_FIELDS}
+`;
+
+export const VEHICLE_LOG = gql`
+  query vehicleLog($budgetID: ID!, $vehicleID: ID!) {
+    vehicleLog(budgetID: $budgetID, vehicleID: $vehicleID) {
+      vehicle {
+        ...VehicleFields
+      }
+      fills {
+        odometer
+        litresPer100km
+        entry {
+          _id
+          createdAt
+          updatedAt
+          effectiveDate
+          title
+          value
+          valueType
+          budgetID
+          categoryID
+          individualEntry
+          userID {
+            _id
+            email
+            userInitials
+            userColor
+          }
+          mileage {
+            vehicleID
+            pricePerLitre
+            litres
+            distance
+          }
+        }
+      }
+    }
+  }
+  ${VEHICLE_FIELDS}
 `;

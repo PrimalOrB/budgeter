@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { ActionButton } from "../components/Buttons";
-import { InlineTextInput, InlineSelectInput } from "../components/Forms";
+import {
+  InlineTextInput,
+  InlineSelectInput,
+  InlineTrackingInput,
+} from "../components/Forms";
 import { InlineError, InlineNotification } from "../components/Notifications";
 import { useMutation } from "@apollo/client";
 import { CREATE_NEW_BUDGET_CATEGORY } from "../utils/mutations";
@@ -11,6 +15,7 @@ const AddCategory = ({ id, refetch, setPageState }) => {
     budgetID: id,
     title: "",
     categoryType: "",
+    metaType: "",
   };
   const [formInput, setFormInput] = useState({ ...initialFormState });
   const [auditState, setAuditState] = useState({ pass: false });
@@ -59,6 +64,9 @@ const AddCategory = ({ id, refetch, setPageState }) => {
           budgetID: formInput.budgetID,
           categoryType: formInput.categoryType,
           title: formInput.title,
+          // only expense categories can track extra data
+          metaType:
+            formInput.categoryType === "expense" ? formInput.metaType || null : null,
         },
       },
       update: (cache, data) => {
@@ -99,6 +107,9 @@ const AddCategory = ({ id, refetch, setPageState }) => {
               label={"Category Name"}
               auditState={auditState}
             />
+            {formInput.categoryType === "expense" && (
+              <InlineTrackingInput input={formInput} setInput={setFormInput} />
+            )}
           </form>
           {createdLoading ? (
             <InlineNotification text={"Submit processing"} />

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import VehicleSettings from "./vehicleSettings";
 import { useMutation } from "@apollo/client";
 import { format } from "date-fns";
 import { FiTrash2, FiPercent, FiTrendingUp } from "react-icons/fi";
@@ -34,7 +35,7 @@ function currentSettingID(settings) {
   return applicable[applicable.length - 1]?._id;
 }
 
-const BudgetSettings = ({ budgetState, refetch }) => {
+const BudgetSettings = ({ budgetState, currentUser, refetch, onOpenVehicle }) => {
   const owners = budgetState.ownerIDs;
   const settings = budgetState.splitSettings || [];
   const activeID = currentSettingID(settings);
@@ -324,6 +325,12 @@ const BudgetSettings = ({ budgetState, refetch }) => {
           disabled={!isValid || saving}
         />
       </section>
+      <VehicleSettings
+        budgetState={budgetState}
+        currentUser={currentUser}
+        refetch={refetch}
+        onOpenVehicle={onOpenVehicle}
+      />
     </div>
   );
 };

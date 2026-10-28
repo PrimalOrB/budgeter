@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { Routes, Route } from "react-router-dom";
 import { setContext } from "@apollo/client/link/context";
 import { onError } from "@apollo/client/link/error";
@@ -10,6 +10,7 @@ import {
   createHttpLink,
 } from "@apollo/client";
 import { StoreProvider } from "./utils/GlobalState";
+import { MetaLinkContext } from "./utils/metaLinks";
 import {
   FullPageSpinLoader,
   Header,
@@ -62,6 +63,27 @@ const App = () => {
   const [pageState, setPageState] = useState("dashboard");
   // bumped when the modal changes data, so the budget view refetches
   const [dataVersion, setDataVersion] = useState(0);
+  // the vehicle whose fuel log is open (pageState "vehicle")
+  const [vehicleID, setVehicleID] = useState(null);
+  // where the vehicle page's back button returns to
+  const [vehicleReturn, setVehicleReturn] = useState("settings");
+  const pageRef = useRef(pageState);
+  pageRef.current = pageState;
+
+  const metaLinks = useMemo(
+    () => ({
+      openVehicle: (id) => {
+        setEditingModal(false);
+        setEditingTransaction(null);
+        setVehicleID(id);
+        if (pageRef.current !== "vehicle") {
+          setVehicleReturn(pageRef.current);
+        }
+        setPageState("vehicle");
+      },
+    }),
+    []
+  );
 
   if (isLoading) {
     return <FullPageSpinLoader />;
@@ -69,6 +91,7 @@ const App = () => {
   return (
     <ApolloProvider client={client}>
       <StoreProvider>
+        <MetaLinkContext.Provider value={metaLinks}>
         <div id="app">
           <Header />
           <EditModal
@@ -95,6 +118,8 @@ const App = () => {
                     editingTransaction={editingTransaction}
                     setEditingTransaction={setEditingTransaction}
                     dataVersion={dataVersion}
+                    vehicleID={vehicleID}
+                    vehicleReturn={vehicleReturn}
                   />
                 }
                 path="/budget/:id/:tab?/:cat?"
@@ -102,6 +127,7 @@ const App = () => {
             </Routes>
           </main>
         </div>
+        </MetaLinkContext.Provider>
       </StoreProvider>
     </ApolloProvider>
   );

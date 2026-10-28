@@ -1,6 +1,22 @@
   
 import { gql } from '@apollo/client';
 
+export const VEHICLE_FIELDS = gql`
+  fragment VehicleFields on Vehicle {
+    _id
+    make
+    model
+    year
+    plate
+    color
+    name
+    odometer
+    totalDistance
+    fillCount
+    defaultFor
+  }
+`;
+
 // everything the dashboard needs for one month
 export const MONTH_FIELDS = gql`
   fragment MonthFields on Month {
@@ -59,6 +75,12 @@ export const MONTH_FIELDS = gql`
         userColor
       }
       individualEntry
+      mileage {
+        vehicleID
+        pricePerLitre
+        litres
+        distance
+      }
     }
     incomeCategories {
       categoryID
@@ -136,6 +158,12 @@ export const EDIT_TRANSACTION = gql`
         userColor
       }
       individualEntry
+      mileage {
+        vehicleID
+        pricePerLitre
+        litres
+        distance
+      }
     }
   }
 `;
@@ -173,6 +201,12 @@ export const EDIT_TRANSFER = gql`
         userColor
       }
       individualEntry
+      mileage {
+        vehicleID
+        pricePerLitre
+        litres
+        distance
+      }
     }
   }
 `;
@@ -189,6 +223,9 @@ export const QUERY_CURRENT_BUDGET = gql`
         userInitials
         userColor
       }
+      vehicles {
+        ...VehicleFields
+      }
       splitSettings {
         _id
         effectiveMonth
@@ -204,6 +241,7 @@ export const QUERY_CURRENT_BUDGET = gql`
         budgetID
         categoryType
         countUse
+        metaType
       }
       months {
         ...MonthFields
@@ -211,6 +249,7 @@ export const QUERY_CURRENT_BUDGET = gql`
     }
   }
   ${MONTH_FIELDS}
+  ${VEHICLE_FIELDS}
 `;
 
 export const QUERY_ALL_USER_BUDGETS = gql`
@@ -231,6 +270,7 @@ mutation queryCategory($input: CategoryIDInput! ) {
       budgetID
       categoryType
       countUse
+      metaType
     }
   }
 `;
@@ -268,4 +308,47 @@ export const DELETE_ENTRY = gql`
   mutation deleteEntry($budgetID: ID!, $entryID: ID!) {
     deleteEntry(budgetID: $budgetID, entryID: $entryID)
   }
+`;
+
+const BUDGET_VEHICLES = `
+  _id
+  vehicles {
+    ...VehicleFields
+  }
+`;
+
+export const SAVE_VEHICLE = gql`
+  mutation saveVehicle($input: VehicleInput!) {
+    saveVehicle(input: $input) {
+      ${BUDGET_VEHICLES}
+    }
+  }
+  ${VEHICLE_FIELDS}
+`;
+
+export const DELETE_VEHICLE = gql`
+  mutation deleteVehicle($budgetID: ID!, $vehicleID: ID!) {
+    deleteVehicle(budgetID: $budgetID, vehicleID: $vehicleID) {
+      ${BUDGET_VEHICLES}
+    }
+  }
+  ${VEHICLE_FIELDS}
+`;
+
+export const SET_DEFAULT_VEHICLE = gql`
+  mutation setDefaultVehicle($budgetID: ID!, $vehicleID: ID) {
+    setDefaultVehicle(budgetID: $budgetID, vehicleID: $vehicleID) {
+      ${BUDGET_VEHICLES}
+    }
+  }
+  ${VEHICLE_FIELDS}
+`;
+
+export const SET_VEHICLE_ODOMETER = gql`
+  mutation setVehicleOdometer($budgetID: ID!, $vehicleID: ID!, $odometer: Float!) {
+    setVehicleOdometer(budgetID: $budgetID, vehicleID: $vehicleID, odometer: $odometer) {
+      ${BUDGET_VEHICLES}
+    }
+  }
+  ${VEHICLE_FIELDS}
 `;

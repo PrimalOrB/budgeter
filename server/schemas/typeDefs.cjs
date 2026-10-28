@@ -5,11 +5,34 @@ const typeDefs = `
         budgetID: ID!
         title: String!
         categoryType: String!
+        "Extra data entries can carry: omit for none, or mileage"
+        metaType: String
     }
 
     input CategoryUpdateInput {
         categoryID: ID!
         title: String!
+        metaType: String
+    }
+
+    "Fuel details for a transaction in a mileage category"
+    input MileageInput {
+        vehicleID: ID!
+        pricePerLitre: Float
+        litres: Float
+        "km driven since the previous fill-up"
+        distance: Float
+    }
+
+    input VehicleInput {
+        budgetID: ID!
+        "Omit to add a new vehicle"
+        vehicleID: ID
+        make: String!
+        model: String!
+        year: Int
+        plate: String
+        color: String
     }
 
     input BudgetInput {
@@ -33,6 +56,8 @@ const typeDefs = `
         effectiveDate: Date!
         userID: ID!
         individualEntry: Boolean
+        "Optional fuel details; only for categories with metaType mileage"
+        mileage: MileageInput
     }
 
     input TransferInput {
@@ -82,6 +107,43 @@ const typeDefs = `
         budgetID: ID!
         categoryType: String!
         countUse: Int
+        metaType: String
+    }
+
+    type Mileage {
+        vehicleID: ID!
+        pricePerLitre: Float
+        litres: Float
+        distance: Float
+    }
+
+    type Vehicle {
+        _id: ID!
+        make: String!
+        model: String!
+        year: Int
+        plate: String
+        color: String
+        "e.g. 2017 Subaru WRX"
+        name: String!
+        "Current reading: offset + all km logged against the vehicle"
+        odometer: Float
+        totalDistance: Float
+        fillCount: Int
+        "Owners who use this as their default vehicle"
+        defaultFor: [ ID ]
+    }
+
+    type FuelFill {
+        entry: Entry!
+        "Odometer after this fill-up's distance"
+        odometer: Float
+        litresPer100km: Float
+    }
+
+    type VehicleLog {
+        vehicle: Vehicle!
+        fills: [ FuelFill ]
     }
 
     type Entry {
@@ -101,6 +163,7 @@ const typeDefs = `
         toUserID: User
         categoryID: ID
         individualEntry: Boolean
+        mileage: Mileage
     }
 
     type ReportEntry {
@@ -121,6 +184,7 @@ const typeDefs = `
         toUserID: User
         categoryID: ID
         individualEntry: Boolean
+        mileage: Mileage
     }
 
     type MonthUser {
@@ -200,6 +264,7 @@ const typeDefs = `
         entries: [ Entry ]
         months: [ Month ]
         splitSettings: [ SplitSetting ]
+        vehicles: [ Vehicle ]
     }
 
     type PDF {
@@ -221,6 +286,8 @@ const typeDefs = `
         requestCustomReport(budgetID: ID!, userID: ID!, startDate: Date!, endDate: Date!): ReportPeriod
         "Monthly summaries for the given month labels (M/yy), e.g. to page back past the initial 6 months"
         requestBudgetMonths(budgetID: ID!, months: [ String! ]!): [ Month ]
+        "Every fill-up logged against a vehicle, oldest first"
+        vehicleLog(budgetID: ID!, vehicleID: ID!): VehicleLog
     }
 
     type Mutation {
@@ -240,6 +307,14 @@ const typeDefs = `
         deleteEntry( budgetID: ID!, entryID: ID! ): ID
         saveSplitSetting( input: SplitSettingInput! ): Budget
         deleteSplitSetting( budgetID: ID!, settingID: ID! ): Budget
+        "Add a vehicle, or update one when vehicleID is given"
+        saveVehicle( input: VehicleInput! ): Budget
+        "Only vehicles with no fill-ups can be deleted"
+        deleteVehicle( budgetID: ID!, vehicleID: ID! ): Budget
+        "Make a vehicle the signed-in user's default; null clears it"
+        setDefaultVehicle( budgetID: ID!, vehicleID: ID ): Budget
+        "Correct the odometer to a reading; later fill-ups add to it"
+        setVehicleOdometer( budgetID: ID!, vehicleID: ID!, odometer: Float! ): Budget
     }
     
 `;

@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import { useParams } from "react-router";
 import { useMutation, useApolloClient } from "@apollo/client";
 import { QUERY_CURRENT_BUDGET } from "../utils/mutations";
 import { REQUEST_BUDGET_MONTHS } from "../utils/queries";
 import { useStoreContext } from "../utils/GlobalState";
+import { MetaLinkContext } from "../utils/metaLinks";
 import { InlineError } from "../components/Notifications";
 import { FullPageSpinLoader } from "../components/Loaders";
 import { NavStateContainer } from "../components/Menus";
@@ -21,6 +22,7 @@ import {
   MonthSummary,
   Reports,
   BudgetSettings,
+  VehicleLog,
 } from ".";
 import {
   dateToMonthStr,
@@ -52,11 +54,14 @@ const Budget = ({
   editingTransaction,
   setEditingTransaction,
   dataVersion,
+  vehicleID,
+  vehicleReturn,
 }) => {
   const { id: _id } = useParams();
 
   const [state] = useStoreContext();
   const { currentUser } = state;
+  const { openVehicle } = useContext(MetaLinkContext);
 
   const [v, setV] = useState(0);
   const [budgetState, setBudgetState] = useState({});
@@ -389,7 +394,20 @@ const Budget = ({
             <BudgetSettings
               key={`settings_${v}`}
               budgetState={budgetState}
+              currentUser={currentUser}
               refetch={queryBudget}
+              onOpenVehicle={openVehicle}
+            />
+          )}
+          {pageState === "vehicle" && vehicleID && (
+            <VehicleLog
+              key={`vehicle_${vehicleID}_${v}`}
+              budgetID={budgetState._id}
+              vehicleID={vehicleID}
+              backTo={vehicleReturn}
+              onBack={() => setPageState(vehicleReturn)}
+              setEditingModal={setEditingModal}
+              setEditingTransaction={setEditingTransaction}
             />
           )}
           {pageState === "reports" && (

@@ -13,6 +13,7 @@ import AllCategories from './allCategories'
 import MonthSummary from './monthSummary'
 import Reports from './reports'
 import BudgetSettings from './budgetSettings'
+import VehicleLog from './vehicleLog'
 
 export { 
     Home,
@@ -29,5 +30,6 @@ export {
     AllCategories,
     MonthSummary,
     Reports,
-    BudgetSettings
+    BudgetSettings,
+    VehicleLog
  };
