@@ -18,7 +18,18 @@ const DAY = 24 * 60 * 60 * 1000;
 // Each metric says how a month is summarised: sums add up, rates are
 // weighted (a month's $/L is what was paid / litres bought, and its L/100 km
 // is litres / km driven), so a big fill-up counts for more than a top-up.
+// Total km is the odometer, so a month shows its last reading.
 const METRICS = [
+  {
+    key: "efficiency",
+    label: "L/100 km",
+    short: "L/100 km",
+    fill: (f) => f.litresPer100km,
+    month: (fills) => ratio(fills, (f) => f.litres * 100, (f) => f.distance, (f) => f.litres && f.distance),
+    format: (v) => `${v.toFixed(1)} L/100 km`,
+    axis: (v) => v.toFixed(1),
+    summary: "Monthly average",
+  },
   {
     key: "price",
     label: "Price per litre",
@@ -27,7 +38,7 @@ const METRICS = [
     month: (fills) => ratio(fills, (f) => f.pricePerLitre * f.litres, (f) => f.litres, (f) => f.pricePerLitre && f.litres),
     format: (v) => `$${v.toFixed(3)}`,
     axis: (v) => `$${v.toFixed(2)}`,
-    summary: "Average",
+    summary: "Monthly average",
   },
   {
     key: "cost",
@@ -37,17 +48,7 @@ const METRICS = [
     month: (fills) => sum(fills, (f) => f.value),
     format: (v) => toCurrency(v),
     axis: (v) => `$${Math.round(v)}`,
-    summary: "Total",
-  },
-  {
-    key: "efficiency",
-    label: "L/100 km",
-    short: "L/100 km",
-    fill: (f) => f.litresPer100km,
-    month: (fills) => ratio(fills, (f) => f.litres * 100, (f) => f.distance, (f) => f.litres && f.distance),
-    format: (v) => `${v.toFixed(1)} L/100 km`,
-    axis: (v) => v.toFixed(1),
-    summary: "Average",
+    summary: "Monthly total",
   },
   {
     key: "distance",
@@ -57,7 +58,7 @@ const METRICS = [
     month: (fills) => sum(fills, (f) => f.distance),
     format: (v) => formatKm(v),
     axis: (v) => `${Math.round(v).toLocaleString("en-US")}`,
-    summary: "Total",
+    summary: "Monthly total",
   },
   {
     key: "litres",
@@ -67,7 +68,17 @@ const METRICS = [
     month: (fills) => sum(fills, (f) => f.litres),
     format: (v) => `${v.toFixed(1)} L`,
     axis: (v) => `${Math.round(v)}`,
-    summary: "Total",
+    summary: "Monthly total",
+  },
+  {
+    key: "odometer",
+    label: "Total km",
+    fill: (f) => f.odometer,
+    month: (fills) => (fills.length ? fills[fills.length - 1].odometer : null),
+    format: (v) => formatKm(v),
+    axis: (v) => (v ? `${Math.round(v / 1000).toLocaleString("en-US")}k` : "0"),
+    summary: "End of month",
+    atMonthEnd: true,
   },
 ];
 
@@ -113,7 +124,7 @@ const BACK_LABELS = {
 
 const VehicleLog = ({ budgetID, vehicleID, backTo, onBack, setEditingModal, setEditingTransaction }) => {
   const { resolvedTheme } = useTheme();
-  const [metricKey, setMetricKey] = useState("price");
+  const [metricKey, setMetricKey] = useState("efficiency");
   const [range, setRange] = useState(12);
   const isNarrow = useMediaQuery("(max-width: 640px)");
 
@@ -150,9 +161,9 @@ const VehicleLog = ({ budgetID, vehicleID, backTo, onBack, setEditingModal, setE
   const graphData = useMemo(() => {
     const colors = getChartColors();
     const accent = colors.accent || "#4f46e5";
-    // a month's point sits mid-month; empty months leave a gap
+    // a month's point sits mid-month (end of month for readings); empty months leave a gap
     const monthly = months.map((m) => ({
-      x: m.start.getTime() + 15 * DAY,
+      x: metric.atMonthEnd ? addMonths(m.start, 1).getTime() - DAY : m.start.getTime() + 15 * DAY,
       y: m.fills.length ? metric.month(m.fills) : null,
       count: m.fills.length,
       label: format(m.start, "MMMM yyyy"),
@@ -197,6 +208,11 @@ const VehicleLog = ({ budgetID, vehicleID, backTo, onBack, setEditingModal, setE
     const spanMonths = months.length;
     // fewer month labels when there are many months or little room
     const tickEvery = (spanMonths > 36 ? 6 : spanMonths > 18 ? 3 : 1) * (isNarrow && spanMonths > 6 ? 2 : 1);
+    // none of the measures go below zero, so don't let the padding take the axis there
+    const values = fills.map(metric.fill).filter((v) => Number.isFinite(v));
+    const low = Math.min(...values);
+    const high = Math.max(...values);
+    const floorAtZero = values.length > 0 && low - (high - low) * 0.08 < 0;
     return {
       responsive: true,
       maintainAspectRatio: false,
@@ -217,7 +233,7 @@ const VehicleLog = ({ budgetID, vehicleID, backTo, onBack, setEditingModal, setE
             label: (item) =>
               item.raw.fill
                 ? `Fill-up: ${metric.format(item.raw.y)}`
-                : `${metric.summary === "Total" ? "Month total" : "Month average"}: ${metric.format(item.raw.y)} (${item.raw.count} fill-up${item.raw.count === 1 ? "" : "s"})`,
+                : `${metric.summary}: ${metric.format(item.raw.y)} (${item.raw.count} fill-up${item.raw.count === 1 ? "" : "s"})`,
           },
         },
       },
@@ -252,6 +268,7 @@ const VehicleLog = ({ budgetID, vehicleID, backTo, onBack, setEditingModal, setE
         },
         y: {
           grace: "8%",
+          min: floorAtZero ? 0 : undefined,
           border: { display: false },
           grid: { color: `${colors.muted}22` },
           ticks: { color: colors.muted, font: { size: 11 }, maxTicksLimit: 5, callback: metric.axis },
@@ -259,7 +276,7 @@ const VehicleLog = ({ budgetID, vehicleID, backTo, onBack, setEditingModal, setE
       },
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [months, metricKey, resolvedTheme, start, end, isNarrow]);
+  }, [fills, months, metricKey, resolvedTheme, start, end, isNarrow]);
 
   if (loading) {
     return <SpinLoader />;
@@ -271,8 +288,9 @@ const VehicleLog = ({ budgetID, vehicleID, backTo, onBack, setEditingModal, setE
   const totalCost = sum(fills, (f) => f.value) || 0;
   const totalKm = sum(fills, (f) => f.distance) || 0;
   const totalLitres = sum(fills, (f) => f.litres) || 0;
-  const avgPrice = METRICS[0].month(fills);
-  const avgEfficiency = METRICS[2].month(fills);
+  const metricByKey = (key) => METRICS.find((m) => m.key === key);
+  const avgPrice = metricByKey("price").month(fills);
+  const avgEfficiency = metricByKey("efficiency").month(fills);
   const rangeLabel = range ? `in the last ${range} months` : "in total";
 
   const openEntry = (entry) => {
@@ -351,7 +369,7 @@ const VehicleLog = ({ budgetID, vehicleID, backTo, onBack, setEditingModal, setE
         </div>
         <p className="vehicle-chart-legend">
           <span className="legend-item">
-            <span className="legend-swatch legend-accent" /> Monthly {metric.summary === "Total" ? "total" : "average"}
+            <span className="legend-swatch legend-accent" /> {metric.summary}
           </span>
           <span className="legend-item">
             <span className="legend-dot" /> Each fill-up

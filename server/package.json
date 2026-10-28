@@ -9,9 +9,7 @@
   },
   "scripts": {
     "start": "node server.js",
-    "watch": "nodemon",
-    "seed": "node seeders/seeds.cjs",
-    "migrate": "node seeders/migrate.cjs"
+    "watch": "nodemon"
   },
   "keywords": [],
   "author": "",
