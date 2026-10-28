@@ -102,3 +102,7 @@ dist
 
 # TernJS port file
 .tern-port
+
+# Local data files (real budget data, never commit)
+fuel_seed.csv
+sample-statement-*.pdf
