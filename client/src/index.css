@@ -2854,3 +2854,22 @@ form {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
+
+/* fill-up dots coloured against the window's average */
+.legend-dot-below {
+  background: var(--income);
+  opacity: 0.6;
+}
+
+.legend-dot-above {
+  background: var(--expense);
+  opacity: 0.85;
+}
+
+.vehicle-chart-legend .legend-item {
+  flex-wrap: wrap;
+}
+
+.vehicle-chart-legend .legend-dot:not(:first-child) {
+  margin-left: 4px;
+}

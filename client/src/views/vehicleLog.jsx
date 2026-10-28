@@ -6,7 +6,7 @@ import { format, startOfMonth, addMonths, subMonths } from "date-fns";
 import { FiArrowLeft } from "react-icons/fi";
 import { VEHICLE_LOG } from "../utils/queries";
 import { toCurrency } from "../utils/helpers";
-import { getChartColors, useTheme } from "../utils/theme";
+import { getChartColors, useTheme, withAlpha, fade } from "../utils/theme";
 import useMediaQuery from "../utils/useMediaQuery";
 import { SpinLoader } from "../components/Loaders";
 import { InlineError } from "../components/Notifications";
@@ -79,6 +79,7 @@ const METRICS = [
     axis: (v) => (v ? `${Math.round(v / 1000).toLocaleString("en-US")}k` : "0"),
     summary: "End of month",
     atMonthEnd: true,
+    noCompare: true,
   },
 ];
 
@@ -100,6 +101,19 @@ function ratio(fills, numerator, denominator, usable) {
 }
 
 const monthKey = (date) => format(date, "yyyy-MM");
+
+// How far each fill-up sits from the window's average, in standard
+// deviations: within half of one reads as average (grey); further out fades
+// up towards red above and green below, at full strength by 2.
+function compareToAverage(values) {
+  const mean = values.reduce((a, b) => a + b, 0) / values.length;
+  const sd = Math.sqrt(values.reduce((a, v) => a + (v - mean) ** 2, 0) / values.length);
+  return (v) => {
+    const z = sd ? (v - mean) / sd : 0;
+    const strength = Math.min(1, Math.max(0, (Math.abs(z) - 0.5) / 1.5));
+    return { z, strength, vsMean: mean ? (v - mean) / mean : 0 };
+  };
+}
 
 // flatten the API shape into one record per fill-up
 function toFills(data) {
@@ -171,6 +185,22 @@ const VehicleLog = ({ budgetID, vehicleID, backTo, onBack, setEditingModal, setE
     const individual = fills
       .map((f) => ({ x: f.date.getTime(), y: metric.fill(f), fill: f }))
       .filter((p) => Number.isFinite(p.y));
+    const compare = !metric.noCompare && individual.length > 1 && compareToAverage(individual.map((p) => p.y));
+    const dotColor = (p) => {
+      if (!compare) {
+        return withAlpha(colors.muted, 0.33);
+      }
+      p.compare = compare(p.y);
+      const { z, strength } = p.compare;
+      if (!strength) {
+        return withAlpha(colors.muted, 0.33);
+      }
+      // above average stands out more than below
+      return z > 0
+        ? withAlpha(colors.expense, 0.4 + 0.5 * strength)
+        : withAlpha(colors.income, 0.35 + 0.35 * strength);
+    };
+    const dotColors = individual.map(dotColor);
     return {
       datasets: [
         {
@@ -178,10 +208,11 @@ const VehicleLog = ({ budgetID, vehicleID, backTo, onBack, setEditingModal, setE
           label: "Monthly",
           data: monthly,
           borderColor: accent,
-          backgroundColor: accent,
           borderWidth: 2.5,
           tension: 0.3,
           spanGaps: true,
+          fill: "start",
+          backgroundColor: fade(accent, 0.22),
           pointRadius: months.length > 24 ? 2 : 3.5,
           pointHoverRadius: 6,
           pointBackgroundColor: colors.surface,
@@ -192,10 +223,10 @@ const VehicleLog = ({ budgetID, vehicleID, backTo, onBack, setEditingModal, setE
           type: "scatter",
           label: "Fill-ups",
           data: individual,
-          backgroundColor: `${colors.muted}55`,
+          backgroundColor: dotColors,
           borderColor: "transparent",
-          pointRadius: 3,
-          pointHoverRadius: 5,
+          pointRadius: 3.5,
+          pointHoverRadius: 5.5,
           order: 2,
         },
       ],
@@ -232,7 +263,11 @@ const VehicleLog = ({ budgetID, vehicleID, backTo, onBack, setEditingModal, setE
             },
             label: (item) =>
               item.raw.fill
-                ? `Fill-up: ${metric.format(item.raw.y)}`
+                ? `Fill-up: ${metric.format(item.raw.y)}${
+                    item.raw.compare
+                      ? ` (${item.raw.compare.vsMean >= 0 ? "+" : "−"}${Math.abs(item.raw.compare.vsMean * 100).toFixed(1)}% vs average)`
+                      : ""
+                  }`
                 : `${metric.summary}: ${metric.format(item.raw.y)} (${item.raw.count} fill-up${item.raw.count === 1 ? "" : "s"})`,
           },
         },
@@ -371,9 +406,18 @@ const VehicleLog = ({ budgetID, vehicleID, backTo, onBack, setEditingModal, setE
           <span className="legend-item">
             <span className="legend-swatch legend-accent" /> {metric.summary}
           </span>
-          <span className="legend-item">
-            <span className="legend-dot" /> Each fill-up
-          </span>
+          {metric.noCompare ? (
+            <span className="legend-item">
+              <span className="legend-dot" /> Each fill-up
+            </span>
+          ) : (
+            <span className="legend-item">
+              Fill-ups vs average
+              <span className="legend-dot legend-dot-below" /> below
+              <span className="legend-dot" /> near
+              <span className="legend-dot legend-dot-above" /> above
+            </span>
+          )}
         </p>
       </section>
 

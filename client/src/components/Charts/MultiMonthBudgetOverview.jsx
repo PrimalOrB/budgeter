@@ -10,34 +10,7 @@ import {
   shiftMonthLabel,
   dateToMonthStr,
 } from "../../utils/helpers";
-import { getChartColors, useTheme } from "../../utils/theme";
-
-// "#059669" / "rgb(5, 150, 105)" -> rgba with the given alpha
-function withAlpha(color, alpha) {
-  const hex = String(color).trim().match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
-  if (hex) {
-    let value = hex[1];
-    if (value.length === 3) {
-      value = value.split("").map((c) => c + c).join("");
-    }
-    const n = parseInt(value, 16);
-    return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
-  }
-  const rgb = String(color).match(/\d+(\.\d+)?/g);
-  return rgb ? `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha})` : color;
-}
-
-// vertical fade from `top` alpha down to nothing
-const fade = (color, top) => (context) => {
-  const { ctx, chartArea } = context.chart;
-  if (!chartArea) {
-    return withAlpha(color, top / 2);
-  }
-  const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-  gradient.addColorStop(0, withAlpha(color, top));
-  gradient.addColorStop(1, withAlpha(color, top * 0.1));
-  return gradient;
-};
+import { getChartColors, useTheme, withAlpha, fade } from "../../utils/theme";
 
 // Points are placed by month, not by window position: x = 0 is the current
 // month, -1 last month, and so on. Moving the window only moves the x-axis
