@@ -1,5 +1,5 @@
 import React from "react";
-import { FiSlash, FiNavigation } from "react-icons/fi";
+import { FiSlash, FiNavigation, FiTool } from "react-icons/fi";
 
 // extra data a category's entries can carry (see the server's META_TYPES)
 export const TRACKING_TYPES = [
@@ -14,6 +14,12 @@ export const TRACKING_TYPES = [
     label: "Mileage",
     icon: FiNavigation,
     hint: "Fuel purchases can record the vehicle, price per litre, litres and km driven.",
+  },
+  {
+    value: "maintenance",
+    label: "Maintenance",
+    icon: FiTool,
+    hint: "Repairs and servicing can record the vehicle and its odometer reading.",
   },
 ];
 

@@ -1451,7 +1451,8 @@ form {
 /* segmented control (shared / individual) */
 .segmented {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
   gap: 2px;
   padding: 3px;
   background: var(--surface-2);
@@ -2613,7 +2614,7 @@ form {
 
 .vehicle-stats {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1px;
   background: var(--border);
   border: 1px solid var(--border);
@@ -2761,11 +2762,6 @@ form {
   font-variant-numeric: tabular-nums;
 }
 
-@media (max-width: 960px) {
-  .vehicle-stats {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
 
 @media (max-width: 640px) {
   .fuel-body,
@@ -2872,4 +2868,75 @@ form {
 
 .vehicle-chart-legend .legend-dot:not(:first-child) {
   margin-left: 4px;
+}
+
+/* maintenance on the Total km chart */
+.legend-dot-service {
+  width: 10px;
+  height: 10px;
+  background: var(--transfer);
+  opacity: 0.6;
+  box-shadow: inset 0 0 0 1.5px var(--transfer);
+}
+
+/* record tables on the vehicle page: fold away, page through */
+.record-table-toggle {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-width: 0;
+  text-align: left;
+}
+
+.record-table-toggle .card-subtitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.record-table-chevron {
+  align-self: center;
+  flex: none;
+  color: var(--text-muted);
+  transition: transform 0.15s var(--ease);
+}
+
+.record-table-closed .record-table-chevron {
+  transform: rotate(-90deg);
+}
+
+.record-table-closed .card-header {
+  border-bottom: 0;
+}
+
+.fuel-table .wide {
+  width: 100%;
+}
+
+.fuel-table td.note {
+  white-space: normal;
+  min-width: 160px;
+}
+
+/* reports: people or vehicles */
+.report-kind {
+  margin-bottom: var(--space-4);
+}
+
+.vehicle-report-hint {
+  margin: var(--space-3) 0;
+}
+
+.vehicle-report-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+@media (max-width: 640px) {
+  /* let notes wrap so the cost column stays on screen */
+  .fuel-table td.note {
+    min-width: 0;
+  }
 }

@@ -55,6 +55,10 @@ export const QUERY_SINGLE_TRANSACTION = gql`
         litres
         distance
       }
+      maintenance {
+        vehicleID
+        odometer
+      }
     }
   }
 `;
@@ -143,6 +147,10 @@ export const QUERY_CUSTOM_REPORT = gql`
           litres
           distance
         }
+        maintenance {
+          vehicleID
+          odometer
+        }
       }   
       incomeCategories {
         categoryID
@@ -199,9 +207,54 @@ export const VEHICLE_LOG = gql`
             litres
             distance
           }
+          maintenance {
+            vehicleID
+            odometer
+          }
+        }
+      }
+      maintenance {
+        _id
+        createdAt
+        updatedAt
+        effectiveDate
+        title
+        value
+        valueType
+        budgetID
+        categoryID
+        individualEntry
+        userID {
+          _id
+          email
+          userInitials
+          userColor
+        }
+        maintenance {
+          vehicleID
+          odometer
         }
       }
     }
   }
   ${VEHICLE_FIELDS}
+`;
+
+export const REQUEST_VEHICLE_REPORT_PDF = gql`
+  query requestVehicleReport(
+    $budgetID: ID!
+    $vehicleID: ID!
+    $startMonth: String!
+    $endMonth: String!
+  ) {
+    requestVehicleReport(
+      budgetID: $budgetID
+      vehicleID: $vehicleID
+      startMonth: $startMonth
+      endMonth: $endMonth
+    ) {
+      blob
+      filename
+    }
+  }
 `;

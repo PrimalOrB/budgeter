@@ -10,6 +10,9 @@ import {
   FuelDetailsInput,
   emptyFuel,
   fuelForSubmit,
+  MaintenanceDetailsInput,
+  emptyMaintenance,
+  maintenanceForSubmit,
 } from "../components/Forms";
 import { InlineError, InlineNotification } from "../components/Notifications";
 import { Title } from "../components/Layout";
@@ -35,12 +38,13 @@ const AddTransactionEntry = ({
     userID: state.currentUser._id,
     individualEntry: false,
     fuel: emptyFuel,
+    service: emptyMaintenance,
   };
   const [formInput, setFormInput] = useState({ ...initialFormState });
-  // categories that track mileage offer optional fuel details
-  const tracksMileage =
-    budgetState.categories.find((c) => c._id === formInput.categoryID)?.metaType ===
-    "mileage";
+  // categories that track mileage or maintenance offer optional vehicle details
+  const metaType = budgetState.categories.find((c) => c._id === formInput.categoryID)?.metaType;
+  const tracksMileage = metaType === "mileage";
+  const tracksMaintenance = metaType === "maintenance";
   const [auditState, setAuditState] = useState({ pass: false });
   const [errorState, setErrorState] = useState();
 
@@ -101,6 +105,7 @@ const AddTransactionEntry = ({
           userID: formInput.userID,
           individualEntry: formInput.individualEntry,
           mileage: tracksMileage ? fuelForSubmit(formInput.fuel) : null,
+          maintenance: tracksMaintenance ? maintenanceForSubmit(formInput.service) : null,
         },
       },
       update: (cache, data) => {
@@ -152,6 +157,13 @@ const AddTransactionEntry = ({
             />
             {tracksMileage && (
               <FuelDetailsInput
+                input={formInput}
+                setInput={setFormInput}
+                vehicles={budgetState.vehicles}
+              />
+            )}
+            {tracksMaintenance && (
+              <MaintenanceDetailsInput
                 input={formInput}
                 setInput={setFormInput}
                 vehicles={budgetState.vehicles}

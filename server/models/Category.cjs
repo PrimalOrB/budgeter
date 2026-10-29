@@ -25,10 +25,11 @@ const categorySchema = new Schema(
       default: 0 
     },
     // optional extra data entries in this category can carry, e.g.
-    // "mileage" lets fuel purchases record vehicle, litres and distance
+    // "mileage" lets fuel purchases record vehicle, litres and distance;
+    // "maintenance" lets repairs and servicing record vehicle and odometer
     metaType: {
       type: String,
-      enum: [ 'mileage' ],
+      enum: [ 'mileage', 'maintenance' ],
     },
   },
 )

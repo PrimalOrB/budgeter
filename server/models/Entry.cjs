@@ -76,6 +76,18 @@ const entrySchema = new Schema(
       ),
       default: undefined,
     },
+    // optional vehicle details for categories with metaType "maintenance"
+    maintenance: {
+      type: new Schema(
+        {
+          vehicleID: { type: Schema.Types.ObjectId, required: true },
+          // reading when the work was done
+          odometer: { type: Number, min: 0 },
+        },
+        { _id: false }
+      ),
+      default: undefined,
+    },
   },
   {
     // createdAt (immutable, when the record was made) + updatedAt
@@ -86,6 +98,7 @@ const entrySchema = new Schema(
 entrySchema.index({ budgetID: 1, monthString: 1 });
 entrySchema.index({ budgetID: 1, effectiveDate: -1 });
 entrySchema.index({ budgetID: 1, "mileage.vehicleID": 1 }, { sparse: true });
+entrySchema.index({ budgetID: 1, "maintenance.vehicleID": 1 }, { sparse: true });
 
 const Entry = model( 'Entry', entrySchema );
 

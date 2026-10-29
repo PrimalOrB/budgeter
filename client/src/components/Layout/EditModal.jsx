@@ -25,7 +25,29 @@ const FuelSummary = ({ entry }) => {
       ))}
       {metaLink && (
         <button type="button" className="modal-fuel-link" onClick={metaLink.open}>
-          <metaLink.icon aria-hidden="true" /> Fuel log
+          <metaLink.icon aria-hidden="true" /> Vehicle log
+        </button>
+      )}
+    </div>
+  );
+};
+
+const MaintenanceSummary = ({ entry }) => {
+  const vehicleName = useVehicleName(entry.maintenance.vehicleID);
+  const metaLink = useMetaLink(entry);
+  const { odometer } = entry.maintenance;
+  const parts = [
+    vehicleName,
+    odometer != null && `Odometer ${Math.round(odometer).toLocaleString("en-US")} km`,
+  ].filter(Boolean);
+  return (
+    <div className="modal-fuel">
+      {parts.map((part) => (
+        <span key={part}>{part}</span>
+      ))}
+      {metaLink && (
+        <button type="button" className="modal-fuel-link" onClick={metaLink.open}>
+          <metaLink.icon aria-hidden="true" /> Vehicle log
         </button>
       )}
     </div>
@@ -154,6 +176,7 @@ const EditModal = ({
               <p className="modal-note">{entry.title}</p>
             )}
             {entry.mileage && <FuelSummary entry={entry} />}
+            {entry.maintenance && <MaintenanceSummary entry={entry} />}
             <dl className="detail-list">
               <dt>Effective date</dt>
               <dd>{formatEntryDate(entry.effectiveDate)}</dd>

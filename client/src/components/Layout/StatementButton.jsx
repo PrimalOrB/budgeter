@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useLazyQuery } from "@apollo/client";
 import { FiDownload } from "react-icons/fi";
 import { REQUEST_STATEMENT_PDF } from "../../utils/queries";
+import { savePdf } from "../../utils/download";
 
 // downloads one person's PDF statement for whole months startMonth..endMonth
 const StatementButton = ({
@@ -16,21 +17,7 @@ const StatementButton = ({
 
   const [getStatement, { loading }] = useLazyQuery(REQUEST_STATEMENT_PDF, {
     fetchPolicy: "no-cache",
-    onCompleted: async ({ requestStatement }) => {
-      const response = await fetch(
-        `data:application/pdf;base64,${requestStatement.blob}`
-      );
-      const url = URL.createObjectURL(await response.blob());
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = requestStatement.filename || "statement.pdf";
-      document.body.appendChild(link);
-      link.click();
-      setTimeout(() => {
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      }, 0);
-    },
+    onCompleted: ({ requestStatement }) => savePdf(requestStatement, "statement.pdf"),
     onError: (err) => setErrorState(err.message),
   });
 

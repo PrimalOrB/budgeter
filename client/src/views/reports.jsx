@@ -14,6 +14,9 @@ import {
   BudgetCategoryEntriesExpandableList,
 } from "../components/Layout";
 import { InlineBarTotal } from "../components/Charts";
+import { FiUsers } from "react-icons/fi";
+import { LuCar } from "react-icons/lu";
+import VehicleReports from "./vehicleReport";
 
 // "yyyy-MM" month picker values -> the report's date range and labels.
 // Reports cover whole months: the 1st of the start month to the last day of
@@ -36,13 +39,14 @@ const monthTitle = (key) => {
   return format(new Date(year, month - 1, 1), "MMM yyyy");
 };
 
-const Reports = ({
+const PersonReports = ({
   budgetState,
   categories,
   setErrorState,
   setPageState,
   setEditingModal,
   setEditingTransaction,
+  header,
 }) => {
   const { id: _id } = useParams();
 
@@ -136,7 +140,7 @@ const Reports = ({
 
   return (
     <section className="full-container">
-      <Title text={`Reports`} />
+      {header}
       <form autoComplete="off">
         <InlineUserInput
           prop={"userID"}
@@ -400,6 +404,45 @@ const Reports = ({
       ) : (
         <></>
       )}
+    </section>
+  );
+};
+
+const REPORT_KINDS = [
+  { value: "people", label: "People", icon: FiUsers },
+  { value: "vehicles", label: "Vehicles", icon: LuCar },
+];
+
+// statements per person, or a vehicle's fuel and maintenance report
+const Reports = (props) => {
+  const [kind, setKind] = useState("people");
+  const header = (
+    <>
+      <Title text={`Reports`} />
+      <div className="segmented report-kind" role="radiogroup" aria-label="Report type">
+        {REPORT_KINDS.map(({ value, label, icon: Icon }) => (
+          <button
+            key={value}
+            type="button"
+            role="radio"
+            aria-checked={kind === value}
+            className={`segmented-option${kind === value ? " segmented-active" : ""}`}
+            onClick={() => setKind(value)}
+          >
+            <Icon />
+            {label}
+          </button>
+        ))}
+      </div>
+    </>
+  );
+
+  return kind === "people" ? (
+    <PersonReports {...props} header={header} />
+  ) : (
+    <section className="full-container">
+      {header}
+      <VehicleReports budgetState={props.budgetState} />
     </section>
   );
 };

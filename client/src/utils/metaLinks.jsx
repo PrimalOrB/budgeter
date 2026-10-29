@@ -1,9 +1,9 @@
 import { createContext, useContext } from "react";
 import { gql, useApolloClient } from "@apollo/client";
-import { FiTruck } from "react-icons/fi";
+import { LuCar } from "react-icons/lu";
 
-// Entries carrying details for a category's meta type (fuel details on a
-// mileage category) link to the page for that data. App provides the
+// Entries carrying details for a category's meta type (fuel or maintenance
+// details) link to the page for that data. App provides the
 // handlers; anything outside it simply shows no link.
 export const MetaLinkContext = createContext({});
 
@@ -26,12 +26,16 @@ export function useVehicleName(vehicleID) {
   return vehicle?.name || null;
 }
 
-// a short figure from the linked data to show beside the entry's title,
-// e.g. fuel economy; null when the entry has no such data
+// a short figure from the linked data to show beside the entry's title:
+// fuel economy, or the odometer at a maintenance visit; null for none
 export function entryMetaStat(entry) {
   const { litres, distance } = entry?.mileage || {};
   if (litres && distance) {
     return `${((litres / distance) * 100).toFixed(1)} L/100 km`;
+  }
+  const odometer = entry?.maintenance?.odometer;
+  if (odometer) {
+    return `${Math.round(odometer).toLocaleString("en-US")} km`;
   }
   return null;
 }
@@ -39,12 +43,12 @@ export function entryMetaStat(entry) {
 // { icon, label, open } for an entry with linked data, or null
 export function useMetaLink(entry) {
   const { openVehicle } = useContext(MetaLinkContext);
-  const vehicleID = entry?.mileage?.vehicleID;
+  const vehicleID = entry?.mileage?.vehicleID || entry?.maintenance?.vehicleID;
   const vehicleName = useVehicleName(vehicleID);
   if (vehicleID && openVehicle) {
     return {
-      icon: FiTruck,
-      label: `Fuel log for ${vehicleName || "this vehicle"}`,
+      icon: LuCar,
+      label: `Vehicle log for ${vehicleName || "this vehicle"}`,
       open: () => openVehicle(vehicleID),
     };
   }

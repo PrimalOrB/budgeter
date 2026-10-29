@@ -112,5 +112,6 @@ export function getChartColors() {
     surface: read("--surface"),
     border: read("--border"),
     accent: read("--accent"),
+    transfer: read("--transfer"),
   };
 }

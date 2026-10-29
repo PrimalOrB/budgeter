@@ -1,6 +1,7 @@
 import React from "react";
 import { FiNavigation } from "react-icons/fi";
 import { toCurrency } from "../../utils/helpers";
+import VehicleSelect from "./VehicleSelect";
 
 // form state for the optional fuel details, as strings while typing
 export const emptyFuel = { enabled: false, vehicleID: "", pricePerLitre: "", litres: "", distance: "" };
@@ -23,12 +24,12 @@ export function fuelFromEntry(mileage) {
 const DECIMALS = { pricePerLitre: 3, litres: 3, distance: 1 };
 
 // digits and a single decimal point, cut to the field's precision
-function cleanDecimal(text, places) {
+export function cleanDecimal(text, places) {
   const [whole, ...rest] = text.replace(/[^\d.]/g, "").split(".");
   return rest.length ? `${whole}.${rest.join("").slice(0, places)}` : whole;
 }
 
-const toNumber = (text) => {
+export const toNumber = (text) => {
   if (text === "" || text === null || text === undefined) {
     return null;
   }
@@ -135,24 +136,15 @@ const FuelDetailsInput = ({ input, setInput, vehicles = [], prop = "fuel", value
 
       {fuel.enabled && (
         <div className="fuel-body">
-          <label className="fuel-field fuel-field-wide">
-            <span>Vehicle</span>
-            <select
-              value={fuel.vehicleID}
-              onChange={(e) => update({ vehicleID: e.target.value })}
-            >
-              <option value="" disabled>
-                Choose a vehicle
-              </option>
-              {vehicles.map((v) => (
-                <option key={v._id} value={v._id}>
-                  {v.name}
-                  {v.plate ? ` (${v.plate})` : ""}
-                  {v.defaultFor?.includes(input.userID) ? " - default" : ""}
-                </option>
-              ))}
-            </select>
-          </label>
+          <VehicleSelect
+            value={fuel.vehicleID}
+            vehicles={vehicles}
+            userID={input.userID}
+            // no vehicle means no fuel details
+            onChange={(vehicleID) =>
+              update(vehicleID ? { vehicleID } : { enabled: false, vehicleID: "" })
+            }
+          />
           {field("pricePerLitre", "Price", "1.999", "$/L")}
           {field("litres", "Litres", "52.418", "L")}
           {field("distance", "Distance", "450", "km")}

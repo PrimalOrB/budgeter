@@ -13,6 +13,8 @@ export const VEHICLE_FIELDS = gql`
     odometer
     totalDistance
     fillCount
+    maintenanceCount
+    maintenanceCost
     defaultFor
   }
 `;
@@ -80,6 +82,10 @@ export const MONTH_FIELDS = gql`
         pricePerLitre
         litres
         distance
+      }
+      maintenance {
+        vehicleID
+        odometer
       }
     }
     incomeCategories {
@@ -164,6 +170,10 @@ export const EDIT_TRANSACTION = gql`
         litres
         distance
       }
+      maintenance {
+        vehicleID
+        odometer
+      }
     }
   }
 `;
@@ -206,6 +216,10 @@ export const EDIT_TRANSFER = gql`
         pricePerLitre
         litres
         distance
+      }
+      maintenance {
+        vehicleID
+        odometer
       }
     }
   }
