@@ -208,11 +208,14 @@ const EditTransactionEntry = ({
                   setInput={setFormInput}
                   label={"Category"}
                   auditState={auditState}
-                  optionList={budgetState.categories.filter(
-                    (category) =>
-                      category.categoryType ===
-                      entryData.requestSingleTransaction.valueType
-                  )}
+                  optionList={budgetState.categories
+                    .filter(
+                      (category) =>
+                        category.categoryType ===
+                        entryData.requestSingleTransaction.valueType
+                    )
+                    // most used first, as when adding
+                    .sort((a, b) => (b.countUse || 0) - (a.countUse || 0))}
                 />
                 <InlineTextareaInput
                   prop={"title"}
