@@ -1303,6 +1303,13 @@ const resolvers = {
         change.date = input.date;
         change.dateEstimated = false;
       }
+      // any of the vehicle's sets, retired ones included, since a change
+      // can be in the past; a set can't be retired at its own change
+      if (input.tireID) {
+        const tire = await loadTire(vehicle, input.tireID);
+        change.tireID = tire._id;
+        change.retired = (change.retired || []).filter((id) => !id.equals(tire._id));
+      }
       await vehicle.save();
       return budget;
     },

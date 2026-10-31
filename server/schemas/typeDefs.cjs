@@ -45,13 +45,14 @@ const typeDefs = `
         retired: Boolean
     }
 
-    "Correct a tire change's reading and date"
+    "Correct a tire change: its reading, and optionally its date or the set going on"
     input TireChangeUpdateInput {
         budgetID: ID!
         vehicleID: ID!
         changeID: ID!
         odometer: Float!
         date: Date
+        tireID: ID
     }
 
     "Put a set of tires on a vehicle from an odometer reading"

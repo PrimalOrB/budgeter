@@ -2855,25 +2855,6 @@ form {
   white-space: nowrap;
 }
 
-/* fill-up dots coloured against the window's average */
-.legend-dot-below {
-  background: var(--income);
-  opacity: 0.6;
-}
-
-.legend-dot-above {
-  background: var(--expense);
-  opacity: 0.85;
-}
-
-.vehicle-chart-legend .legend-item {
-  flex-wrap: wrap;
-}
-
-.vehicle-chart-legend .legend-dot:not(:first-child) {
-  margin-left: 4px;
-}
-
 /* maintenance on the Total km chart */
 .legend-dot-service {
   width: 10px;
@@ -3175,12 +3156,16 @@ form {
   color: var(--expense);
 }
 
+/* the dialog's fields share its width: odometer and date side by side,
+   the tire picker across both */
 .tire-change-form {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   margin-bottom: var(--space-2);
 }
 
-.tire-change-form input:disabled {
-  color: var(--text-muted);
-  background: var(--surface-2);
+.tire-change-form select,
+.tire-change-form input {
+  width: 100%;
 }
+
 

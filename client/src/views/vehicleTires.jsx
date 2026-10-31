@@ -490,15 +490,14 @@ export function TiresCard({ budgetID, vehicle, tires, changes, records = [], ref
             setOpenChangeID(null);
             setErrorState(null);
           }}
-          onSave={({ odometer, date }) =>
+          onSave={(changes) =>
             updateChange({
               variables: {
                 input: {
                   budgetID,
                   vehicleID: vehicle._id,
                   changeID: openChange._id,
-                  odometer,
-                  date,
+                  ...changes,
                 },
               },
             })
@@ -516,9 +515,11 @@ export function TiresCard({ budgetID, vehicle, tires, changes, records = [], ref
 function TireChangeModal({ change, tireByID, record, error, busy, onClose, onSave, onDelete }) {
   const [editing, setEditing] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const originalDate = format(new Date(change.date), "yyyy-MM-dd");
   const [form, setForm] = useState({
     odometer: String(change.odometer),
-    date: format(new Date(change.date), "yyyy-MM-dd"),
+    date: originalDate,
+    tireID: change.tireID,
   });
 
   // close on Escape
@@ -552,9 +553,25 @@ function TireChangeModal({ change, tireByID, record, error, busy, onClose, onSav
             className="vehicle-form-grid tire-change-form"
             onSubmit={(e) => {
               e.preventDefault();
-              onSave({ odometer: Number(form.odometer), date: dateInputToEffectiveDate(form.date) });
+              // only what changed: an untouched date stays as it is (estimated or not)
+              onSave({
+                odometer: Number(form.odometer),
+                ...(form.date !== originalDate ? { date: dateInputToEffectiveDate(form.date) } : {}),
+                ...(form.tireID !== change.tireID ? { tireID: form.tireID } : {}),
+              });
             }}
           >
+            <label className="tires-wide">
+              Tires going on
+              <select value={form.tireID} onChange={(e) => setForm({ ...form, tireID: e.target.value })}>
+                {[...tireByID.values()].map((t) => (
+                  <option key={t._id} value={t._id}>
+                    {tireOptionLabel(t)}
+                    {t.retired ? " - retired" : ""}
+                  </option>
+                ))}
+              </select>
+            </label>
             <label>
               Odometer
               <input

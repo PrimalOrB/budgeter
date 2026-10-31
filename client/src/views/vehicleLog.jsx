@@ -597,7 +597,6 @@ const VehicleLog = ({ budgetID, vehicleID, backTo, onBack, setEditingModal, setE
                   <Icon className={`season-${value}`} /> {label}
                 </span>
               ))}
-              <span className="legend-item">Outlined: on the car now</span>
             </p>
           </>
         ) : (
@@ -609,23 +608,12 @@ const VehicleLog = ({ budgetID, vehicleID, backTo, onBack, setEditingModal, setE
           <span className="legend-item">
             <span className="legend-swatch legend-accent" /> {metric.summary}
           </span>
-          {metric.noCompare ? (
-            <>
-              <span className="legend-item">
-                <span className="legend-dot" /> Each fill-up
-              </span>
-              {metric.key === "odometer" && services.length > 0 && (
-                <span className="legend-item">
-                  <span className="legend-dot legend-dot-service" /> Maintenance, sized by cost
-                </span>
-              )}
-            </>
-          ) : (
+          <span className="legend-item">
+            <span className="legend-dot" /> {metric.source === "services" ? "Each record" : "Each fill-up"}
+          </span>
+          {metric.key === "odometer" && services.length > 0 && (
             <span className="legend-item">
-              {metric.source === "services" ? "Records" : "Fill-ups"} vs average
-              <span className="legend-dot legend-dot-below" /> below
-              <span className="legend-dot" /> near
-              <span className="legend-dot legend-dot-above" /> above
+              <span className="legend-dot legend-dot-service" /> Maintenance, sized by cost
             </span>
           )}
         </p>
