@@ -15,9 +15,15 @@ import {
   fuelFromEntry,
   fuelForSubmit,
   maintenanceFromEntry,
+  tiresFromEntry,
   MaintenanceDetailsInput,
   emptyMaintenance,
   maintenanceForSubmit,
+  TireChangeInput,
+  emptyTires,
+  tiresForSubmit,
+  fuelReady,
+  maintenanceReady,
 } from "../components/Forms";
 import { FullPageSpinLoader } from "../components";
 import { InlineError, InlineNotification } from "../components/Notifications";
@@ -47,6 +53,7 @@ const EditTransactionEntry = ({
     individualEntry: false,
     fuel: emptyFuel,
     service: emptyMaintenance,
+    tires: emptyTires,
   };
   const [formInput, setFormInput] = useState({ ...initialFormState });
   // categories that track mileage or maintenance offer optional vehicle details
@@ -89,6 +96,14 @@ const EditTransactionEntry = ({
       auditField.push(currentAuditState[field]);
     });
 
+    // vehicle details, when switched on, need every number valid
+    if (tracksMileage) {
+      auditField.push(fuelReady(currentFormState.fuel));
+    }
+    if (tracksMaintenance) {
+      auditField.push(maintenanceReady(currentFormState.service));
+    }
+
     currentAuditState.pass =
       auditField.filter((x) => x === true).length === auditField.length;
 
@@ -104,7 +119,7 @@ const EditTransactionEntry = ({
 
   useEffect(() => {
     if (entryData?.requestSingleTransaction) {
-      const { categoryID, title, value, effectiveDate, userID, individualEntry, mileage, maintenance } =
+      const { categoryID, title, value, effectiveDate, userID, individualEntry, mileage, maintenance, tireChange } =
         entryData.requestSingleTransaction;
       setFormInput({
         categoryID,
@@ -115,6 +130,7 @@ const EditTransactionEntry = ({
         individualEntry,
         fuel: fuelFromEntry(mileage),
         service: maintenanceFromEntry(maintenance),
+        tires: tiresFromEntry(tireChange),
       });
       setPopulated(true);
     }
@@ -147,6 +163,11 @@ const EditTransactionEntry = ({
           individualEntry: formInput.individualEntry,
           mileage: tracksMileage ? fuelForSubmit(formInput.fuel) : null,
           maintenance: tracksMaintenance ? maintenanceForSubmit(formInput.service) : null,
+          // a tire change rides on the maintenance details
+          tireChange:
+            tracksMaintenance && maintenanceForSubmit(formInput.service)
+              ? tiresForSubmit(formInput.tires)
+              : null,
         },
       },
       update: (cache, data) => {
@@ -216,6 +237,13 @@ const EditTransactionEntry = ({
                 )}
                 {tracksMaintenance && (
                   <MaintenanceDetailsInput
+                    input={formInput}
+                    setInput={setFormInput}
+                    vehicles={budgetState.vehicles}
+                  />
+                )}
+                {tracksMaintenance && (
+                  <TireChangeInput
                     input={formInput}
                     setInput={setFormInput}
                     vehicles={budgetState.vehicles}

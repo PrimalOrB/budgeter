@@ -29,18 +29,6 @@ const budgetSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'Entry',
     }],
-    // vehicles for mileage tracking; the odometer is offset + every km logged
-    // against the vehicle, so editing a fill-up keeps it current
-    vehicles: [ {
-      make: { type: String, trim: true, required: true },
-      model: { type: String, trim: true, required: true },
-      year: { type: Number, min: 1900, max: 2100 },
-      plate: { type: String, trim: true, default: "" },
-      color: { type: String, trim: true, default: "" },
-      odometerOffset: { type: Number, default: 0 },
-      // owners who use this as their default vehicle when logging fuel
-      defaultFor: [ { type: Schema.Types.ObjectId, ref: 'User' } ],
-    } ],
     // how shared expenses are divided, changeable month over month; each
     // setting applies from effectiveMonth until the next one
     splitSettings: [ {

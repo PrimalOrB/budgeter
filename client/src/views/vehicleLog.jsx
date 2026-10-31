@@ -12,6 +12,7 @@ import { SpinLoader } from "../components/Loaders";
 import { InlineError } from "../components/Notifications";
 import { UserAvatar } from "../components/Layout/EntryRow";
 import { VehicleSwatch, formatKm } from "./vehicleSettings";
+import { TireTimeline, TiresCard, SEASONS } from "./vehicleTires";
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -93,6 +94,12 @@ const METRICS = [
     summary: "Monthly total",
     // a month with no work cost nothing, rather than leaving a gap
     emptyAsZero: true,
+  },
+  {
+    key: "tires",
+    label: "Tires",
+    // drawn as a timeline of which set was on the car
+    timeline: true,
   },
 ];
 
@@ -248,7 +255,7 @@ const VehicleLog = ({ budgetID, vehicleID, backTo, onBack, setEditingModal, setE
   const [range, setRange] = useState(12);
   const isNarrow = useMediaQuery("(max-width: 640px)");
 
-  const { data, loading, error } = useQuery(VEHICLE_LOG, {
+  const { data, loading, error, refetch } = useQuery(VEHICLE_LOG, {
     variables: { budgetID, vehicleID },
     fetchPolicy: "network-only",
   });
@@ -261,12 +268,27 @@ const VehicleLog = ({ budgetID, vehicleID, backTo, onBack, setEditingModal, setE
   const vehicle = data?.vehicleLog?.vehicle;
   const allFills = useMemo(() => toFills(data), [data]);
   const allServices = useMemo(() => toServices(data), [data]);
+  const tires = data?.vehicleLog?.vehicle?.tires || [];
+  const tireChanges = data?.vehicleLog?.vehicle?.tireChanges || [];
+  const stints = useMemo(
+    () =>
+      (data?.vehicleLog?.vehicle?.tireStints || []).map((s) => ({
+        ...s,
+        fromDate: new Date(s.fromDate),
+        toDate: new Date(s.toDate),
+      })),
+    [data]
+  );
   const metric = METRICS.find((m) => m.key === metricKey);
 
   // the months shown: the last N up to this month, or everything logged
   const { fills, services, months, start, end } = useMemo(() => {
     const now = startOfMonth(new Date());
-    const firstDates = [allFills[0]?.date, allServices[0]?.date].filter(Boolean);
+    const firstDates = [
+      allFills[0]?.date,
+      allServices[0]?.date,
+      metric.timeline && stints[0]?.fromDate,
+    ].filter(Boolean);
     const first = firstDates.length ? startOfMonth(new Date(Math.min(...firstDates))) : now;
     const rangeStart = range ? subMonths(now, range - 1) : first;
     const rangeEnd = addMonths(now, 1);
@@ -287,11 +309,14 @@ const VehicleLog = ({ budgetID, vehicleID, backTo, onBack, setEditingModal, setE
       start: rangeStart,
       end: rangeEnd,
     };
-  }, [allFills, allServices, range]);
+  }, [allFills, allServices, stints, range, metric.timeline]);
   // what the chosen measure is drawn from
   const source = metric.source === "services" ? services : fills;
 
   const graphData = useMemo(() => {
+    if (metric.timeline) {
+      return null;
+    }
     const colors = getChartColors();
     const accent = colors.accent || "#4f46e5";
     // a month's point sits mid-month (end of month for readings); empty months leave a gap
@@ -385,6 +410,9 @@ const VehicleLog = ({ budgetID, vehicleID, backTo, onBack, setEditingModal, setE
   }, [fills, services, months, metricKey, resolvedTheme]);
 
   const options = useMemo(() => {
+    if (metric.timeline) {
+      return null;
+    }
     const colors = getChartColors();
     const spanMonths = months.length;
     // fewer month labels when there are many months or little room
@@ -559,6 +587,21 @@ const VehicleLog = ({ budgetID, vehicleID, backTo, onBack, setEditingModal, setE
             ))}
           </div>
         </div>
+        {metric.timeline ? (
+          <>
+            <TireTimeline tires={tires} stints={stints} start={start} end={end} isNarrow={isNarrow} />
+            <p className="vehicle-chart-legend">
+              {SEASONS.filter((s) => tires.some((t) => t.season === s.value)).map(({ value, label, icon: Icon }) => (
+                <span key={value} className="legend-item">
+                  <span className={`legend-swatch legend-${value}`} />
+                  <Icon className={`season-${value}`} /> {label}
+                </span>
+              ))}
+              <span className="legend-item">Outlined: on the car now</span>
+            </p>
+          </>
+        ) : (
+          <>
         <div className="vehicle-chart">
           <Chart type="line" data={graphData} options={options} />
         </div>
@@ -586,7 +629,17 @@ const VehicleLog = ({ budgetID, vehicleID, backTo, onBack, setEditingModal, setE
             </span>
           )}
         </p>
+          </>
+        )}
       </section>
+
+      <TiresCard
+        budgetID={budgetID}
+        vehicle={vehicle}
+        tires={tires}
+        changes={tireChanges}
+        refetch={refetch}
+      />
 
       <RecordTable
         title="Fill-ups"

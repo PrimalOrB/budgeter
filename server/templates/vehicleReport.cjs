@@ -6,6 +6,7 @@
 // beyond the built-in Helvetica (Western characters only: "-" not a minus).
 const { format } = require("date-fns");
 const { toCurrency, dateToMonthStr } = require("../utils/helpers.cjs");
+const { tireStints } = require("../utils/tires.cjs");
 
 const PAGE_WIDTH = 612; // US Letter, points
 const MARGIN = 36; // 0.5in
@@ -22,7 +23,11 @@ const C = {
   accentSoft: "#e3e4fb",
   dot: "#b9bac6",
   maintenance: "#d97706",
+  winter: "#2563eb",
+  summer: "#ea580c",
+  allSeason: "#8b8b96",
 };
+const DAY = 24 * 60 * 60 * 1000;
 
 // ---- formatting --------------------------------------------------------------
 const money = (value) => toCurrency(value || 0);
@@ -301,6 +306,98 @@ const legend = (items) => ({
   margin: [AXIS_WIDTH, 6, 0, 0],
 });
 
+// ---- tires ---------------------------------------------------------------------
+const seasonColor = (season) =>
+  season === "winter" ? C.winter : season === "summer" ? C.summer : C.allSeason;
+// the year a set first went on tells two sets of the same tire apart
+const tireName = (tire, tires) =>
+  tires.filter((t) => t.brand === tire.brand).length > 1 && tire.firstDate
+    ? `${tire.brand} (${new Date(tire.firstDate).getFullYear()})`
+    : tire.brand;
+const seasonName = (season) =>
+  season === "winter" ? "Winter" : season === "summer" ? "Summer" : "All-season";
+
+// a small sun, snowflake or half-disc drawn in the season's colour
+function seasonGlyph(season) {
+  const color = seasonColor(season);
+  const cx = 4.5;
+  const cy = 5.5;
+  if (season === "summer") {
+    const rays = Array.from({ length: 8 }, (_, i) => {
+      const a = (i * Math.PI) / 4;
+      return { type: "line", x1: cx + Math.cos(a) * 3, y1: cy + Math.sin(a) * 3, x2: cx + Math.cos(a) * 4.4, y2: cy + Math.sin(a) * 4.4, lineWidth: 0.8, lineColor: color };
+    });
+    return { width: 12, canvas: [{ type: "ellipse", x: cx, y: cy, r1: 2, r2: 2, color }, ...rays] };
+  }
+  if (season === "winter") {
+    const arms = [0, 60, 120].map((deg) => {
+      const a = (deg * Math.PI) / 180;
+      return { type: "line", x1: cx - Math.cos(a) * 4.2, y1: cy - Math.sin(a) * 4.2, x2: cx + Math.cos(a) * 4.2, y2: cy + Math.sin(a) * 4.2, lineWidth: 0.9, lineColor: color };
+    });
+    return { width: 12, canvas: arms };
+  }
+  return { width: 12, canvas: [{ type: "ellipse", x: cx, y: cy, r1: 3.6, r2: 3.6, lineWidth: 0.9, lineColor: color }] };
+}
+
+// Each set's time on the car within the period. km are the stint's km in
+// proportion to the days of it that fall in the period.
+function tiresInPeriod(log, periodStart, periodEnd) {
+  const stints = tireStints(log.vehicle.tireChanges, log.vehicle.odometer);
+  const byTire = new Map();
+  stints.forEach((s) => {
+    const from = Math.max(s.fromDate.getTime(), periodStart.getTime());
+    const to = Math.min(s.toDate.getTime(), periodEnd.getTime());
+    if (to <= from) {
+      return;
+    }
+    const length = s.toDate - s.fromDate;
+    const share = length > 0 ? (to - from) / length : 1;
+    const row = byTire.get(s.tireID) || { days: 0, km: 0, bars: [], current: false };
+    row.days += (to - from) / DAY;
+    row.km += s.km * share;
+    row.bars.push({ from, to, current: s.current });
+    row.current = row.current || (s.current && periodEnd.getTime() >= Date.now() - DAY);
+    byTire.set(s.tireID, row);
+  });
+  return (log.tires || [])
+    .filter((t) => byTire.has(String(t._id)))
+    .map((t) => ({ tire: t, ...byTire.get(String(t._id)) }));
+}
+
+function tireTimeline(rows, tires, periodStart, periodEnd) {
+  const LABEL = 150;
+  const width = WIDTH - LABEL;
+  const span = periodEnd - periodStart;
+  const x = (time) => ((time - periodStart) / span) * width;
+  return {
+    stack: rows.map((row) => ({
+      columns: [
+        {
+          width: LABEL,
+          columns: [seasonGlyph(row.tire.season), { width: "*", text: tireName(row.tire, tires), fontSize: 7.5, margin: [2, 1, 4, 0] }],
+        },
+        {
+          width,
+          canvas: [
+            { type: "rect", x: 0, y: 2, w: width, h: 8, r: 2, color: C.surface },
+            ...row.bars.map((bar) => ({
+              type: "rect",
+              x: x(bar.from),
+              y: 2,
+              w: Math.max(1.5, x(bar.to) - x(bar.from)),
+              h: 8,
+              r: 2,
+              color: seasonColor(row.tire.season),
+              ...(bar.current ? { lineColor: C.text, lineWidth: 0.8 } : {}),
+            })),
+          ],
+        },
+      ],
+      margin: [0, 2, 0, 2],
+    })),
+  };
+}
+
 // ---- document ------------------------------------------------------------------
 function vehicleReportDocument(log, { months, footer = "" }) {
   const { vehicle } = log;
@@ -435,6 +532,50 @@ function vehicleReportDocument(log, { months, footer = "" }) {
       }
     : empty("No maintenance in this period.");
 
+  // tires on the car during the period
+  const periodStart = labelToDate(months[0]);
+  const periodEnd = new Date(Math.min(
+    new Date(labelToDate(months[months.length - 1]).getFullYear(), labelToDate(months[months.length - 1]).getMonth() + 1, 1).getTime(),
+    Date.now()
+  ));
+  const tireRows = tiresInPeriod(log, periodStart, periodEnd);
+  const tiresSection = tireRows.length
+    ? section("Tires", "Sets on the car in this period", {
+        stack: [
+          tireTimeline(tireRows, log.tires, periodStart, periodEnd),
+          {
+            margin: [0, 8, 0, 0],
+            table: {
+              headerRows: 1,
+              dontBreakRows: true,
+              widths: [14, "*", 54, 42, 52, 52, 56, 56],
+              body: [
+                [th(""), th("Tires"), th("Season"), th("Days", "right"), th("km here", "right"), th("km total", "right"), th("$/100 km", "right"), th("Cost here", "right")],
+                ...tireRows.map((row) => [
+                  seasonGlyph(row.tire.season),
+                  { text: [tireName(row.tire, log.tires), row.current ? { text: "  on the car", color: C.muted, fontSize: 7 } : row.tire.retired ? { text: "  retired", color: C.subtle, fontSize: 7 } : ""] },
+                  { text: seasonName(row.tire.season), color: C.muted },
+                  num(Math.round(row.days).toLocaleString("en-US")),
+                  num(Math.round(row.km).toLocaleString("en-US")),
+                  num(Math.round(row.tire.mileage).toLocaleString("en-US"), { color: C.muted }),
+                  num(row.tire.costPer100km != null ? money(row.tire.costPer100km) : "-"),
+                  num(row.tire.costPer100km != null ? money((row.tire.costPer100km * row.km) / 100) : "-", { bold: true }),
+                ]),
+              ],
+            },
+            layout: dataLayout(),
+          },
+          {
+            text: "km here is each stint's distance in proportion to its days in the period. Cost here is that distance at the set's lifetime cost per 100 km.",
+            fontSize: 7,
+            color: C.muted,
+            margin: [0, 5, 0, 0],
+          },
+        ],
+        margin: [0, 6, 0, 0],
+      })
+    : null;
+
   return {
     pageSize: "LETTER",
     pageMargins: [MARGIN, MARGIN, MARGIN, MARGIN + 12],
@@ -455,6 +596,7 @@ function vehicleReportDocument(log, { months, footer = "" }) {
       ...masthead,
       ...stats,
       ...charts,
+      ...(tiresSection ? [tiresSection] : []),
       section("Fill-ups", `${fills.length} in this period`, fillTable),
       section("Maintenance", `${maintenance.length} in this period`, maintenanceTable),
     ],

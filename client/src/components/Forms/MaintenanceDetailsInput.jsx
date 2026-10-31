@@ -2,6 +2,7 @@ import React from "react";
 import { FiTool } from "react-icons/fi";
 import VehicleSelect from "./VehicleSelect";
 import { cleanDecimal, toNumber, defaultVehicleID } from "./FuelDetailsInput";
+import { fieldState, fieldHint } from "./vehicleChecks";
 
 // form state for the optional maintenance details, as strings while typing
 export const emptyMaintenance = { enabled: false, vehicleID: "", odometer: "" };
@@ -99,7 +100,7 @@ const MaintenanceDetailsInput = ({ input, setInput, vehicles = [], prop = "servi
           />
           <label className="fuel-field fuel-field-wide">
             <span>Odometer</span>
-            <span className="fuel-input">
+            <span className={`fuel-input field-${fieldState("odometer", details.odometer)}`}>
               <input
                 name="odometer"
                 inputMode="decimal"
@@ -109,6 +110,9 @@ const MaintenanceDetailsInput = ({ input, setInput, vehicles = [], prop = "servi
               />
               <span className="fuel-suffix">km</span>
             </span>
+            {fieldHint("odometer", details.odometer) && (
+              <span className="field-hint">{fieldHint("odometer", details.odometer)}</span>
+            )}
           </label>
           {latest && (
             <div className="fuel-summary">

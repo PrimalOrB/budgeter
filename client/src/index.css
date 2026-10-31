@@ -44,6 +44,8 @@
   --expense: #e11d48;
   --expense-soft: rgba(225, 29, 72, 0.35);
   --transfer: #d97706;
+  --winter: #2563eb;
+  --summer: #ea580c;
   --danger-bg: #fff1f3;
   --danger-border: #fecdd6;
   --info-bg: #eef0ff;
@@ -76,6 +78,8 @@
   --expense: #fb7185;
   --expense-soft: rgba(251, 113, 133, 0.35);
   --transfer: #fbbf24;
+  --winter: #60a5fa;
+  --summer: #fb923c;
   --danger-bg: rgba(251, 113, 133, 0.1);
   --danger-border: rgba(251, 113, 133, 0.3);
   --info-bg: rgba(129, 140, 248, 0.1);
@@ -2939,4 +2943,234 @@ form {
   .fuel-table td.note {
     min-width: 0;
   }
+}
+
+/* ==========================================================================
+   Tires
+   ========================================================================== */
+.season-icon {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+}
+
+.season-icon svg {
+  width: 13px;
+  height: 13px;
+}
+
+.season-summer {
+  color: var(--summer);
+}
+
+.season-winter {
+  color: var(--winter);
+}
+
+.season-all-season {
+  color: var(--text-muted);
+}
+
+.season-icon.season-summer {
+  background: color-mix(in srgb, var(--summer) 14%, transparent);
+}
+
+.season-icon.season-winter {
+  background: color-mix(in srgb, var(--winter) 14%, transparent);
+}
+
+.season-icon.season-all-season {
+  background: var(--surface-2);
+}
+
+.legend-summer {
+  background: var(--summer);
+}
+
+.legend-winter {
+  background: var(--winter);
+}
+
+.legend-all-season {
+  background: var(--text-muted);
+}
+
+.tire-chart {
+  position: relative;
+  min-height: 120px;
+  padding: var(--space-4) var(--space-3) 0;
+}
+
+.tires-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.tires-form {
+  margin: var(--space-3) var(--space-4);
+}
+
+.tires-banner {
+  margin: var(--space-3) var(--space-4) 0;
+}
+
+.tires-wide {
+  grid-column: 1 / -1;
+}
+
+.vehicle-form-grid select {
+  height: 38px;
+  padding: 0 var(--space-3);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.tire-season {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  grid-column: 1 / -1;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.tire-season .segmented-option {
+  height: 32px;
+  font-size: 0.85rem;
+}
+
+.tire-retire {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 0.85rem;
+}
+
+.tire-retire legend {
+  width: 100%;
+  margin-bottom: 4px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.tire-retire-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.tires-table .tire-name,
+.tire-changes .tire-name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  white-space: normal;
+}
+
+.tires-table tbody tr {
+  cursor: default;
+}
+
+.tire-active td {
+  background: color-mix(in srgb, var(--accent) 5%, transparent);
+}
+
+.tire-retired td {
+  color: var(--text-subtle);
+}
+
+.tire-installs {
+  color: var(--text-subtle);
+  font-size: 0.8rem;
+}
+
+.row-actions {
+  width: 1%;
+  text-align: right;
+}
+
+.btn-link {
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 550;
+}
+
+.btn-link:hover {
+  text-decoration: underline;
+}
+
+.tire-changes {
+  border-top: 1px solid var(--border);
+}
+
+.tire-changes summary {
+  padding: var(--space-3) var(--space-4);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.tire-changes tbody tr {
+  cursor: default;
+}
+
+.tire-change-body .segmented-option {
+  height: 32px;
+  font-size: 0.85rem;
+}
+
+.tire-change-body .tire-season-label {
+  display: none;
+}
+
+/* vehicle detail fields: required (empty), invalid, valid */
+.fuel-input.field-required {
+  border-style: dashed;
+  border-color: var(--transfer);
+}
+
+.fuel-input.field-invalid {
+  border-color: var(--expense);
+  background: var(--danger-bg);
+}
+
+.fuel-input.field-valid {
+  border-color: color-mix(in srgb, var(--income) 70%, var(--border-strong));
+}
+
+.fuel-input.field-required:focus-within,
+.fuel-input.field-valid:focus-within {
+  border-style: solid;
+  border-color: var(--accent);
+}
+
+.fuel-input.field-invalid:focus-within {
+  border-color: var(--expense);
+  box-shadow: 0 0 0 3px var(--expense-soft);
+}
+
+.field-hint {
+  color: var(--expense);
+  font-size: 0.75rem;
+}
+
+/* suggestions in the fuel and odometer fields are faint and light, so they
+   can't be mistaken for entered values */
+.fuel-input input::placeholder,
+.vehicle-form-grid input::placeholder {
+  color: var(--text-subtle);
+  opacity: 0.55;
+  font-weight: 400;
+  font-style: italic;
 }

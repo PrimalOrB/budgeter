@@ -1,4 +1,5 @@
-const { User, Budget, Category, Entry } = require("../models/index.cjs");
+const { User, Budget, Category, Entry, Vehicle, Tire } = require("../models/index.cjs");
+const { tireStints, tireSummary } = require("../utils/tires.cjs");
 const mongoose = require("mongoose");
 const {
   signToken,
@@ -42,6 +43,7 @@ const CATEGORY_TYPES = ["income", "expense"];
 // extra data a category's entries can carry
 const META_TYPES = ["mileage", "maintenance"];
 const MILEAGE_FIELDS = ["pricePerLitre", "litres", "distance"];
+const TIRE_SEASONS = ["summer", "winter", "all-season"];
 
 // "" / null clear the meta type; anything else must be a known type
 function cleanMetaType(metaType) {
@@ -111,12 +113,131 @@ function presentVehicle(vehicle, totals) {
     maintenanceCount: total.maintenanceCount || 0,
     maintenanceCost: fixRounding(total.maintenanceCost || 0, 2),
     defaultFor: (vehicle.defaultFor || []).map(String),
+    tireChanges: [...(vehicle.tireChanges || [])].sort((a, b) => a.odometer - b.odometer),
   };
 }
 
-function loadVehicle(budget, vehicleID) {
+// a vehicle's tires with their usage, given the presented vehicle
+async function presentTires(vehicle) {
+  const tires = await Tire.find({ vehicleID: vehicle._id }).sort({ createdAt: 1 });
+  const stints = tireStints(vehicle.tireChanges, vehicle.odometer);
+  return tires.map((tire) => ({ ...tire.toObject(), ...tireSummary(tire, stints) }));
+}
+
+function cleanTireFields(input) {
+  const fields = {
+    brand: String(input.brand || "").trim(),
+    season: input.season,
+    cost: input.cost ?? 0,
+    initialOdometer: input.initialOdometer ?? 0,
+  };
+  if (!fields.brand) {
+    throw inputError("Tires need a brand");
+  }
+  if (!TIRE_SEASONS.includes(fields.season)) {
+    throw inputError("Season must be summer, winter or all-season");
+  }
+  ["cost", "initialOdometer"].forEach((field) => {
+    if (!(Number.isFinite(fields[field]) && fields[field] >= 0)) {
+      throw inputError(`${field} must be zero or more`);
+    }
+  });
+  return fields;
+}
+
+async function loadTire(vehicle, tireID) {
+  assertObjectId(tireID, "tire");
+  const tire = await Tire.findOne({ _id: tireID, vehicleID: vehicle._id });
+  if (!tire) {
+    throw inputError("Those tires aren't on this vehicle's list");
+  }
+  return tire;
+}
+
+// add a change to a (loaded) vehicle and retire the sets coming off for good
+async function addChange(vehicle, { tireID, odometer, date, retireTireIDs = [], entryID }) {
+  if (!(Number.isFinite(odometer) && odometer >= 0)) {
+    throw inputError("Odometer must be zero or more");
+  }
+  const tire = await loadTire(vehicle, tireID);
+  const retiring = [];
+  for (const id of retireTireIDs || []) {
+    const retired = await loadTire(vehicle, id);
+    if (!retired._id.equals(tire._id)) {
+      retiring.push(retired._id);
+    }
+  }
+  vehicle.tireChanges.push({ odometer, date, tireID: tire._id, retired: retiring, entryID });
+  if (retiring.length) {
+    await Tire.updateMany({ _id: { $in: retiring } }, { $set: { retired: true } });
+  }
+  if (tire.retired) {
+    tire.retired = false;
+    await tire.save();
+  }
+}
+
+// take a change off a (loaded) vehicle, bringing back what it retired
+async function removeChange(vehicle, change) {
+  if (change.retired?.length) {
+    await Tire.updateMany({ _id: { $in: change.retired } }, { $set: { retired: false } });
+  }
+  vehicle.tireChanges.pull(change._id);
+}
+
+// remove the tire change a maintenance entry logged, wherever it is
+async function removeEntryTireChange(budgetID, entryID) {
+  const vehicles = await Vehicle.find({ budgetID, "tireChanges.entryID": entryID });
+  for (const vehicle of vehicles) {
+    const linked = vehicle.tireChanges.filter((c) => c.entryID?.equals(entryID));
+    for (const change of linked) {
+      await removeChange(vehicle, change);
+    }
+    await vehicle.save();
+  }
+}
+
+// a tire change sent with a maintenance entry needs a vehicle and odometer
+function assertEntryTireChange(tireChange, maintenance) {
+  if (!tireChange) {
+    return;
+  }
+  if (!maintenance || !Number.isFinite(maintenance.odometer)) {
+    throw inputError("A tire change needs a vehicle and odometer reading");
+  }
+  if (!tireChange.tireID && !tireChange.newTire) {
+    throw inputError("Choose the tires going on, or add new ones");
+  }
+  if (tireChange.newTire) {
+    cleanTireFields(tireChange.newTire);
+  }
+}
+
+// replace the entry's tire change with the one sent (or none)
+async function applyEntryTireChange(budget, entry, maintenance, tireChange) {
+  await removeEntryTireChange(budget._id, entry._id);
+  if (!tireChange) {
+    return;
+  }
+  const vehicle = await loadVehicle(budget, maintenance.vehicleID);
+  let { tireID } = tireChange;
+  if (!tireID) {
+    const tire = await Tire.create({ ...cleanTireFields(tireChange.newTire), vehicleID: vehicle._id });
+    tireID = tire._id;
+  }
+  await addChange(vehicle, {
+    tireID,
+    odometer: maintenance.odometer,
+    date: entry.effectiveDate,
+    retireTireIDs: tireChange.retireTireIDs,
+    entryID: entry._id,
+  });
+  await vehicle.save();
+}
+
+async function loadVehicle(budget, vehicleID) {
   assertObjectId(vehicleID, "vehicle");
-  const vehicle = budget.vehicles.id(vehicleID);
+  const vehicle = await Vehicle.findOne({ _id: vehicleID, budgetID: budget._id });
   if (!vehicle) {
     throw inputError("Vehicle isn't in this budget");
   }
@@ -124,14 +245,14 @@ function loadVehicle(budget, vehicleID) {
 }
 
 // fuel details for a transaction, or null when none were given
-function cleanMileage(mileage, budget, category) {
+async function cleanMileage(mileage, budget, category) {
   if (!mileage) {
     return null;
   }
   if (category.metaType !== "mileage") {
     throw inputError("This category doesn't track mileage");
   }
-  loadVehicle(budget, mileage.vehicleID);
+  await loadVehicle(budget, mileage.vehicleID);
   const cleaned = { vehicleID: mileage.vehicleID };
   MILEAGE_FIELDS.forEach((field) => {
     const value = mileage[field];
@@ -146,14 +267,14 @@ function cleanMileage(mileage, budget, category) {
   return cleaned;
 }
 
-function cleanMaintenance(maintenance, budget, category) {
+async function cleanMaintenance(maintenance, budget, category) {
   if (!maintenance) {
     return null;
   }
   if (category.metaType !== "maintenance") {
     throw inputError("This category doesn't track maintenance");
   }
-  loadVehicle(budget, maintenance.vehicleID);
+  await loadVehicle(budget, maintenance.vehicleID);
   const cleaned = { vehicleID: maintenance.vehicleID };
   const { odometer } = maintenance;
   if (odometer !== null && odometer !== undefined) {
@@ -392,8 +513,9 @@ async function createVehicleReportPdf({ budgetID, vehicleID, startMonth, endMont
   const authUser = requireUser(context);
   const labels = monthLabelsBetween(startMonth, endMonth, MAX_VEHICLE_REPORT_MONTHS);
   const { budget } = await loadBudgetForUser(budgetID, authUser);
-  const vehicle = loadVehicle(budget, vehicleID);
+  const vehicle = await loadVehicle(budget, vehicleID);
   const log = await buildVehicleLog(budget, vehicle);
+  log.tires = await presentTires(log.vehicle);
 
   const pdf = await renderPdf(
     vehicleReportDocument(log, {
@@ -417,6 +539,17 @@ const resolvers = {
 
   Entry: {
     effectiveDate: effectiveDateResolver,
+    tireChange: async (entry) => {
+      if (!entry.maintenance?.vehicleID) {
+        return null;
+      }
+      const vehicle = await Vehicle.findOne(
+        { _id: entry.maintenance.vehicleID, "tireChanges.entryID": entry._id },
+        { tireChanges: 1 }
+      );
+      const change = vehicle?.tireChanges.find((c) => c.entryID?.equals(entry._id));
+      return change ? { tireID: change.tireID, retireTireIDs: change.retired } : null;
+    },
   },
 
   ReportEntry: {
@@ -425,17 +558,29 @@ const resolvers = {
 
   Budget: {
     vehicles: async (budget) => {
-      if (!budget.vehicles?.length) {
+      const vehicles = await Vehicle.find({ budgetID: budget._id }).sort({ createdAt: 1 });
+      if (!vehicles.length) {
         return [];
       }
       const totals = await vehicleTotals(budget._id);
-      return budget.vehicles.map((vehicle) => presentVehicle(vehicle, totals));
+      return vehicles.map((vehicle) => presentVehicle(vehicle, totals));
     },
     splitSettings: (budget) =>
       [...(budget.splitSettings || [])].sort((a, b) =>
         a.effectiveMonth < b.effectiveMonth ? -1 : 1
       ),
   },
+
+  Vehicle: {
+    tires: presentTires,
+    tireStints: (vehicle) =>
+      tireStints(vehicle.tireChanges, vehicle.odometer).map((stint) => ({
+        ...stint,
+        changeID: stint.change._id,
+      })),
+  },
+
+
 
   SplitShare: {
     userID: (share) => String(share.userID?._id ?? share.userID),
@@ -491,7 +636,7 @@ const resolvers = {
     vehicleLog: async (parent, { budgetID, vehicleID }, context) => {
       const authUser = requireUser(context);
       const { budget } = await loadBudgetForUser(budgetID, authUser);
-      return buildVehicleLog(budget, loadVehicle(budget, vehicleID));
+      return buildVehicleLog(budget, await loadVehicle(budget, vehicleID));
     },
 
     requestCustomReport: async (
@@ -772,8 +917,9 @@ const resolvers = {
       const { budget, owners } = await loadBudgetForUser(budgetID, authUser);
       assertOwner(owners, userID);
       const category = await loadCategoryInBudget(categoryID, budget._id);
-      const mileage = cleanMileage(input.mileage, budget, category);
-      const maintenance = cleanMaintenance(input.maintenance, budget, category);
+      const mileage = await cleanMileage(input.mileage, budget, category);
+      const maintenance = await cleanMaintenance(input.maintenance, budget, category);
+      assertEntryTireChange(input.tireChange, maintenance);
 
       const newEntry = await Entry.create({
         title,
@@ -790,6 +936,9 @@ const resolvers = {
       });
 
       await Category.updateOne({ _id: category._id }, { $inc: { countUse: 1 } });
+      if (input.tireChange) {
+        await applyEntryTireChange(budget, newEntry, maintenance, input.tireChange);
+      }
 
       return Budget.findByIdAndUpdate(
         budget._id,
@@ -812,8 +961,9 @@ const resolvers = {
         throw inputError("Use editTransfer for transfers");
       }
       const category = await loadCategoryInBudget(categoryID, budget._id);
-      const mileage = cleanMileage(input.mileage, budget, category);
-      const maintenance = cleanMaintenance(input.maintenance, budget, category);
+      const mileage = await cleanMileage(input.mileage, budget, category);
+      const maintenance = await cleanMaintenance(input.maintenance, budget, category);
+      assertEntryTireChange(input.tireChange, maintenance);
       const cleared = [!mileage && "mileage", !maintenance && "maintenance"].filter(Boolean);
 
       // keep category usage counts accurate when an entry is re-categorized
@@ -833,6 +983,14 @@ const resolvers = {
           },
         ]);
       }
+
+      // the tire change follows the entry: replaced, or removed when none is sent
+      await applyEntryTireChange(
+        budget,
+        { _id: entry._id, effectiveDate },
+        maintenance,
+        input.tireChange
+      );
 
       // createdAt is left untouched; only the effective date moves
       return Entry.findByIdAndUpdate(
@@ -964,6 +1122,9 @@ const resolvers = {
 
       await Entry.deleteOne({ _id: entry._id });
       await Budget.updateOne({ _id: budget._id }, { $pull: { entries: entry._id } });
+      if (entry.maintenance) {
+        await removeEntryTireChange(budget._id, entry._id);
+      }
       if (entry.categoryID) {
         await Category.updateOne(
           { _id: entry.categoryID, countUse: { $gt: 0 } },
@@ -993,17 +1154,19 @@ const resolvers = {
       }
 
       if (input.vehicleID) {
-        loadVehicle(budget, input.vehicleID).set(fields);
+        const vehicle = await loadVehicle(budget, input.vehicleID);
+        vehicle.set(fields);
+        await vehicle.save();
       } else {
-        budget.vehicles.push(fields);
+        await Vehicle.create({ ...fields, budgetID: budget._id });
       }
-      return budget.save();
+      return budget;
     },
 
     deleteVehicle: async (parent, { budgetID, vehicleID }, context) => {
       const authUser = requireUser(context);
       const { budget } = await loadBudgetForUser(budgetID, authUser);
-      const vehicle = loadVehicle(budget, vehicleID);
+      const vehicle = await loadVehicle(budget, vehicleID);
 
       const records = await Entry.countDocuments({
         budgetID: budget._id,
@@ -1017,27 +1180,28 @@ const resolvers = {
           `${vehicleName(vehicle)} has ${records} record${records === 1 ? "" : "s"} logged and can't be deleted`
         );
       }
-      vehicle.deleteOne();
-      return budget.save();
+      await Tire.deleteMany({ vehicleID: vehicle._id });
+      await vehicle.deleteOne();
+      return budget;
     },
 
     setDefaultVehicle: async (parent, { budgetID, vehicleID }, context) => {
       const authUser = requireUser(context);
       const { budget } = await loadBudgetForUser(budgetID, authUser);
-      const chosen = vehicleID ? loadVehicle(budget, vehicleID) : null;
+      const chosen = vehicleID ? await loadVehicle(budget, vehicleID) : null;
 
       // one default per person
-      budget.vehicles.forEach((vehicle) => vehicle.defaultFor.pull(authUser._id));
+      await Vehicle.updateMany({ budgetID: budget._id }, { $pull: { defaultFor: authUser._id } });
       if (chosen) {
-        chosen.defaultFor.push(authUser._id);
+        await Vehicle.updateOne({ _id: chosen._id }, { $addToSet: { defaultFor: authUser._id } });
       }
-      return budget.save();
+      return budget;
     },
 
     setVehicleOdometer: async (parent, { budgetID, vehicleID, odometer }, context) => {
       const authUser = requireUser(context);
       const { budget } = await loadBudgetForUser(budgetID, authUser);
-      const vehicle = loadVehicle(budget, vehicleID);
+      const vehicle = await loadVehicle(budget, vehicleID);
       if (!(Number.isFinite(odometer) && odometer >= 0)) {
         throw inputError("Odometer must be zero or more");
       }
@@ -1049,8 +1213,12 @@ const resolvers = {
       const shift = fixRounding(offset - (vehicle.odometerOffset || 0), 1);
       vehicle.odometerOffset = offset;
 
-      // maintenance readings are on the same scale as the fill-ups, so they
-      // move by the same amount; moving them isn't an edit of the entries
+      // maintenance readings and tire changes are on the same scale as the
+      // fill-ups, so they move by the same amount; moving them isn't an
+      // edit of the entries
+      vehicle.tireChanges.forEach((change) => {
+        change.odometer = Math.max(0, fixRounding(change.odometer + shift, 1));
+      });
       if (shift) {
         await Entry.updateMany(
           {
@@ -1070,7 +1238,65 @@ const resolvers = {
           { timestamps: false }
         );
       }
-      return budget.save();
+      await vehicle.save();
+      return budget;
+    },
+
+    saveTire: async (parent, { budgetID, input }, context) => {
+      const authUser = requireUser(context);
+      const { budget } = await loadBudgetForUser(budgetID, authUser);
+      const vehicle = await loadVehicle(budget, input.vehicleID);
+      const fields = cleanTireFields(input);
+      if (input.retired !== null && input.retired !== undefined) {
+        fields.retired = Boolean(input.retired);
+      }
+      if (input.tireID) {
+        const tire = await loadTire(vehicle, input.tireID);
+        tire.set(fields);
+        await tire.save();
+      } else {
+        await Tire.create({ ...fields, vehicleID: vehicle._id });
+      }
+      return budget;
+    },
+
+    deleteTire: async (parent, { budgetID, tireID }, context) => {
+      const authUser = requireUser(context);
+      const { budget } = await loadBudgetForUser(budgetID, authUser);
+      assertObjectId(tireID, "tire");
+      const tire = await Tire.findById(tireID);
+      const vehicle = tire && (await loadVehicle(budget, tire.vehicleID));
+      if (!tire || !vehicle) {
+        throw inputError("Those tires aren't in this budget");
+      }
+      if (vehicle.tireChanges.some((c) => c.tireID.equals(tire._id))) {
+        throw inputError(`${tire.brand} has been on the car; retire it instead of deleting it`);
+      }
+      await tire.deleteOne();
+      return budget;
+    },
+
+    addTireChange: async (parent, { input }, context) => {
+      const authUser = requireUser(context);
+      const { budget } = await loadBudgetForUser(input.budgetID, authUser);
+      assertValidDate(input.date, "date");
+      const vehicle = await loadVehicle(budget, input.vehicleID);
+      await addChange(vehicle, input);
+      await vehicle.save();
+      return budget;
+    },
+
+    deleteTireChange: async (parent, { budgetID, vehicleID, changeID }, context) => {
+      const authUser = requireUser(context);
+      const { budget } = await loadBudgetForUser(budgetID, authUser);
+      const vehicle = await loadVehicle(budget, vehicleID);
+      const change = vehicle.tireChanges.id(changeID);
+      if (!change) {
+        throw inputError("That tire change isn't on this vehicle");
+      }
+      await removeChange(vehicle, change);
+      await vehicle.save();
+      return budget;
     },
 
     // add a split setting, or replace the one starting the same month

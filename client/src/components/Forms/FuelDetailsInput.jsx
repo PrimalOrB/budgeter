@@ -2,6 +2,7 @@ import React from "react";
 import { FiNavigation } from "react-icons/fi";
 import { toCurrency } from "../../utils/helpers";
 import VehicleSelect from "./VehicleSelect";
+import { fieldState, fieldHint } from "./vehicleChecks";
 
 // form state for the optional fuel details, as strings while typing
 export const emptyFuel = { enabled: false, vehicleID: "", pricePerLitre: "", litres: "", distance: "" };
@@ -62,7 +63,10 @@ const FuelDetailsInput = ({ input, setInput, vehicles = [], prop = "fuel", value
   const price = toNumber(fuel.pricePerLitre);
   const litres = toNumber(fuel.litres);
   const distance = toNumber(fuel.distance);
-  const total = price !== null && litres !== null ? Math.round(price * litres * 100) / 100 : null;
+  // only sensible price and litres make an amount
+  const priced = (f) =>
+    fieldState("pricePerLitre", f.pricePerLitre) === "valid" && fieldState("litres", f.litres) === "valid";
+  const total = priced(fuel) ? Math.round(price * litres * 100) / 100 : null;
   const efficiency = litres && distance ? (litres / distance) * 100 : null;
 
   // price x litres fills in the amount; it can still be edited afterwards
@@ -71,7 +75,7 @@ const FuelDetailsInput = ({ input, setInput, vehicles = [], prop = "fuel", value
     const p = toNumber(next.pricePerLitre);
     const l = toNumber(next.litres);
     const recalc =
-      ("pricePerLitre" in changes || "litres" in changes) && p !== null && l !== null;
+      ("pricePerLitre" in changes || "litres" in changes) && priced(next);
     setInput({
       ...input,
       [prop]: next,
@@ -102,7 +106,7 @@ const FuelDetailsInput = ({ input, setInput, vehicles = [], prop = "fuel", value
   const field = (name, label, placeholder, suffix) => (
     <label className="fuel-field">
       <span>{label}</span>
-      <span className="fuel-input">
+      <span className={`fuel-input field-${fieldState(name, fuel[name])}`}>
         <input
           name={name}
           inputMode="decimal"
@@ -112,6 +116,7 @@ const FuelDetailsInput = ({ input, setInput, vehicles = [], prop = "fuel", value
         />
         <span className="fuel-suffix">{suffix}</span>
       </span>
+      {fieldHint(name, fuel[name]) && <span className="field-hint">{fieldHint(name, fuel[name])}</span>}
     </label>
   );
 

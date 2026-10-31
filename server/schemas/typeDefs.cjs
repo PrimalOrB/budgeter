@@ -31,6 +31,47 @@ const typeDefs = `
         odometer: Float
     }
 
+    "A set of tires for a vehicle; tireID updates an existing set"
+    input TireInput {
+        vehicleID: ID!
+        tireID: ID
+        "e.g. Michelin Pilot Sport 4S"
+        brand: String!
+        "summer, winter or all-season"
+        season: String!
+        cost: Float
+        "km already on the tires when bought"
+        initialOdometer: Float
+        retired: Boolean
+    }
+
+    "Put a set of tires on a vehicle from an odometer reading"
+    input TireChangeInput {
+        budgetID: ID!
+        vehicleID: ID!
+        tireID: ID!
+        odometer: Float!
+        date: Date!
+        "Sets coming off for good at this change"
+        retireTireIDs: [ ID ]
+    }
+
+    "New tires bought with a maintenance record"
+    input NewTireInput {
+        brand: String!
+        season: String!
+        cost: Float
+        initialOdometer: Float
+    }
+
+    "A tire change logged with a maintenance record, at its odometer reading"
+    input EntryTireChangeInput {
+        "An existing set for the vehicle, or newTire"
+        tireID: ID
+        newTire: NewTireInput
+        retireTireIDs: [ ID ]
+    }
+
     input VehicleInput {
         budgetID: ID!
         "Omit to add a new vehicle"
@@ -67,6 +108,8 @@ const typeDefs = `
         mileage: MileageInput
         "Optional vehicle details; only for categories with metaType maintenance"
         maintenance: MaintenanceInput
+        "Optional tire change; needs maintenance details with an odometer reading"
+        tireChange: EntryTireChangeInput
     }
 
     input TransferInput {
@@ -148,6 +191,60 @@ const typeDefs = `
         maintenanceCost: Float
         "Owners who use this as their default vehicle"
         defaultFor: [ ID ]
+        tires: [ Tire ]
+        "Tire changes, oldest first"
+        tireChanges: [ TireChange ]
+        "Each time a set was on the vehicle, oldest first"
+        tireStints: [ TireStint ]
+    }
+
+    type Tire {
+        _id: ID!
+        vehicleID: ID!
+        brand: String!
+        season: String!
+        cost: Float
+        initialOdometer: Float
+        retired: Boolean
+        "On the vehicle now"
+        active: Boolean
+        "km driven on this vehicle"
+        usedKm: Float
+        "The tires' own odometer: initial km + km driven"
+        mileage: Float
+        costPer100km: Float
+        "How many times the set has been put on"
+        installs: Int
+        "When the set first went on the car"
+        firstDate: Date
+    }
+
+    type TireChange {
+        _id: ID!
+        odometer: Float!
+        date: Date!
+        "Worked out from the odometer rather than recorded"
+        dateEstimated: Boolean
+        tireID: ID!
+        retired: [ ID ]
+        entryID: ID
+    }
+
+    type TireStint {
+        changeID: ID!
+        tireID: ID!
+        fromOdometer: Float
+        toOdometer: Float
+        km: Float
+        fromDate: Date
+        toDate: Date
+        "The set on the vehicle now"
+        current: Boolean
+    }
+
+    type EntryTireChange {
+        tireID: ID!
+        retireTireIDs: [ ID ]
     }
 
     type FuelFill {
@@ -183,6 +280,8 @@ const typeDefs = `
         individualEntry: Boolean
         mileage: Mileage
         maintenance: Maintenance
+        "The tire change logged with this maintenance record, if any"
+        tireChange: EntryTireChange
     }
 
     type ReportEntry {
@@ -337,6 +436,13 @@ const typeDefs = `
         setDefaultVehicle( budgetID: ID!, vehicleID: ID ): Budget
         "Correct the odometer to a reading; later fill-ups add to it"
         setVehicleOdometer( budgetID: ID!, vehicleID: ID!, odometer: Float! ): Budget
+        "Add a set of tires, or update one when tireID is given"
+        saveTire( budgetID: ID!, input: TireInput! ): Budget
+        "Only tires that were never put on can be deleted"
+        deleteTire( budgetID: ID!, tireID: ID! ): Budget
+        addTireChange( input: TireChangeInput! ): Budget
+        "Undo a tire change; tires it retired come back"
+        deleteTireChange( budgetID: ID!, vehicleID: ID!, changeID: ID! ): Budget
     }
     
 `;

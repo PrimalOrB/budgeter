@@ -113,5 +113,7 @@ export function getChartColors() {
     border: read("--border"),
     accent: read("--accent"),
     transfer: read("--transfer"),
+    winter: read("--winter"),
+    summer: read("--summer"),
   };
 }

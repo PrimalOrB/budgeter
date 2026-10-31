@@ -59,6 +59,10 @@ export const QUERY_SINGLE_TRANSACTION = gql`
         vehicleID
         odometer
       }
+      tireChange {
+        tireID
+        retireTireIDs
+      }
     }
   }
 `;
@@ -180,6 +184,39 @@ export const VEHICLE_LOG = gql`
     vehicleLog(budgetID: $budgetID, vehicleID: $vehicleID) {
       vehicle {
         ...VehicleFields
+        tires {
+          _id
+          brand
+          season
+          cost
+          initialOdometer
+          retired
+          active
+          usedKm
+          mileage
+          costPer100km
+          installs
+          firstDate
+        }
+        tireChanges {
+          _id
+          odometer
+          date
+          dateEstimated
+          tireID
+          retired
+          entryID
+        }
+        tireStints {
+          changeID
+          tireID
+          fromOdometer
+          toOdometer
+          km
+          fromDate
+          toDate
+          current
+        }
       }
       fills {
         odometer

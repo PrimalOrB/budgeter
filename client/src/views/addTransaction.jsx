@@ -13,6 +13,11 @@ import {
   MaintenanceDetailsInput,
   emptyMaintenance,
   maintenanceForSubmit,
+  TireChangeInput,
+  emptyTires,
+  tiresForSubmit,
+  fuelReady,
+  maintenanceReady,
 } from "../components/Forms";
 import { InlineError, InlineNotification } from "../components/Notifications";
 import { Title } from "../components/Layout";
@@ -39,6 +44,7 @@ const AddTransactionEntry = ({
     individualEntry: false,
     fuel: emptyFuel,
     service: emptyMaintenance,
+    tires: emptyTires,
   };
   const [formInput, setFormInput] = useState({ ...initialFormState });
   // categories that track mileage or maintenance offer optional vehicle details
@@ -68,6 +74,14 @@ const AddTransactionEntry = ({
       currentAuditState[field] = currentFormState[field].length > 0;
       auditField.push(currentAuditState[field]);
     });
+
+    // vehicle details, when switched on, need every number valid
+    if (tracksMileage) {
+      auditField.push(fuelReady(currentFormState.fuel));
+    }
+    if (tracksMaintenance) {
+      auditField.push(maintenanceReady(currentFormState.service));
+    }
 
     currentAuditState.pass =
       auditField.filter((x) => x === true).length === auditField.length;
@@ -106,6 +120,11 @@ const AddTransactionEntry = ({
           individualEntry: formInput.individualEntry,
           mileage: tracksMileage ? fuelForSubmit(formInput.fuel) : null,
           maintenance: tracksMaintenance ? maintenanceForSubmit(formInput.service) : null,
+          // a tire change rides on the maintenance details
+          tireChange:
+            tracksMaintenance && maintenanceForSubmit(formInput.service)
+              ? tiresForSubmit(formInput.tires)
+              : null,
         },
       },
       update: (cache, data) => {
@@ -164,6 +183,13 @@ const AddTransactionEntry = ({
             )}
             {tracksMaintenance && (
               <MaintenanceDetailsInput
+                input={formInput}
+                setInput={setFormInput}
+                vehicles={budgetState.vehicles}
+              />
+            )}
+            {tracksMaintenance && (
+              <TireChangeInput
                 input={formInput}
                 setInput={setFormInput}
                 vehicles={budgetState.vehicles}

@@ -15,6 +15,15 @@ export const VEHICLE_FIELDS = gql`
     fillCount
     maintenanceCount
     maintenanceCost
+    tires {
+      _id
+      brand
+      season
+      cost
+      retired
+      active
+      firstDate
+    }
     defaultFor
   }
 `;
@@ -352,6 +361,42 @@ export const DELETE_VEHICLE = gql`
 export const SET_DEFAULT_VEHICLE = gql`
   mutation setDefaultVehicle($budgetID: ID!, $vehicleID: ID) {
     setDefaultVehicle(budgetID: $budgetID, vehicleID: $vehicleID) {
+      ${BUDGET_VEHICLES}
+    }
+  }
+  ${VEHICLE_FIELDS}
+`;
+
+export const SAVE_TIRE = gql`
+  mutation saveTire($budgetID: ID!, $input: TireInput!) {
+    saveTire(budgetID: $budgetID, input: $input) {
+      ${BUDGET_VEHICLES}
+    }
+  }
+  ${VEHICLE_FIELDS}
+`;
+
+export const DELETE_TIRE = gql`
+  mutation deleteTire($budgetID: ID!, $tireID: ID!) {
+    deleteTire(budgetID: $budgetID, tireID: $tireID) {
+      ${BUDGET_VEHICLES}
+    }
+  }
+  ${VEHICLE_FIELDS}
+`;
+
+export const ADD_TIRE_CHANGE = gql`
+  mutation addTireChange($input: TireChangeInput!) {
+    addTireChange(input: $input) {
+      ${BUDGET_VEHICLES}
+    }
+  }
+  ${VEHICLE_FIELDS}
+`;
+
+export const DELETE_TIRE_CHANGE = gql`
+  mutation deleteTireChange($budgetID: ID!, $vehicleID: ID!, $changeID: ID!) {
+    deleteTireChange(budgetID: $budgetID, vehicleID: $vehicleID, changeID: $changeID) {
       ${BUDGET_VEHICLES}
     }
   }
