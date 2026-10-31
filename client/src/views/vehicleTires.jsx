@@ -1,11 +1,17 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useMutation } from "@apollo/client";
 import "chart.js/auto";
 import { Chart } from "react-chartjs-2";
 import { format } from "date-fns";
 import { LuSun, LuSnowflake, LuCloudSun } from "react-icons/lu";
-import { FiPlus, FiTrash2, FiRepeat } from "react-icons/fi";
-import { SAVE_TIRE, DELETE_TIRE, ADD_TIRE_CHANGE, DELETE_TIRE_CHANGE } from "../utils/mutations";
+import { FiPlus, FiTrash2, FiRepeat, FiEdit2, FiX } from "react-icons/fi";
+import {
+  SAVE_TIRE,
+  DELETE_TIRE,
+  ADD_TIRE_CHANGE,
+  UPDATE_TIRE_CHANGE,
+  DELETE_TIRE_CHANGE,
+} from "../utils/mutations";
 import { toCurrency, toEffectiveDate, dateInputToEffectiveDate } from "../utils/helpers";
 import { getChartColors, withAlpha } from "../utils/theme";
 import { formatKm } from "./vehicleSettings";
@@ -29,17 +35,13 @@ export const SeasonIcon = ({ season }) => {
 // "☀ Michelin Pilot Sport 4S" for choosing a set: the season as a glyph
 // (options can't hold icons), and "(2)" in buying order when two sets share
 // a name
-export function tireOptionLabel(tire, tires = []) {
-  return `${seasonOf(tire.season).glyph} ${tireLabel(tire, tires)}`;
+export function tireOptionLabel(tire) {
+  return `${seasonOf(tire.season).glyph} ${tireLabel(tire)}`;
 }
 
-// "Michelin Pilot Sport 4S (2025)": the year the set first went on, when two
-// sets share a name ("new" for a set that hasn't been on yet)
-export function tireLabel(tire, tires = []) {
-  const twins = tires.filter((t) => t.brand === tire.brand).length > 1;
-  if (!twins) {
-    return tire.brand;
-  }
+// "Michelin Pilot Sport 4S (2025)": the year the set first went on ("new"
+// for a set that hasn't been on yet)
+export function tireLabel(tire) {
   return `${tire.brand} (${tire.firstDate ? new Date(tire.firstDate).getFullYear() : "new"})`;
 }
 
@@ -48,15 +50,24 @@ const seasonColor = (colors, season) =>
 
 // one row per set of tires, a bar for each time it was on the car
 export function TireTimeline({ tires, stints, start, end, isNarrow }) {
+  // rows in the order each set first appears in the range
   const shown = useMemo(() => {
-    const ids = new Set(
-      stints.filter((s) => s.toDate >= start && s.fromDate < end).map((s) => s.tireID)
-    );
-    return tires.filter((t) => ids.has(t._id));
+    const firstSeen = new Map();
+    stints
+      .filter((s) => s.toDate >= start && s.fromDate < end)
+      .forEach((s) => {
+        const seen = Math.max(s.fromDate.getTime(), start.getTime());
+        if (!firstSeen.has(s.tireID) || seen < firstSeen.get(s.tireID)) {
+          firstSeen.set(s.tireID, seen);
+        }
+      });
+    return tires
+      .filter((t) => firstSeen.has(t._id))
+      .sort((a, b) => firstSeen.get(a._id) - firstSeen.get(b._id));
   }, [tires, stints, start, end]);
 
   const colors = getChartColors();
-  const labels = shown.map((t) => `${seasonOf(t.season).glyph}  ${tireLabel(t, tires)}`);
+  const labels = shown.map((t) => `${seasonOf(t.season).glyph}  ${tireLabel(t)}`);
   const rowOf = new Map(shown.map((t, i) => [t._id, labels[i]]));
 
   const data = {
@@ -160,18 +171,25 @@ export function TireTimeline({ tires, stints, start, end, isNarrow }) {
   );
 }
 
-const blankTire = { brand: "", season: "summer", cost: "", initialOdometer: "" };
+const blankTire = { brand: "", season: "summer", cost: "", initialOdometer: "", retired: false };
 
-// the vehicle's tires: figures for each set, plus adding sets and changes
-export function TiresCard({ budgetID, vehicle, tires, changes, refetch }) {
+// the vehicle's tires: figures for each set, plus adding and editing sets
+// and changes
+export function TiresCard({ budgetID, vehicle, tires, changes, records = [], refetch }) {
   const [adding, setAdding] = useState(null); // null, "tire" or "change"
   const [tireForm, setTireForm] = useState(blankTire);
+  // the set being edited in the tire form, or null when adding one
+  const [editingTireID, setEditingTireID] = useState(null);
   const [changeForm, setChangeForm] = useState(null);
+  // the tire change open in the dialog
+  const [openChangeID, setOpenChangeID] = useState(null);
   const [errorState, setErrorState] = useState(null);
 
   const mutationOptions = {
     onCompleted: () => {
       setAdding(null);
+      setEditingTireID(null);
+      setOpenChangeID(null);
       setErrorState(null);
       refetch();
     },
@@ -180,12 +198,38 @@ export function TiresCard({ budgetID, vehicle, tires, changes, refetch }) {
   const [saveTire, { loading: savingTire }] = useMutation(SAVE_TIRE, mutationOptions);
   const [deleteTire] = useMutation(DELETE_TIRE, mutationOptions);
   const [addChange, { loading: savingChange }] = useMutation(ADD_TIRE_CHANGE, mutationOptions);
-  const [deleteChange] = useMutation(DELETE_TIRE_CHANGE, mutationOptions);
+  const [updateChange, { loading: updatingChange }] = useMutation(UPDATE_TIRE_CHANGE, mutationOptions);
+  const [deleteChange, { loading: deletingChange }] = useMutation(DELETE_TIRE_CHANGE, mutationOptions);
+
+  const startAddTire = () => {
+    if (adding === "tire" && !editingTireID) {
+      setAdding(null);
+      return;
+    }
+    setTireForm(blankTire);
+    setEditingTireID(null);
+    setAdding("tire");
+  };
+
+  const startEditTire = (tire) => {
+    setTireForm({
+      brand: tire.brand,
+      season: tire.season,
+      cost: String(tire.cost ?? ""),
+      initialOdometer: String(tire.initialOdometer ?? ""),
+      retired: Boolean(tire.retired),
+    });
+    setEditingTireID(tire._id);
+    setAdding("tire");
+  };
 
   const usable = tires.filter((t) => !t.retired);
-  const sorted = [...tires].sort(
-    (a, b) => Number(b.active) - Number(a.active) || Number(a.retired) - Number(b.retired)
-  );
+  // on the car, then stored sets, then retired ones; most recently used
+  // first within each (sets never on the car count as newest)
+  const group = (t) => (t.active ? 0 : t.retired ? 2 : 1);
+  const lastUsed = (t) => (t.lastDate ? new Date(t.lastDate).getTime() : Infinity);
+  const sorted = [...tires].sort((a, b) => group(a) - group(b) || lastUsed(b) - lastUsed(a));
+  const editingTire = tires.find((t) => t._id === editingTireID);
 
   const startChange = () => {
     const off = usable.find((t) => !t.active);
@@ -205,6 +249,7 @@ export function TiresCard({ budgetID, vehicle, tires, changes, refetch }) {
         budgetID,
         input: {
           vehicleID: vehicle._id,
+          ...(editingTireID ? { tireID: editingTireID, retired: tireForm.retired } : {}),
           brand: tireForm.brand,
           season: tireForm.season,
           cost: Number(tireForm.cost) || 0,
@@ -232,13 +277,14 @@ export function TiresCard({ budgetID, vehicle, tires, changes, refetch }) {
 
   const tireByID = new Map(tires.map((t) => [t._id, t]));
   const newestFirst = [...changes].reverse();
+  const openChange = changes.find((c) => c._id === openChangeID);
 
   return (
     <section className="card tires-card">
       <div className="card-header">
         <h2 className="card-title">Tires</h2>
         <div className="tires-actions">
-          <button type="button" className="btn btn-secondary btn-sm" onClick={() => setAdding(adding === "tire" ? null : "tire")}>
+          <button type="button" className="btn btn-secondary btn-sm" onClick={startAddTire}>
             <FiPlus /> Add tires
           </button>
           {usable.length > 0 && (
@@ -249,7 +295,7 @@ export function TiresCard({ budgetID, vehicle, tires, changes, refetch }) {
         </div>
       </div>
 
-      {errorState && (
+      {errorState && !openChange && (
         <div className="banner banner-error tires-banner" role="alert">
           {errorState}
         </div>
@@ -272,9 +318,30 @@ export function TiresCard({ budgetID, vehicle, tires, changes, refetch }) {
               <input inputMode="decimal" value={tireForm.initialOdometer} placeholder="0" onChange={(e) => setTireForm({ ...tireForm, initialOdometer: e.target.value.replace(/[^\d.]/g, "") })} />
             </label>
           </div>
+          {editingTire && !editingTire.active && editingTire.installs > 0 && (
+            <label className="tire-retire-option tire-retired-toggle">
+              <input
+                type="checkbox"
+                checked={tireForm.retired}
+                onChange={(e) => setTireForm({ ...tireForm, retired: e.target.checked })}
+              />
+              Retired: done with these tires
+            </label>
+          )}
           <div className="vehicle-form-actions">
+            {editingTire && editingTire.installs === 0 && (
+              <button
+                type="button"
+                className="btn btn-secondary tires-delete"
+                onClick={() => deleteTire({ variables: { budgetID, tireID: editingTire._id } })}
+              >
+                <FiTrash2 /> Delete
+              </button>
+            )}
             <button type="button" className="btn btn-secondary" onClick={() => setAdding(null)}>Cancel</button>
-            <button type="submit" className="btn btn-primary" disabled={!tireForm.brand.trim() || savingTire}>Add tires</button>
+            <button type="submit" className="btn btn-primary" disabled={!tireForm.brand.trim() || savingTire}>
+              {editingTireID ? "Save tires" : "Add tires"}
+            </button>
           </div>
         </form>
       )}
@@ -287,7 +354,7 @@ export function TiresCard({ budgetID, vehicle, tires, changes, refetch }) {
               <select value={changeForm.tireID} onChange={(e) => setChangeForm({ ...changeForm, tireID: e.target.value, retire: changeForm.retire.filter((id) => id !== e.target.value) })}>
                 {usable.map((t) => (
                   <option key={t._id} value={t._id}>
-                    {tireOptionLabel(t, tires)}
+                    {tireOptionLabel(t)}
                     {t.active ? " - on now" : ""}
                   </option>
                 ))}
@@ -304,7 +371,6 @@ export function TiresCard({ budgetID, vehicle, tires, changes, refetch }) {
           </div>
           <RetirePicker
             tires={usable.filter((t) => t._id !== changeForm.tireID)}
-            all={tires}
             value={changeForm.retire}
             onChange={(retire) => setChangeForm({ ...changeForm, retire })}
           />
@@ -324,54 +390,36 @@ export function TiresCard({ budgetID, vehicle, tires, changes, refetch }) {
               <tr>
                 <th>Tires</th>
                 <th className="hide-sm">Status</th>
-                <th className="num">km used</th>
-                <th className="num hide-sm">Tire odometer</th>
+                <th className="num">Tire km</th>
                 <th className="num">Cost</th>
                 <th className="num">$/100 km</th>
-                <th aria-label="Actions" />
               </tr>
             </thead>
             <tbody>
               {sorted.map((t) => (
-                <tr key={t._id} className={`${t.active ? "tire-active" : ""}${t.retired ? " tire-retired" : ""}`}>
-                  <td className="tire-name">
-                    <SeasonIcon season={t.season} />
-                    <span>{tireLabel(t, tires)}</span>
+                <tr
+                  key={t._id}
+                  className={`${t.active ? "tire-active" : ""}${t.retired ? " tire-retired" : ""}${editingTireID === t._id ? " tire-editing" : ""}`}
+                  onClick={() => startEditTire(t)}
+                  tabIndex={0}
+                  onKeyDown={(e) => e.key === "Enter" && startEditTire(t)}
+                  title="Edit these tires"
+                >
+                  <td>
+                    <span className="tire-name">
+                      <SeasonIcon season={t.season} />
+                      <span>{tireLabel(t)}</span>
+                    </span>
                   </td>
                   <td className="hide-sm">
                     {t.active ? <span className="badge badge-accent">On the car</span> : t.retired ? "Retired" : "Stored"}
-                    {t.installs > 0 && <span className="tire-installs"> · {t.installs}×</span>}
                   </td>
-                  <td className="num">{Math.round(t.usedKm).toLocaleString("en-US")}</td>
-                  <td className="num hide-sm muted">
+                  <td className="num" title={t.initialOdometer ? `${Math.round(t.initialOdometer).toLocaleString("en-US")} km already on them when bought` : undefined}>
                     {t.active ? "≈ " : ""}
                     {Math.round(t.mileage).toLocaleString("en-US")}
                   </td>
                   <td className="num">{toCurrency(t.cost)}</td>
                   <td className="num strong">{t.costPer100km != null ? toCurrency(t.costPer100km) : "-"}</td>
-                  <td className="row-actions">
-                    {t.installs === 0 && (
-                      <button type="button" className="icon-button icon-button-sm" aria-label={`Delete ${t.brand}`} onClick={() => deleteTire({ variables: { budgetID, tireID: t._id } })}>
-                        <FiTrash2 />
-                      </button>
-                    )}
-                    {t.installs > 0 && !t.active && (
-                      <button
-                        type="button"
-                        className="btn-link"
-                        onClick={() =>
-                          saveTire({
-                            variables: {
-                              budgetID,
-                              input: { vehicleID: vehicle._id, tireID: t._id, brand: t.brand, season: t.season, cost: t.cost, initialOdometer: t.initialOdometer, retired: !t.retired },
-                            },
-                          })
-                        }
-                      >
-                        {t.retired ? "Unretire" : "Retire"}
-                      </button>
-                    )}
-                  </td>
                 </tr>
               ))}
             </tbody>
@@ -390,34 +438,37 @@ export function TiresCard({ budgetID, vehicle, tires, changes, refetch }) {
                 <tr>
                   <th>Date</th>
                   <th className="num">Odometer</th>
-                  <th className="wide">On</th>
-                  <th className="hide-sm">Retired</th>
-                  <th aria-label="Actions" />
+                  <th className="tire-col">On</th>
+                  <th className="tire-col hide-sm">Retired</th>
                 </tr>
               </thead>
               <tbody>
                 {newestFirst.map((c) => {
                   const tire = tireByID.get(c.tireID);
                   return (
-                    <tr key={c._id}>
+                    <tr
+                      key={c._id}
+                      onClick={() => setOpenChangeID(c._id)}
+                      tabIndex={0}
+                      onKeyDown={(e) => e.key === "Enter" && setOpenChangeID(c._id)}
+                    >
                       <td title={c.dateEstimated ? "Estimated from the odometer" : undefined}>
                         {c.dateEstimated ? "≈ " : ""}
                         {format(new Date(c.date), "MMM d, yyyy")}
                       </td>
                       <td className="num muted">{Math.round(c.odometer).toLocaleString("en-US")}</td>
-                      <td className="wide tire-name">
-                        {tire && <SeasonIcon season={tire.season} />}
-                        <span>{tire ? tireLabel(tire, tires) : "?"}</span>
+                      <td className="tire-col">
+                        <span className="tire-name">
+                          {tire && <SeasonIcon season={tire.season} />}
+                          <span>{tire ? tireLabel(tire) : "?"}</span>
+                        </span>
                       </td>
-                      <td className="hide-sm muted">
-                        {(c.retired || []).map((id) => tireByID.get(id)?.brand).filter(Boolean).join(", ")}
-                      </td>
-                      <td className="row-actions">
-                        {!c.entryID && (
-                          <button type="button" className="icon-button icon-button-sm" aria-label="Undo this tire change" onClick={() => deleteChange({ variables: { budgetID, vehicleID: vehicle._id, changeID: c._id } })}>
-                            <FiTrash2 />
-                          </button>
-                        )}
+                      <td className="tire-col hide-sm muted">
+                        {(c.retired || [])
+                          .map((id) => tireByID.get(id))
+                          .filter(Boolean)
+                          .map((t) => tireLabel(t))
+                          .join(", ")}
                       </td>
                     </tr>
                   );
@@ -427,7 +478,173 @@ export function TiresCard({ budgetID, vehicle, tires, changes, refetch }) {
           </div>
         </details>
       )}
+
+      {openChange && (
+        <TireChangeModal
+          change={openChange}
+          tireByID={tireByID}
+          record={records.find((r) => r._id === openChange.entryID)}
+          error={errorState}
+          busy={updatingChange || deletingChange}
+          onClose={() => {
+            setOpenChangeID(null);
+            setErrorState(null);
+          }}
+          onSave={({ odometer, date }) =>
+            updateChange({
+              variables: {
+                input: {
+                  budgetID,
+                  vehicleID: vehicle._id,
+                  changeID: openChange._id,
+                  odometer,
+                  date,
+                },
+              },
+            })
+          }
+          onDelete={() =>
+            deleteChange({ variables: { budgetID, vehicleID: vehicle._id, changeID: openChange._id } })
+          }
+        />
+      )}
     </section>
+  );
+}
+
+// a tire change's details, like a transaction's: edit it, or delete it
+function TireChangeModal({ change, tireByID, record, error, busy, onClose, onSave, onDelete }) {
+  const [editing, setEditing] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [form, setForm] = useState({
+    odometer: String(change.odometer),
+    date: format(new Date(change.date), "yyyy-MM-dd"),
+  });
+
+  // close on Escape
+  useEffect(() => {
+    const onKeyDown = (e) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [onClose]);
+
+  const tire = tireByID.get(change.tireID);
+  const retired = (change.retired || []).map((id) => tireByID.get(id)).filter(Boolean);
+  const linked = Boolean(change.entryID);
+
+  return (
+    <div className="modal-pane" role="dialog" aria-modal="true">
+      <div className="modal-bg" onClick={onClose}></div>
+      <div className="modal-window">
+        <div className="modal-header">
+          <span className="modal-eyebrow">Tire change</span>
+          <button type="button" className="icon-button icon-button-sm" onClick={onClose} aria-label="Close">
+            <FiX />
+          </button>
+        </div>
+        <h2 className="modal-title tire-name">
+          {tire && <SeasonIcon season={tire.season} />}
+          <span>{tire ? tireLabel(tire) : "?"}</span>
+        </h2>
+
+        {editing ? (
+          <form
+            className="vehicle-form-grid tire-change-form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              onSave({ odometer: Number(form.odometer), date: dateInputToEffectiveDate(form.date) });
+            }}
+          >
+            <label>
+              Odometer
+              <input
+                inputMode="decimal"
+                value={form.odometer}
+                onChange={(e) => setForm({ ...form, odometer: e.target.value.replace(/[^\d.]/g, "") })}
+              />
+            </label>
+            <label>
+              Date
+              <input
+                type="date"
+                value={form.date}
+                onChange={(e) => setForm({ ...form, date: e.target.value })}
+              />
+            </label>
+            <div className="modal-actions tires-wide">
+              <button type="button" className="btn btn-secondary" onClick={() => setEditing(false)}>
+                Cancel
+              </button>
+              <button type="submit" className="btn btn-primary" disabled={form.odometer === "" || busy}>
+                Save change
+              </button>
+            </div>
+          </form>
+        ) : (
+          <dl className="detail-list">
+            <dt>Date</dt>
+            <dd>
+              {format(new Date(change.date), "MMM d, yyyy")}
+              {change.dateEstimated ? " (estimated)" : ""}
+            </dd>
+            <dt>Odometer</dt>
+            <dd>{formatKm(change.odometer)}</dd>
+            {retired.length > 0 && (
+              <>
+                <dt>Retired</dt>
+                <dd>{retired.map((t) => tireLabel(t)).join(", ")}</dd>
+              </>
+            )}
+            {linked && (
+              <>
+                <dt>Logged with</dt>
+                <dd>{record ? record.title : "a maintenance record"}</dd>
+              </>
+            )}
+          </dl>
+        )}
+
+        {error && (
+          <div className="banner banner-error modal-banner" role="alert">
+            {error}
+          </div>
+        )}
+
+        {!editing &&
+          (confirmingDelete ? (
+            <div className="modal-confirm">
+              <p>
+                Delete this tire change?
+                {retired.length ? " The tires it retired come back." : ""}
+                {linked ? " The maintenance record stays." : ""}
+              </p>
+              <div className="modal-actions">
+                <button type="button" className="btn btn-secondary" onClick={() => setConfirmingDelete(false)} disabled={busy}>
+                  Keep it
+                </button>
+                <button type="button" className="btn btn-danger" onClick={onDelete} disabled={busy}>
+                  <FiTrash2 /> Delete
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="modal-actions">
+                <button type="button" className="btn btn-secondary" onClick={onClose}>
+                  Close
+                </button>
+                <button type="button" className="btn btn-primary" onClick={() => setEditing(true)}>
+                  <FiEdit2 /> Edit change
+                </button>
+              </div>
+              <button type="button" className="modal-delete" onClick={() => setConfirmingDelete(true)}>
+                <FiTrash2 aria-hidden="true" />
+                Delete change
+              </button>
+            </>
+          ))}
+      </div>
+    </div>
   );
 }
 
@@ -453,7 +670,7 @@ export const SeasonPicker = ({ value, onChange }) => (
 );
 
 // sets coming off for good at a change
-export const RetirePicker = ({ tires, all, value, onChange }) =>
+export const RetirePicker = ({ tires, value, onChange }) =>
   tires.length > 0 && (
     <fieldset className="tire-retire">
       <legend>Retire at this change</legend>
@@ -467,7 +684,7 @@ export const RetirePicker = ({ tires, all, value, onChange }) =>
             }
           />
           <SeasonIcon season={t.season} />
-          {tireLabel(t, all)}
+          {tireLabel(t)}
         </label>
       ))}
     </fieldset>

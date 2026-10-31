@@ -3072,14 +3072,14 @@ form {
 
 .tires-table .tire-name,
 .tire-changes .tire-name {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: var(--space-2);
   white-space: normal;
 }
 
 .tires-table tbody tr {
-  cursor: default;
+  cursor: pointer;
 }
 
 .tire-active td {
@@ -3088,26 +3088,6 @@ form {
 
 .tire-retired td {
   color: var(--text-subtle);
-}
-
-.tire-installs {
-  color: var(--text-subtle);
-  font-size: 0.8rem;
-}
-
-.row-actions {
-  width: 1%;
-  text-align: right;
-}
-
-.btn-link {
-  color: var(--accent);
-  font-size: 0.8rem;
-  font-weight: 550;
-}
-
-.btn-link:hover {
-  text-decoration: underline;
 }
 
 .tire-changes {
@@ -3122,7 +3102,7 @@ form {
 }
 
 .tire-changes tbody tr {
-  cursor: default;
+  cursor: pointer;
 }
 
 .tire-change-body .segmented-option {
@@ -3174,3 +3154,33 @@ form {
   font-weight: 400;
   font-style: italic;
 }
+
+/* tire changes: the sets going on and coming off share the room */
+.tire-changes .tire-col {
+  width: 40%;
+}
+
+
+/* the set open in the tire form */
+.tire-editing td {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.tire-retired-toggle {
+  font-size: 0.85rem;
+}
+
+.tires-delete {
+  margin-right: auto;
+  color: var(--expense);
+}
+
+.tire-change-form {
+  margin-bottom: var(--space-2);
+}
+
+.tire-change-form input:disabled {
+  color: var(--text-muted);
+  background: var(--surface-2);
+}
+

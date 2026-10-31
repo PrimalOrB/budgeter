@@ -638,6 +638,7 @@ const VehicleLog = ({ budgetID, vehicleID, backTo, onBack, setEditingModal, setE
         vehicle={vehicle}
         tires={tires}
         changes={tireChanges}
+        records={allServices.map((s) => s.entry)}
         refetch={refetch}
       />
 

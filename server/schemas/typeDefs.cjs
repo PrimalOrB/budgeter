@@ -45,6 +45,15 @@ const typeDefs = `
         retired: Boolean
     }
 
+    "Correct a tire change's reading and date"
+    input TireChangeUpdateInput {
+        budgetID: ID!
+        vehicleID: ID!
+        changeID: ID!
+        odometer: Float!
+        date: Date
+    }
+
     "Put a set of tires on a vehicle from an odometer reading"
     input TireChangeInput {
         budgetID: ID!
@@ -108,7 +117,7 @@ const typeDefs = `
         mileage: MileageInput
         "Optional vehicle details; only for categories with metaType maintenance"
         maintenance: MaintenanceInput
-        "Optional tire change; needs maintenance details with an odometer reading"
+        "Optional tire change, logged once and linked for information; needs maintenance details with an odometer reading"
         tireChange: EntryTireChangeInput
     }
 
@@ -217,6 +226,8 @@ const typeDefs = `
         installs: Int
         "When the set first went on the car"
         firstDate: Date
+        "When the set last came off (now, for the set on the car)"
+        lastDate: Date
     }
 
     type TireChange {
@@ -441,6 +452,7 @@ const typeDefs = `
         "Only tires that were never put on can be deleted"
         deleteTire( budgetID: ID!, tireID: ID! ): Budget
         addTireChange( input: TireChangeInput! ): Budget
+        updateTireChange( input: TireChangeUpdateInput! ): Budget
         "Undo a tire change; tires it retired come back"
         deleteTireChange( budgetID: ID!, vehicleID: ID!, changeID: ID! ): Budget
     }

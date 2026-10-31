@@ -197,6 +197,7 @@ export const VEHICLE_LOG = gql`
           costPer100km
           installs
           firstDate
+          lastDate
         }
         tireChanges {
           _id

@@ -185,17 +185,18 @@ async function removeChange(vehicle, change) {
   vehicle.tireChanges.pull(change._id);
 }
 
-// remove the tire change a maintenance entry logged, wherever it is
-async function removeEntryTireChange(budgetID, entryID) {
-  const vehicles = await Vehicle.find({ budgetID, "tireChanges.entryID": entryID });
-  for (const vehicle of vehicles) {
-    const linked = vehicle.tireChanges.filter((c) => c.entryID?.equals(entryID));
-    for (const change of linked) {
-      await removeChange(vehicle, change);
-    }
-    await vehicle.save();
-  }
+// A tire change's link to the maintenance entry that logged it is only for
+// information: the change stands on its own, so this just drops the link
+async function unlinkEntryTireChanges(budgetID, entryID) {
+  await Vehicle.updateMany(
+    { budgetID, "tireChanges.entryID": entryID },
+    { $unset: { "tireChanges.$[change].entryID": 1 } },
+    { arrayFilters: [{ "change.entryID": entryID }] }
+  );
 }
+
+const entryHasTireChange = (budgetID, entryID) =>
+  Vehicle.exists({ budgetID, "tireChanges.entryID": entryID });
 
 // a tire change sent with a maintenance entry needs a vehicle and odometer
 function assertEntryTireChange(tireChange, maintenance) {
@@ -213,12 +214,8 @@ function assertEntryTireChange(tireChange, maintenance) {
   }
 }
 
-// replace the entry's tire change with the one sent (or none)
+// log the tire change sent with a maintenance entry, linked to it
 async function applyEntryTireChange(budget, entry, maintenance, tireChange) {
-  await removeEntryTireChange(budget._id, entry._id);
-  if (!tireChange) {
-    return;
-  }
   const vehicle = await loadVehicle(budget, maintenance.vehicleID);
   let { tireID } = tireChange;
   if (!tireID) {
@@ -984,13 +981,16 @@ const resolvers = {
         ]);
       }
 
-      // the tire change follows the entry: replaced, or removed when none is sent
-      await applyEntryTireChange(
-        budget,
-        { _id: entry._id, effectiveDate },
-        maintenance,
-        input.tireChange
-      );
+      // a tire change can be logged once from the record; after that it's
+      // managed in the vehicle's tire log
+      if (input.tireChange && !(await entryHasTireChange(budget._id, entry._id))) {
+        await applyEntryTireChange(
+          budget,
+          { _id: entry._id, effectiveDate },
+          maintenance,
+          input.tireChange
+        );
+      }
 
       // createdAt is left untouched; only the effective date moves
       return Entry.findByIdAndUpdate(
@@ -1123,7 +1123,7 @@ const resolvers = {
       await Entry.deleteOne({ _id: entry._id });
       await Budget.updateOne({ _id: budget._id }, { $pull: { entries: entry._id } });
       if (entry.maintenance) {
-        await removeEntryTireChange(budget._id, entry._id);
+        await unlinkEntryTireChanges(budget._id, entry._id);
       }
       if (entry.categoryID) {
         await Category.updateOne(
@@ -1282,6 +1282,27 @@ const resolvers = {
       assertValidDate(input.date, "date");
       const vehicle = await loadVehicle(budget, input.vehicleID);
       await addChange(vehicle, input);
+      await vehicle.save();
+      return budget;
+    },
+
+    updateTireChange: async (parent, { input }, context) => {
+      const authUser = requireUser(context);
+      const { budget } = await loadBudgetForUser(input.budgetID, authUser);
+      const vehicle = await loadVehicle(budget, input.vehicleID);
+      const change = vehicle.tireChanges.id(input.changeID);
+      if (!change) {
+        throw inputError("That tire change isn't on this vehicle");
+      }
+      if (!(Number.isFinite(input.odometer) && input.odometer >= 0)) {
+        throw inputError("Odometer must be zero or more");
+      }
+      change.odometer = input.odometer;
+      if (input.date) {
+        assertValidDate(input.date, "date");
+        change.date = input.date;
+        change.dateEstimated = false;
+      }
       await vehicle.save();
       return budget;
     },

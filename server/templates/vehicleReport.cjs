@@ -309,11 +309,9 @@ const legend = (items) => ({
 // ---- tires ---------------------------------------------------------------------
 const seasonColor = (season) =>
   season === "winter" ? C.winter : season === "summer" ? C.summer : C.allSeason;
-// the year a set first went on tells two sets of the same tire apart
-const tireName = (tire, tires) =>
-  tires.filter((t) => t.brand === tire.brand).length > 1 && tire.firstDate
-    ? `${tire.brand} (${new Date(tire.firstDate).getFullYear()})`
-    : tire.brand;
+// "Michelin Pilot Sport 4S (2025)": the year the set first went on
+const tireName = (tire) =>
+  tire.firstDate ? `${tire.brand} (${new Date(tire.firstDate).getFullYear()})` : tire.brand;
 const seasonName = (season) =>
   season === "winter" ? "Winter" : season === "summer" ? "Summer" : "All-season";
 
@@ -364,7 +362,7 @@ function tiresInPeriod(log, periodStart, periodEnd) {
     .map((t) => ({ tire: t, ...byTire.get(String(t._id)) }));
 }
 
-function tireTimeline(rows, tires, periodStart, periodEnd) {
+function tireTimeline(rows, periodStart, periodEnd) {
   const LABEL = 150;
   const width = WIDTH - LABEL;
   const span = periodEnd - periodStart;
@@ -374,7 +372,7 @@ function tireTimeline(rows, tires, periodStart, periodEnd) {
       columns: [
         {
           width: LABEL,
-          columns: [seasonGlyph(row.tire.season), { width: "*", text: tireName(row.tire, tires), fontSize: 7.5, margin: [2, 1, 4, 0] }],
+          columns: [seasonGlyph(row.tire.season), { width: "*", text: tireName(row.tire), fontSize: 7.5, margin: [2, 1, 4, 0] }],
         },
         {
           width,
@@ -542,7 +540,7 @@ function vehicleReportDocument(log, { months, footer = "" }) {
   const tiresSection = tireRows.length
     ? section("Tires", "Sets on the car in this period", {
         stack: [
-          tireTimeline(tireRows, log.tires, periodStart, periodEnd),
+          tireTimeline(tireRows, periodStart, periodEnd),
           {
             margin: [0, 8, 0, 0],
             table: {
@@ -553,7 +551,7 @@ function vehicleReportDocument(log, { months, footer = "" }) {
                 [th(""), th("Tires"), th("Season"), th("Days", "right"), th("km here", "right"), th("km total", "right"), th("$/100 km", "right"), th("Cost here", "right")],
                 ...tireRows.map((row) => [
                   seasonGlyph(row.tire.season),
-                  { text: [tireName(row.tire, log.tires), row.current ? { text: "  on the car", color: C.muted, fontSize: 7 } : row.tire.retired ? { text: "  retired", color: C.subtle, fontSize: 7 } : ""] },
+                  { text: [tireName(row.tire), row.current ? { text: "  on the car", color: C.muted, fontSize: 7 } : row.tire.retired ? { text: "  retired", color: C.subtle, fontSize: 7 } : ""] },
                   { text: seasonName(row.tire.season), color: C.muted },
                   num(Math.round(row.days).toLocaleString("en-US")),
                   num(Math.round(row.km).toLocaleString("en-US")),

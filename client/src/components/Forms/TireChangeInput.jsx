@@ -15,16 +15,10 @@ export const emptyTires = {
   retire: [],
 };
 
+// a record that already logged a tire change only notes it: the change is
+// managed in the vehicle's tire log from then on
 export function tiresFromEntry(tireChange) {
-  if (!tireChange) {
-    return emptyTires;
-  }
-  return {
-    ...emptyTires,
-    enabled: true,
-    tireID: tireChange.tireID,
-    retire: tireChange.retireTireIDs || [],
-  };
+  return tireChange ? { ...emptyTires, linked: tireChange } : emptyTires;
 }
 
 // the EntryTireChangeInput to send, or null when there's no tire change
@@ -54,7 +48,22 @@ const TireChangeInput = ({ input, setInput, vehicles = [], prop = "tires", servi
   const tires = input[prop] || emptyTires;
   const service = input[serviceProp] || {};
   const vehicle = vehicles.find((v) => v._id === service.vehicleID);
-  if (!service.enabled || !vehicle || !(mentionsTires(input.title) || tires.enabled)) {
+  if (!service.enabled || !vehicle) {
+    return null;
+  }
+  if (tires.linked) {
+    const tire = (vehicle.tires || []).find((t) => t._id === tires.linked.tireID);
+    return (
+      <div className="fuel-panel fuel-panel-empty">
+        <FiRepeat aria-hidden="true" />
+        <span>
+          Logged a tire change{tire ? ` to ${tireOptionLabel(tire)}` : ""}. Edit or delete it from
+          the vehicle's tire log.
+        </span>
+      </div>
+    );
+  }
+  if (!(mentionsTires(input.title) || tires.enabled)) {
     return null;
   }
 
@@ -127,7 +136,7 @@ const TireChangeInput = ({ input, setInput, vehicles = [], prop = "tires", servi
                 </option>
                 {usable.map((t) => (
                   <option key={t._id} value={t._id}>
-                    {tireOptionLabel(t, vehicle.tires)}
+                    {tireOptionLabel(t)}
                     {t.active ? " - on now" : ""}
                   </option>
                 ))}
@@ -181,7 +190,6 @@ const TireChangeInput = ({ input, setInput, vehicles = [], prop = "tires", servi
           <div className="fuel-field-wide">
             <RetirePicker
               tires={usable.filter((t) => !t.retired && t._id !== goingOn)}
-              all={vehicle.tires}
               value={tires.retire}
               onChange={(retire) => update({ retire })}
             />

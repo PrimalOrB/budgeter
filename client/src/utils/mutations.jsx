@@ -394,6 +394,15 @@ export const ADD_TIRE_CHANGE = gql`
   ${VEHICLE_FIELDS}
 `;
 
+export const UPDATE_TIRE_CHANGE = gql`
+  mutation updateTireChange($input: TireChangeUpdateInput!) {
+    updateTireChange(input: $input) {
+      ${BUDGET_VEHICLES}
+    }
+  }
+  ${VEHICLE_FIELDS}
+`;
+
 export const DELETE_TIRE_CHANGE = gql`
   mutation deleteTireChange($budgetID: ID!, $vehicleID: ID!, $changeID: ID!) {
     deleteTireChange(budgetID: $budgetID, vehicleID: $vehicleID, changeID: $changeID) {
