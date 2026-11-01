@@ -15,6 +15,9 @@ export function entryAmountClass(entry) {
   return entry.value < 0 ? "credit" : "negative";
 }
 
+// beside a category's name when it's paid automatically
+export const AutoPayTag = () => <span className="auto-pay-tag">(auto-pay)</span>;
+
 export const UserAvatar = ({ user }) => (
   <span
     className="initials-icon noselect"
@@ -72,7 +75,8 @@ const EntryRow = ({ entry, category, onSelect, compact }) => {
         <span className="entry-main">
           {!compact && (
             <span className="entry-category">
-              {label}
+              <span className="entry-category-name">{label}</span>
+              {!isTransfer && category?.isAutoPay && <AutoPayTag />}
               {metaLink && <MetaLinkIcon link={metaLink} />}
             </span>
           )}

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FiChevronDown } from "react-icons/fi";
 import { BudgetCategoryEntriesExpandableList } from ".";
 import { toCurrency } from "../../utils/helpers";
+import { AutoPayTag } from "./EntryRow";
 
 const BudgetCategoryExpandableList = ({
   category,
@@ -24,7 +25,10 @@ const BudgetCategoryExpandableList = ({
             className={`chevron${expandedState ? " chevron-open" : ""}`}
             aria-hidden="true"
           />
-          <span className="category-title noselect">{category.title}</span>
+          <span className="category-title noselect">
+            {category.title}
+            {category.isAutoPay && <AutoPayTag />}
+          </span>
           <span className="category-count noselect">{data.length}</span>
           {category?.totalIndividual ? (
             <span className="personal-cost noselect" title="Your share">

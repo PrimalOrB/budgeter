@@ -4,6 +4,7 @@ import {
   InlineTextInput,
   InlineSelectInput,
   InlineTrackingInput,
+  InlineToggleInput,
 } from "../components/Forms";
 import { InlineError, InlineNotification } from "../components/Notifications";
 import { useMutation } from "@apollo/client";
@@ -99,6 +100,7 @@ const EditCategory = ({ refetch, setPageState, editingTransaction }) => {
           title: formInput.title,
           metaType:
             formInput.categoryType === "expense" ? formInput.metaType || null : null,
+          isAutoPay: Boolean(formInput.isAutoPay),
         },
       },
       update: (cache, data) => {
@@ -142,6 +144,13 @@ const EditCategory = ({ refetch, setPageState, editingTransaction }) => {
             {formInput.categoryType === "expense" && (
               <InlineTrackingInput input={formInput} setInput={setFormInput} />
             )}
+            <InlineToggleInput
+              prop="isAutoPay"
+              input={formInput}
+              setInput={setFormInput}
+              label="Auto-pay"
+              hint="Paid automatically each period; shown as (auto-pay) beside the name."
+            />
             {formInput.error && <InlineError text={formInput.error} />}
           </form>
           {createdLoading ? (

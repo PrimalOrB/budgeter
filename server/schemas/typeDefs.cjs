@@ -7,12 +7,15 @@ const typeDefs = `
         categoryType: String!
         "Extra data entries can carry: omit for none, mileage or maintenance"
         metaType: String
+        "Paid automatically each period"
+        isAutoPay: Boolean
     }
 
     input CategoryUpdateInput {
         categoryID: ID!
         title: String!
         metaType: String
+        isAutoPay: Boolean
     }
 
     "Fuel details for a transaction in a mileage category"
@@ -170,6 +173,7 @@ const typeDefs = `
         categoryType: String!
         countUse: Int
         metaType: String
+        isAutoPay: Boolean
     }
 
     type Mileage {

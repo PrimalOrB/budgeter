@@ -170,7 +170,7 @@ const MonthSummary = ({
                 (category) => category._id === entry.categoryID
               );
 
-              const category = { ...entry, title: findCategory.title };
+              const category = { ...entry, title: findCategory.title, isAutoPay: findCategory.isAutoPay };
 
               const entries = monthData.entries
                 .filter((entry) => entry.valueType === "expense")
@@ -214,7 +214,7 @@ const MonthSummary = ({
                 (category) => category._id === entry.categoryID
               );
 
-              const category = { ...entry, title: findCategory.title };
+              const category = { ...entry, title: findCategory.title, isAutoPay: findCategory.isAutoPay };
 
               const entries = monthData.entries
                 .filter((entry) => entry.valueType === "income")

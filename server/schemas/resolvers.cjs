@@ -877,6 +877,7 @@ const resolvers = {
         title,
         categoryType,
         metaType: cleanMetaType(input.metaType),
+        isAutoPay: Boolean(input.isAutoPay),
       });
 
       return Budget.findByIdAndUpdate(
@@ -901,6 +902,9 @@ const resolvers = {
       // only change the tracking type when the client sends the field
       if ("metaType" in input) {
         category.metaType = cleanMetaType(input.metaType);
+      }
+      if ("isAutoPay" in input && input.isAutoPay !== null) {
+        category.isAutoPay = Boolean(input.isAutoPay);
       }
       return category.save();
     },

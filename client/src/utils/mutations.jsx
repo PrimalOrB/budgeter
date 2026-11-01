@@ -265,6 +265,7 @@ export const QUERY_CURRENT_BUDGET = gql`
         categoryType
         countUse
         metaType
+        isAutoPay
       }
       months {
         ...MonthFields
@@ -294,6 +295,7 @@ mutation queryCategory($input: CategoryIDInput! ) {
       categoryType
       countUse
       metaType
+      isAutoPay
     }
   }
 `;

@@ -4,6 +4,7 @@ import {
   InlineTextInput,
   InlineSelectInput,
   InlineTrackingInput,
+  InlineToggleInput,
 } from "../components/Forms";
 import { InlineError, InlineNotification } from "../components/Notifications";
 import { useMutation } from "@apollo/client";
@@ -16,6 +17,7 @@ const AddCategory = ({ id, refetch, setPageState }) => {
     title: "",
     categoryType: "",
     metaType: "",
+    isAutoPay: false,
   };
   const [formInput, setFormInput] = useState({ ...initialFormState });
   const [auditState, setAuditState] = useState({ pass: false });
@@ -67,6 +69,7 @@ const AddCategory = ({ id, refetch, setPageState }) => {
           // only expense categories can track extra data
           metaType:
             formInput.categoryType === "expense" ? formInput.metaType || null : null,
+          isAutoPay: Boolean(formInput.isAutoPay),
         },
       },
       update: (cache, data) => {
@@ -110,6 +113,13 @@ const AddCategory = ({ id, refetch, setPageState }) => {
             {formInput.categoryType === "expense" && (
               <InlineTrackingInput input={formInput} setInput={setFormInput} />
             )}
+            <InlineToggleInput
+              prop="isAutoPay"
+              input={formInput}
+              setInput={setFormInput}
+              label="Auto-pay"
+              hint="Paid automatically each period; shown as (auto-pay) beside the name."
+            />
           </form>
           {createdLoading ? (
             <InlineNotification text={"Submit processing"} />

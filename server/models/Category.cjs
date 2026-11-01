@@ -31,6 +31,11 @@ const categorySchema = new Schema(
       type: String,
       enum: [ 'mileage', 'maintenance' ],
     },
+    // paid automatically each period, e.g. a phone bill on pre-authorized debit
+    isAutoPay: {
+      type: Boolean,
+      default: false,
+    },
   },
 )
 

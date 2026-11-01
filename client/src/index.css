@@ -3169,3 +3169,36 @@ form {
 }
 
 
+
+/* "(auto-pay)" beside a category's name, light like the fuel figures */
+.auto-pay-tag {
+  margin-left: 6px;
+  color: var(--text-subtle);
+  font-size: 0.75rem;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.form-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+/* a long category name shortens before its tags and icons do */
+.entry-category {
+  display: flex;
+  align-items: center;
+}
+
+.entry-category-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.entry-category .auto-pay-tag,
+.entry-category .entry-meta-link {
+  flex: none;
+}

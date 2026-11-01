@@ -1,5 +1,6 @@
 import React from "react";
 import { Title } from "../components/Layout";
+import { AutoPayTag } from "../components/Layout/EntryRow";
 import { ActionButton } from "../components/Buttons";
 import {
   toCurrency,
@@ -47,7 +48,10 @@ const CategoryList = ({ title, type, categories, averages, onSelect, onAdd }) =>
         ) : (
           list.map((category) => (
             <li key={category._id} onClick={() => onSelect(category)}>
-              <span className="f1 noselect">{category.title}</span>
+              <span className="f1 noselect">
+                {category.title}
+                {category.isAutoPay && <AutoPayTag />}
+              </span>
               <span className="category-average noselect">
                 {toCurrency(averages[category._id] || 0)}
                 <span className="category-average-unit">/mo</span>
