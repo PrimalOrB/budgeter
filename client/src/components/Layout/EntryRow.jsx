@@ -80,13 +80,19 @@ const EntryRow = ({ entry, category, onSelect, compact }) => {
               {metaLink && <MetaLinkIcon link={metaLink} />}
             </span>
           )}
-          {text && (
-            <span className="entry-title">
-              {text}
-              {metaStat && <span className="entry-meta-stat">{metaStat}</span>}
-              {compact && metaLink && <MetaLinkIcon link={metaLink} />}
+          {/* on phones the date leads this line, so dates line up on the left */}
+          <span className="entry-sub">
+            <span className="entry-date-inline">
+              {formatEntryDate(entry.effectiveDate, "MMM d")}
             </span>
-          )}
+            {text && (
+              <span className="entry-title">
+                {text}
+                {metaStat && <span className="entry-meta-stat">{metaStat}</span>}
+                {compact && metaLink && <MetaLinkIcon link={metaLink} />}
+              </span>
+            )}
+          </span>
         </span>
         <span className="entry-date">
           {formatEntryDate(entry.effectiveDate, "MMM d")}

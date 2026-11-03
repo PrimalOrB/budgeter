@@ -1059,12 +1059,41 @@ svg {
   color: var(--transfer);
 }
 
+/* the line under the category: the description, and on phones the date */
+.entry-sub {
+  display: flex;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.entry-sub .entry-title {
+  min-width: 0;
+}
+
+.entry-date-inline {
+  display: none;
+}
+
+/* phones: the date leads the second line rather than taking a column */
 @media (max-width: 480px) {
   .entry-row-button {
     grid-template-columns: minmax(0, 1fr) auto auto;
   }
   .entry-date {
     display: none;
+  }
+  .entry-date-inline {
+    display: inline;
+    flex: none;
+    color: var(--text-subtle);
+    font-size: 0.78rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .entry-date-inline + .entry-title::before {
+    content: "·";
+    margin: 0 5px;
+    color: var(--text-subtle);
   }
 }
 
