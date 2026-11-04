@@ -47,6 +47,15 @@ export function ThemeProvider({ children }) {
     root.style.colorScheme = resolvedTheme;
   }
 
+  // the installed app's title bar follows the chosen theme, not just the OS
+  useEffect(() => {
+    const color = resolvedTheme === "dark" ? "#0b0b0e" : "#f7f7f8";
+    document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => {
+      meta.removeAttribute("media");
+      meta.setAttribute("content", color);
+    });
+  }, [resolvedTheme]);
+
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, preference);

@@ -54,7 +54,17 @@ app.use(
 );
 
 if (isProduction) {
-  app.use(express.static(path.join(__dirname, "../client/dist")));
+  app.use(
+    express.static(path.join(__dirname, "../client/dist"), {
+      setHeaders: (res, filePath) => {
+        // browsers re-check the service worker and manifest on every visit,
+        // so a new version of the app is picked up straight away
+        if (/[\\/](sw\.js|manifest\.json)$/.test(filePath)) {
+          res.setHeader("Cache-Control", "no-cache");
+        }
+      },
+    })
+  );
 }
 
 app.get("*", (req, res) => {

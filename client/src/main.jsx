@@ -7,6 +7,16 @@ import { ThemeProvider } from "./utils/theme";
 
 import "./index.css";
 
+// installable app: the service worker only runs in the built app, so local
+// development always loads fresh files
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch((err) => {
+      console.warn("Service worker registration failed", err);
+    });
+  });
+}
+
 const container = document.getElementById("root");
 const root = createRoot(container); // createRoot(container!) if you use TypeScript
 root.render(
