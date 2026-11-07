@@ -15,6 +15,7 @@ import InlineToggleInput from './InlineToggleInput'
 import FuelDetailsInput, { emptyFuel, fuelFromEntry, fuelForSubmit } from './FuelDetailsInput'
 import MaintenanceDetailsInput, { emptyMaintenance, maintenanceFromEntry, maintenanceForSubmit } from './MaintenanceDetailsInput'
 import TireChangeInput, { emptyTires, tiresFromEntry, tiresForSubmit } from './TireChangeInput'
+import OnBehalfInput from './OnBehalfInput'
 import { fuelReady, maintenanceReady } from './vehicleChecks'
 
-export { BudgetValueRangeGroup, InlineTextInput, InlineTextareaInput, InlineListDisplay, InlineEmailInput, InlineNumberInput, InlineMonthlyDateInput, InlineDateInput, InlineSelectInput, InlineUserInput, InlineSwitchTwoWay, InlineMonthInput, InlineTrackingInput, InlineToggleInput, FuelDetailsInput, emptyFuel, fuelFromEntry, fuelForSubmit, MaintenanceDetailsInput, emptyMaintenance, maintenanceFromEntry, maintenanceForSubmit, TireChangeInput, emptyTires, tiresFromEntry, tiresForSubmit, fuelReady, maintenanceReady };
+export { BudgetValueRangeGroup, InlineTextInput, InlineTextareaInput, InlineListDisplay, InlineEmailInput, InlineNumberInput, InlineMonthlyDateInput, InlineDateInput, InlineSelectInput, InlineUserInput, InlineSwitchTwoWay, InlineMonthInput, InlineTrackingInput, InlineToggleInput, FuelDetailsInput, emptyFuel, fuelFromEntry, fuelForSubmit, MaintenanceDetailsInput, emptyMaintenance, maintenanceFromEntry, maintenanceForSubmit, TireChangeInput, emptyTires, tiresFromEntry, tiresForSubmit, fuelReady, maintenanceReady, OnBehalfInput };

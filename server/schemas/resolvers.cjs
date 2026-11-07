@@ -922,19 +922,50 @@ const resolvers = {
       const maintenance = await cleanMaintenance(input.maintenance, budget, category);
       assertEntryTireChange(input.tireChange, maintenance);
 
+      // paid on behalf of another owner: the expense is theirs alone, and a
+      // transfer from them back to the payer settles it
+      const onBehalfOfUserID = input.onBehalfOfUserID || null;
+      let payer = null;
+      if (onBehalfOfUserID) {
+        if (category.categoryType !== "expense") {
+          throw inputError("Only expenses can be paid on behalf of another user");
+        }
+        assertOwner(owners, onBehalfOfUserID, "On behalf of user");
+        if (String(onBehalfOfUserID) === String(userID)) {
+          throw inputError("Cannot pay on behalf of the same user");
+        }
+        payer = await User.findById(userID);
+      }
+
       const newEntry = await Entry.create({
         title,
         value,
         budgetID: budget._id,
         categoryID: category._id,
-        userID,
+        userID: onBehalfOfUserID || userID,
         effectiveDate,
         monthString: dateToMonthStr(effectiveDate),
         valueType: category.categoryType,
-        individualEntry: input.individualEntry || false,
+        individualEntry: onBehalfOfUserID ? true : input.individualEntry || false,
         mileage: mileage || undefined,
         maintenance: maintenance || undefined,
       });
+      const entryIDs = [newEntry._id];
+
+      if (onBehalfOfUserID) {
+        const payerName = payer.userInitials || payer.email;
+        const repayment = await Entry.create({
+          value,
+          budgetID: budget._id,
+          userID: onBehalfOfUserID,
+          toUserID: userID,
+          effectiveDate,
+          monthString: dateToMonthStr(effectiveDate),
+          valueType: "transfer",
+          title: `${title} paid by ${payerName}`,
+        });
+        entryIDs.push(repayment._id);
+      }
 
       await Category.updateOne({ _id: category._id }, { $inc: { countUse: 1 } });
       if (input.tireChange) {
@@ -943,7 +974,7 @@ const resolvers = {
 
       return Budget.findByIdAndUpdate(
         budget._id,
-        { $push: { entries: newEntry._id } },
+        { $push: { entries: { $each: entryIDs } } },
         { new: true }
       );
     },

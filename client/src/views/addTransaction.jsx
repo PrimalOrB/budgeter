@@ -18,6 +18,7 @@ import {
   tiresForSubmit,
   fuelReady,
   maintenanceReady,
+  OnBehalfInput,
 } from "../components/Forms";
 import { InlineError, InlineNotification } from "../components/Notifications";
 import { Title } from "../components/Layout";
@@ -45,12 +46,19 @@ const AddTransactionEntry = ({
     fuel: emptyFuel,
     service: emptyMaintenance,
     tires: emptyTires,
+    onBehalfEnabled: false,
+    onBehalfOfUserID: "",
   };
   const [formInput, setFormInput] = useState({ ...initialFormState });
   // categories that track mileage or maintenance offer optional vehicle details
   const metaType = budgetState.categories.find((c) => c._id === formInput.categoryID)?.metaType;
   const tracksMileage = metaType === "mileage";
   const tracksMaintenance = metaType === "maintenance";
+  // an expense paid for another owner is booked to them alone
+  const onBehalf =
+    categoryType === "expense" &&
+    formInput.onBehalfEnabled &&
+    formInput.onBehalfOfUserID !== formInput.userID;
   const [auditState, setAuditState] = useState({ pass: false });
   const [errorState, setErrorState] = useState();
 
@@ -81,6 +89,13 @@ const AddTransactionEntry = ({
     }
     if (tracksMaintenance) {
       auditField.push(maintenanceReady(currentFormState.service));
+    }
+    // paying for someone else needs that someone picked (and not the payer)
+    if (categoryType === "expense" && currentFormState.onBehalfEnabled) {
+      auditField.push(
+        Boolean(currentFormState.onBehalfOfUserID) &&
+          currentFormState.onBehalfOfUserID !== currentFormState.userID
+      );
     }
 
     currentAuditState.pass =
@@ -117,7 +132,8 @@ const AddTransactionEntry = ({
           categoryID: formInput.categoryID,
           effectiveDate: formInput.effectiveDate,
           userID: formInput.userID,
-          individualEntry: formInput.individualEntry,
+          individualEntry: onBehalf ? true : formInput.individualEntry,
+          onBehalfOfUserID: onBehalf ? formInput.onBehalfOfUserID : null,
           mileage: tracksMileage ? fuelForSubmit(formInput.fuel) : null,
           maintenance: tracksMaintenance ? maintenanceForSubmit(formInput.service) : null,
           // a tire change rides on the maintenance details
@@ -206,19 +222,29 @@ const AddTransactionEntry = ({
               prop={"userID"}
               input={formInput}
               setInput={setFormInput}
-              label={"User"}
+              label={formInput.onBehalfEnabled ? "Paid by" : "User"}
               optionList={budgetState.ownerIDs}
               auditState={auditState}
             />
-            <InlineSwitchTwoWay
-              prop={`individualEntry`}
-              input={formInput}
-              setInput={setFormInput}
-              label={"Split"}
-              falseIcon={MdPeople}
-              trueIcon={MdPerson}
-              auditState={auditState}
-            />
+            {/* booked to the other owner alone, so no split choice */}
+            {!formInput.onBehalfEnabled && (
+              <InlineSwitchTwoWay
+                prop={`individualEntry`}
+                input={formInput}
+                setInput={setFormInput}
+                label={"Split"}
+                falseIcon={MdPeople}
+                trueIcon={MdPerson}
+                auditState={auditState}
+              />
+            )}
+            {categoryType === "expense" && (
+              <OnBehalfInput
+                input={formInput}
+                setInput={setFormInput}
+                owners={budgetState.ownerIDs}
+              />
+            )}
           </form>
           {createdLoading ? (
             <InlineNotification text={"Submit processing"} />
