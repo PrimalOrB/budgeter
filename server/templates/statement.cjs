@@ -83,28 +83,36 @@ const toneColor = (tone) =>
   tone === "positive" ? C.positive : tone === "negative" ? C.negative : C.text;
 
 // ---- building blocks -----------------------------------------------------------
-function avatar(user) {
+// initials in a coloured circle, `size` points across
+function avatar(user, size = 13) {
   const color = user?.userColor ? `#${user.userColor}` : C.subtle;
   const text = (user?.userInitials || user?.email?.[0] || "?").toUpperCase();
+  const r = size / 2;
+  const fontSize = size >= 12 ? 5 : 4.5;
   return {
-    width: 13,
+    width: size,
     stack: [
-      { canvas: [{ type: "ellipse", x: 6.5, y: 6.5, r1: 6.5, r2: 6.5, color }] },
-      { text, bold: true, fontSize: 5, color: "#ffffff", alignment: "center", relativePosition: { x: 0, y: -9.6 } },
+      { canvas: [{ type: "ellipse", x: r, y: r, r1: r, r2: r, color }] },
+      // the initials' line box sits below the circle; pull it up so the
+      // capitals (not the line box) are centred, measured from rendered output
+      { text, bold: true, fontSize, color: "#ffffff", alignment: "center", lineHeight: 1, relativePosition: { x: 0, y: -r - fontSize * 0.4 } },
     ],
   };
 }
 
-const arrow = () => ({
-  width: 12,
-  canvas: [
-    { type: "line", x1: 2, y1: 6.5, x2: 10, y2: 6.5, lineWidth: 1.1, lineColor: C.transfer },
-    { type: "polyline", points: [{ x: 7.2, y: 4.2 }, { x: 10, y: 6.5 }, { x: 7.2, y: 8.8 }], lineWidth: 1.1, lineColor: C.transfer },
-  ],
-});
+const arrow = (size = 13) => {
+  const mid = size / 2;
+  return {
+    width: 12,
+    canvas: [
+      { type: "line", x1: 2, y1: mid, x2: 10, y2: mid, lineWidth: 1.1, lineColor: C.transfer },
+      { type: "polyline", points: [{ x: 7.2, y: mid - 2.3 }, { x: 10, y: mid }, { x: 7.2, y: mid + 2.3 }], lineWidth: 1.1, lineColor: C.transfer },
+    ],
+  };
+};
 
-const direction = (entry) => ({
-  columns: [avatar(entry.userID), arrow(), avatar(entry.toUserID)],
+const direction = (entry, size) => ({
+  columns: [avatar(entry.userID, size), arrow(size), avatar(entry.toUserID, size)],
   columnGap: 1,
 });
 
@@ -146,6 +154,37 @@ function dataLayout({ footer = false, compact = false } = {}) {
     paddingRight: (i, node) => (i === node.table.widths.length - 1 ? 0 : 4),
     paddingTop: () => (compact ? 2.5 : 3.5),
     paddingBottom: () => (compact ? 2.5 : 3.5),
+  };
+}
+
+// the detail tables (transfers, shared and individual expenses) share one row
+// height whether or not a row has avatars, and every cell is centred between
+// the hairlines, so the tables line up with each other
+const DETAIL_FONT = 8;
+const DETAIL_AVATAR = 11;
+const DETAIL_ROW = 11; // one line of 8pt text, or an avatar
+
+// a text line's box leaves room for descenders below the glyphs, so centred
+// text reads high; this moves it down without changing the row height
+const TEXT_NUDGE = 1.5;
+
+function detailTable(widths, header, rows) {
+  const middle = (cell) => {
+    const node = typeof cell === "object" && cell !== null ? cell : { text: cell };
+    return node.text === undefined
+      ? { ...node, verticalAlignment: "middle" }
+      : { ...node, verticalAlignment: "middle", margin: [0, TEXT_NUDGE, 0, -TEXT_NUDGE] };
+  };
+  return {
+    table: {
+      headerRows: 1,
+      dontBreakRows: true,
+      widths,
+      heights: (i) => (i === 0 ? "auto" : DETAIL_ROW),
+      body: [header, ...rows.map((row) => row.map(middle))],
+    },
+    layout: dataLayout({ compact: true }),
+    fontSize: DETAIL_FONT,
   };
 }
 
@@ -474,23 +513,16 @@ function statementDocument(statement, { footer = "" } = {}) {
     "Transfers",
     `${money(totals.transfersIn)} received · ${money(totals.transfersOut)} sent`,
     statement.transfers.length
-      ? {
-          table: {
-            headerRows: 1,
-            dontBreakRows: true,
-            widths: [34, 46, "*", "auto"],
-            body: [
-              [th("Date"), th("Between"), th("Note"), th("Amount", "right")],
-              ...statement.transfers.map(({ entry, direction: dir }) => [
-                { text: entryDate(entry), color: C.muted },
-                direction(entry),
-                { text: entry.title || "", color: C.muted },
-                num(`${dir === "in" ? "+" : "-"}${money(entry.value)}`, { color: dir === "in" ? C.positive : C.negative }),
-              ]),
-            ],
-          },
-          layout: dataLayout({ compact: true }),
-        }
+      ? detailTable(
+          [34, 110, "*", "auto"],
+          [th("Date"), th("Between"), th("Note"), th("Amount", "right")],
+          statement.transfers.map(({ entry, direction: dir }) => [
+            { text: entryDate(entry), color: C.muted },
+            direction(entry, DETAIL_AVATAR),
+            { text: entry.title || "", color: C.muted },
+            num(`${dir === "in" ? "+" : "-"}${money(entry.value)}`, { color: dir === "in" ? C.positive : C.negative }),
+          ])
+        )
       : empty("No transfers in this period."),
     WIDTH,
     6
@@ -500,26 +532,18 @@ function statementDocument(statement, { footer = "" } = {}) {
     "Shared expense detail",
     `${statement.detail.shared.length} entries`,
     statement.detail.shared.length
-      ? {
-          table: {
-            headerRows: 1,
-            dontBreakRows: true,
-            widths: [34, 110, "*", 34, "auto", "auto"],
-            body: [
-              [th("Date"), th("Category"), th("Description"), th("Paid by"), th("Amount", "right"), th("Your share", "right")],
-              ...statement.detail.shared.map(({ entry, yourShare, categoryTitle }) => [
-                { text: entryDate(entry), color: C.muted },
-                { text: categoryTitle, color: C.muted },
-                entry.title,
-                { columns: [avatar(entry.userID)] },
-                num(signedMoney(entry.value)),
-                num(signedMoney(yourShare), { bold: true }),
-              ]),
-            ],
-          },
-          layout: dataLayout({ compact: true }),
-          fontSize: 8,
-        }
+      ? detailTable(
+          [34, 110, "*", 34, "auto", "auto"],
+          [th("Date"), th("Category"), th("Description"), th("Paid by"), th("Amount", "right"), th("Your share", "right")],
+          statement.detail.shared.map(({ entry, yourShare, categoryTitle }) => [
+            { text: entryDate(entry), color: C.muted },
+            { text: categoryTitle, color: C.muted },
+            entry.title,
+            { columns: [avatar(entry.userID, DETAIL_AVATAR)] },
+            num(signedMoney(entry.value)),
+            num(signedMoney(yourShare), { bold: true }),
+          ])
+        )
       : empty("No shared expenses in this period.")
   );
 
@@ -527,24 +551,16 @@ function statementDocument(statement, { footer = "" } = {}) {
     "Individual expense detail",
     `${statement.detail.individualExpenses.length} entries`,
     statement.detail.individualExpenses.length
-      ? {
-          table: {
-            headerRows: 1,
-            dontBreakRows: true,
-            widths: [34, 110, "*", "auto"],
-            body: [
-              [th("Date"), th("Category"), th("Description"), th("Amount", "right")],
-              ...statement.detail.individualExpenses.map(({ entry, categoryTitle }) => [
-                { text: entryDate(entry), color: C.muted },
-                { text: categoryTitle, color: C.muted },
-                entry.title,
-                num(signedMoney(entry.value), { bold: true }),
-              ]),
-            ],
-          },
-          layout: dataLayout({ compact: true }),
-          fontSize: 8,
-        }
+      ? detailTable(
+          [34, 110, "*", "auto"],
+          [th("Date"), th("Category"), th("Description"), th("Amount", "right")],
+          statement.detail.individualExpenses.map(({ entry, categoryTitle }) => [
+            { text: entryDate(entry), color: C.muted },
+            { text: categoryTitle, color: C.muted },
+            entry.title,
+            num(signedMoney(entry.value), { bold: true }),
+          ])
+        )
       : empty("No individual expenses in this period.")
   );
 
