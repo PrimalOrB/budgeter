@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import React, { useState, useEffect, useRef, useContext, lazy, Suspense } from "react";
 import { useParams } from "react-router";
 import { useMutation, useApolloClient } from "@apollo/client";
 import { QUERY_CURRENT_BUDGET } from "../utils/mutations";
@@ -6,24 +6,37 @@ import { REQUEST_BUDGET_MONTHS } from "../utils/queries";
 import { useStoreContext } from "../utils/GlobalState";
 import { MetaLinkContext } from "../utils/metaLinks";
 import { InlineError } from "../components/Notifications";
-import { FullPageSpinLoader } from "../components/Loaders";
+import { FullPageSpinLoader, SpinLoader } from "../components/Loaders";
 import { NavStateContainer } from "../components/Menus";
 import { MultiMonthBudgetOverview } from "../components/Charts";
 import { Title } from "../components/Layout";
-import {
-  AddCategory,
-  AddTransactionEntry,
-  EditTransactionEntry,
-  AddTransferEntry,
-  EditTransferEntry,
-  RecentTransactions,
-  AllCategories,
-  EditCategory,
-  MonthSummary,
-  Reports,
-  BudgetSettings,
-  VehicleLog,
-} from ".";
+import RecentTransactions from "./recentTransactions";
+import MonthSummary from "./monthSummary";
+
+// the overview shows first; the other tabs load when opened, and are warmed in
+// the background once the budget is on screen
+const tabViews = {
+  AddCategory: () => import("./addCategory"),
+  AddTransactionEntry: () => import("./addTransaction"),
+  EditTransactionEntry: () => import("./editTransaction"),
+  AddTransferEntry: () => import("./addTransfer"),
+  EditTransferEntry: () => import("./editTransfer"),
+  AllCategories: () => import("./allCategories"),
+  EditCategory: () => import("./editCategory"),
+  Reports: () => import("./reports"),
+  BudgetSettings: () => import("./budgetSettings"),
+  VehicleLog: () => import("./vehicleLog"),
+};
+const AddCategory = lazy(tabViews.AddCategory);
+const AddTransactionEntry = lazy(tabViews.AddTransactionEntry);
+const EditTransactionEntry = lazy(tabViews.EditTransactionEntry);
+const AddTransferEntry = lazy(tabViews.AddTransferEntry);
+const EditTransferEntry = lazy(tabViews.EditTransferEntry);
+const AllCategories = lazy(tabViews.AllCategories);
+const EditCategory = lazy(tabViews.EditCategory);
+const Reports = lazy(tabViews.Reports);
+const BudgetSettings = lazy(tabViews.BudgetSettings);
+const VehicleLog = lazy(tabViews.VehicleLog);
 import {
   dateToMonthStr,
   shiftMonthLabel,
@@ -195,6 +208,23 @@ const Budget = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser, dataVersion]);
 
+  // once the budget is showing, fetch the other tabs while the app is idle,
+  // so opening them is instant and they're cached for offline use
+  const hasBudget = Boolean(budgetState?.title);
+  useEffect(() => {
+    if (!hasBudget) {
+      return;
+    }
+    const warm = () =>
+      Object.values(tabViews).forEach((load) => load().catch(() => {}));
+    if ("requestIdleCallback" in window) {
+      const handle = window.requestIdleCallback(warm, { timeout: 5000 });
+      return () => window.cancelIdleCallback(handle);
+    }
+    const handle = setTimeout(warm, 2000);
+    return () => clearTimeout(handle);
+  }, [hasBudget]);
+
   if (errorState) {
     return (
       <div className="page">
@@ -272,6 +302,7 @@ const Budget = ({
             state={pageState}
             setState={setPageState}
           />
+          <Suspense fallback={<SpinLoader />}>
           {pageState === "dashboard" && (
             <div className="dashboard-grid">
               <div className="dashboard-chart">
@@ -422,6 +453,7 @@ const Budget = ({
               />
             </>
           )}
+          </Suspense>
         </div>
       )}
       {queryLoading && <FullPageSpinLoader />}

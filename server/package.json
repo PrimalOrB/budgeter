@@ -9,7 +9,8 @@
   },
   "scripts": {
     "start": "node server.js",
-    "watch": "nodemon"
+    "watch": "nodemon",
+    "test": "node --test tests/"
   },
   "keywords": [],
   "author": "",

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo, useRef, lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import { setContext } from "@apollo/client/link/context";
 import { onError } from "@apollo/client/link/error";
@@ -17,7 +17,12 @@ import {
   EditModal,
   // Footer
 } from "./components";
-import { Home, CallbackPage, AddBudget, Budget } from "./views";
+import Home from "./views/home";
+import CallbackPage from "./views/callback";
+
+// loaded on demand, so the sign-in page doesn't download the budget screens
+const AddBudget = lazy(() => import("./views/addBudget"));
+const Budget = lazy(() => import("./views/budget"));
 
 const httpLink = createHttpLink({
   uri: "/graphql",
@@ -104,6 +109,7 @@ const App = () => {
             onDataChanged={() => setDataVersion((version) => version + 1)}
           />
           <main className="app-main">
+            <Suspense fallback={<FullPageSpinLoader />}>
             <Routes>
               <Route element={<Home />} path="/" />
               <Route element={<CallbackPage />} path="/callback" />
@@ -125,6 +131,7 @@ const App = () => {
                 path="/budget/:id/:tab?/:cat?"
               />
             </Routes>
+            </Suspense>
           </main>
         </div>
         </MetaLinkContext.Provider>
