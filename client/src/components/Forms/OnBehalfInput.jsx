@@ -1,13 +1,16 @@
 import React from "react";
 import { FiUsers } from "react-icons/fi";
 
-// an expense one owner pays for another: the cost is booked to the other
-// owner alone, and a transfer from them back to the payer settles it
-const OnBehalfInput = ({ input, setInput, owners }) => {
+// an expense one owner pays, or income one owner receives, for another: it's
+// booked to the other owner alone, with a transfer for the money moved between
+// them (income: other owner -> receiver; expense: payer -> other owner)
+const OnBehalfInput = ({ input, setInput, owners, categoryType }) => {
   const enabled = Boolean(input.onBehalfEnabled);
   const others = owners.filter((owner) => owner._id !== input.userID);
+  const isIncome = categoryType === "income";
+  const verb = isIncome ? "Received" : "Paid";
 
-  // only budgets with someone else to pay for get the option
+  // only budgets with someone else to act for get the option
   if (!owners.length || owners.length < 2) {
     return null;
   }
@@ -22,14 +25,20 @@ const OnBehalfInput = ({ input, setInput, owners }) => {
     });
   };
 
-  const payer = owners.find((owner) => owner._id === input.userID);
-  const beneficiary = owners.find((owner) => owner._id === input.onBehalfOfUserID);
+  const actor = owners.find((owner) => owner._id === input.userID)?.email;
+  const beneficiary = owners.find((owner) => owner._id === input.onBehalfOfUserID)?.email;
+
+  const summary = !beneficiary
+    ? `Pick who this was ${verb.toLowerCase()} for.`
+    : isIncome
+    ? `Booked as individual income for ${beneficiary}, with a transfer from them to ${actor || "the receiver"} to show it's held for them.`
+    : `Booked as an individual cost for ${beneficiary}, with a transfer to them from ${actor || "the payer"} for the money spent on their behalf.`;
 
   return (
     <div className={`fuel-panel${enabled ? " fuel-panel-open" : ""}`}>
       <div className="fuel-head">
         <span className="fuel-title">
-          <FiUsers aria-hidden="true" /> Paid for someone else
+          <FiUsers aria-hidden="true" /> {verb} for someone else
           <span className="fuel-optional">optional</span>
         </span>
         <button
@@ -40,7 +49,7 @@ const OnBehalfInput = ({ input, setInput, owners }) => {
           onClick={toggle}
         >
           <span className="switch-knob" />
-          <span className="sr-only">Paid on behalf of another user</span>
+          <span className="sr-only">{verb} on behalf of another user</span>
         </button>
       </div>
 
@@ -62,11 +71,7 @@ const OnBehalfInput = ({ input, setInput, owners }) => {
             </select>
           </label>
           <div className="fuel-summary">
-            <span>
-              {beneficiary
-                ? `Booked as an individual cost for ${beneficiary.email}, with a transfer from them to ${payer?.email || "the payer"} to pay it back.`
-                : "Pick who this was paid for."}
-            </span>
+            <span>{summary}</span>
           </div>
         </div>
       )}

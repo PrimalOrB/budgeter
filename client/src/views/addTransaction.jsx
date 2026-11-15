@@ -54,9 +54,8 @@ const AddTransactionEntry = ({
   const metaType = budgetState.categories.find((c) => c._id === formInput.categoryID)?.metaType;
   const tracksMileage = metaType === "mileage";
   const tracksMaintenance = metaType === "maintenance";
-  // an expense paid for another owner is booked to them alone
+  // an expense paid, or income received, for another owner is booked to them alone
   const onBehalf =
-    categoryType === "expense" &&
     formInput.onBehalfEnabled &&
     formInput.onBehalfOfUserID !== formInput.userID;
   const [auditState, setAuditState] = useState({ pass: false });
@@ -90,8 +89,8 @@ const AddTransactionEntry = ({
     if (tracksMaintenance) {
       auditField.push(maintenanceReady(currentFormState.service));
     }
-    // paying for someone else needs that someone picked (and not the payer)
-    if (categoryType === "expense" && currentFormState.onBehalfEnabled) {
+    // acting for someone else needs that someone picked (and not the same user)
+    if (currentFormState.onBehalfEnabled) {
       auditField.push(
         Boolean(currentFormState.onBehalfOfUserID) &&
           currentFormState.onBehalfOfUserID !== currentFormState.userID
@@ -222,7 +221,13 @@ const AddTransactionEntry = ({
               prop={"userID"}
               input={formInput}
               setInput={setFormInput}
-              label={formInput.onBehalfEnabled ? "Paid by" : "User"}
+              label={
+                formInput.onBehalfEnabled
+                  ? categoryType === "income"
+                    ? "Received by"
+                    : "Paid by"
+                  : "User"
+              }
               optionList={budgetState.ownerIDs}
               auditState={auditState}
             />
@@ -238,10 +243,11 @@ const AddTransactionEntry = ({
                 auditState={auditState}
               />
             )}
-            {categoryType === "expense" && (
+            {(categoryType === "expense" || categoryType === "income") && (
               <OnBehalfInput
                 input={formInput}
                 setInput={setFormInput}
+                categoryType={categoryType}
                 owners={budgetState.ownerIDs}
               />
             )}

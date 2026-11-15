@@ -123,7 +123,7 @@ const typeDefs = `
         maintenance: MaintenanceInput
         "Optional tire change, logged once and linked for information; needs maintenance details with an odometer reading"
         tireChange: EntryTireChangeInput
-        "New expenses only: the owner userID paid on behalf of. The expense is booked to this owner as an individual cost, plus a transfer from them back to userID"
+        "New transactions only: the owner userID paid or received this on behalf of. It is booked to this owner as an individual entry, plus a matching transfer: for income from them to userID, for an expense from userID to them"
         onBehalfOfUserID: ID
     }
 

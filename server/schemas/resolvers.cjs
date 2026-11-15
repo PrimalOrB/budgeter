@@ -922,17 +922,14 @@ const resolvers = {
       const maintenance = await cleanMaintenance(input.maintenance, budget, category);
       assertEntryTireChange(input.tireChange, maintenance);
 
-      // paid on behalf of another owner: the expense is theirs alone, and a
-      // transfer from them back to the payer settles it
+      // on behalf of another owner: the expense or income is theirs alone,
+      // matched by a transfer between them and the user who paid or received it
       const onBehalfOfUserID = input.onBehalfOfUserID || null;
       let payer = null;
       if (onBehalfOfUserID) {
-        if (category.categoryType !== "expense") {
-          throw inputError("Only expenses can be paid on behalf of another user");
-        }
         assertOwner(owners, onBehalfOfUserID, "On behalf of user");
         if (String(onBehalfOfUserID) === String(userID)) {
-          throw inputError("Cannot pay on behalf of the same user");
+          throw inputError("Cannot record on behalf of the same user");
         }
         payer = await User.findById(userID);
       }
@@ -954,15 +951,21 @@ const resolvers = {
 
       if (onBehalfOfUserID) {
         const payerName = payer.userInitials || payer.email;
+        const isIncome = category.categoryType === "income";
+        const verb = isIncome ? "received" : "paid";
+        // income: the other owner's money went to the receiver, as if they
+        // were paid it and passed it on (transfer other owner -> receiver)
+        // expense: the payer's money was spent on the other owner, as if the
+        // payer gave it to them to spend (transfer payer -> other owner)
         const repayment = await Entry.create({
           value,
           budgetID: budget._id,
-          userID: onBehalfOfUserID,
-          toUserID: userID,
+          userID: isIncome ? onBehalfOfUserID : userID,
+          toUserID: isIncome ? userID : onBehalfOfUserID,
           effectiveDate,
           monthString: dateToMonthStr(effectiveDate),
           valueType: "transfer",
-          title: `${title} paid by ${payerName}`,
+          title: `${title} ${verb} by ${payerName}`,
         });
         entryIDs.push(repayment._id);
       }
